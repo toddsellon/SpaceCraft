@@ -14,7 +14,7 @@ Factions are defined inside Spawn Groups. Spawn Groups are defined inside XML fo
 		&lt;TypeId&gt;SpawnGroupDefinition&lt;/TypeId&gt;
 		&lt;SubtypeId&gt;TerranPlanetPod&lt;/SubtypeId&gt;
 	&lt;/Id&gt;
-	&lt;Description&gt;SpaceCraft HVS -scavenger&lt;/Description&gt;
+	&lt;Description&gt;**SpaceCraft HVS -scavenger**&lt;/Description&gt;
 	&lt;Icon&gt;Textures\GUI\Icons\Fake.dds&lt;/Icon&gt;
 	&lt;Frequency&gt;1.0&lt;/Frequency&gt;
 	&lt;IsPirate&gt;true&lt;/IsPirate&gt;
