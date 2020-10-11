@@ -1,3 +1,5 @@
+![SpaceCraft Thumbnail](https://raw.githubusercontent.com/toddsellon/SpaceCraft/main/thumbnail.jpg)
+
 # SpaceCraft
 A mod for Space Engineers
 
