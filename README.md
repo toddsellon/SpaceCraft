@@ -5,6 +5,8 @@ A mod for Space Engineers
 Factions are defined inside Spawn Groups. Spawn Groups are defined inside XML formated .sbc files.
 
 # Example
+The &lt;SpawnGroup&gt; Description is parsed using a Command Line syntax. The first argument of "SpaceCraft" defines a new Faction. The Faction tag is the second argument. Any faction-specific parameters can be defined with flags (i.e. -aggressive).
+
 ```xml
 <?xml version="1.0"?>
 <Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
@@ -15,7 +17,7 @@ Factions are defined inside Spawn Groups. Spawn Groups are defined inside XML fo
 		<TypeId>SpawnGroupDefinition</TypeId>
 		<SubtypeId>TerranPlanetPod</SubtypeId>
 	</Id>
-	<Description>**SpaceCraft HVS -scavenger**</Description>
+	<Description>SpaceCraft HVS -scavenger</Description>
 	<Icon>Textures\GUI\Icons\Fake.dds</Icon>
 	<Frequency>1.0</Frequency>
 	<IsPirate>true</IsPirate>
@@ -37,3 +39,5 @@ Factions are defined inside Spawn Groups. Spawn Groups are defined inside XML fo
 </SpawnGroups>
 </Definitions>
 ```
+
+## Subject to Change
