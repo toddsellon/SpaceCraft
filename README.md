@@ -5,6 +5,7 @@ A mod for Space Engineers
 Factions are defined inside Spawn Groups. Spawn Groups are defined inside XML formated .sbc files.
 
 # Example
+```xml
 &lt;?xml version="1.0"?&gt;
 &lt;Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
 &lt;SpawnGroups&gt;
@@ -35,3 +36,4 @@ Factions are defined inside Spawn Groups. Spawn Groups are defined inside XML fo
 
 &lt;/SpawnGroups&gt;
 &lt;/Definitions&gt;
+```
