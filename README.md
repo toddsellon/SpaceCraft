@@ -1,4 +1,4 @@
-![SpaceCraft Thumbnail](https://raw.githubusercontent.com/toddsellon/SpaceCraft/main/thumbnail.jpg)
+![](https://raw.githubusercontent.com/toddsellon/SpaceCraft/main/thumbnail.jpg?token=AB6IMWOXRSLL2T76BAYSH327RTGKW)
 
 # SpaceCraft
 A mod for Space Engineers
