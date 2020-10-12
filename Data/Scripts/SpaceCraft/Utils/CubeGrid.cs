@@ -9,6 +9,7 @@ using Sandbox.Definitions;
 using Sandbox.Game.AI;
 using Sandbox.Game.Multiplayer;
 using Sandbox.Game.Entities.Cube;
+using Sandbox.Common.ObjectBuilders;
 using Sandbox.Game.Components;
 using Sandbox.Game.Entities.Character;
 using Sandbox.Game.EntityComponents;
@@ -27,12 +28,13 @@ namespace SpaceCraft.Utils {
 	public class CubeGrid : Controllable {
 
 		public enum Needs {
+			None,
 	    Power,
 	    Components,
 			Storage
 	  };
 
-		public Needs Need;
+		public Needs Need = Needs.None;
     public IMyCubeGrid Grid;
 		public string Prefab;
 
@@ -177,6 +179,51 @@ namespace SpaceCraft.Utils {
 			}
 
 			return false;
+		}
+
+		//public Vector3I FindOpenSlot( SerializableVector3I size, Grid.GridSizeEnum gridSize = MyCubeSize.Large ) {
+		public bool FindOpenSlot( out Vector3I slot, MyCubeSize gridSize = MyCubeSize.Large ) {
+			List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+			slot = Vector3I.Zero;
+			Grid.GetBlocks( blocks );
+
+			foreach( IMySlimBlock block in blocks ) {
+				if( block.FatBlock == null ) continue;
+
+				if( block.CubeGrid.GridSizeEnum == gridSize ) {
+					//MyObjectBuilder_CubeBlockDefinition
+					//SerializableDefinitionId def = block.FatBlock.BlockDefinition;
+					MyCubeBlockDefinition def = MyDefinitionManager.Static.GetCubeBlockDefinition(block.FatBlock.BlockDefinition);
+					foreach( MyCubeBlockDefinition.MountPoint point in def.MountPoints ) {
+						IMySlimBlock hit = Grid.GetCubeBlock( point.Normal + block.Position );
+						//MyAPIGateway.Utilities.ShowMessage( "point.Normal", point.Normal.ToString() );
+						if( hit == null ) {
+							slot = point.Normal + block.Position;
+							return true;
+						}
+					}
+				}
+			}
+
+			return false;
+		}
+
+		public IMyCubeGrid GetLargeGrid() {
+			if( Grid.GridSizeEnum == MyCubeSize.Large ) {
+				return Grid;
+			} else {
+				if( Grid == null ) return null;
+				List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+
+				Grid.GetBlocks( blocks );
+
+				foreach( IMySlimBlock block in blocks ) {
+					if( block.CubeGrid.GridSizeEnum == MyCubeSize.Large )
+						return block.CubeGrid;
+				}
+			}
+
+			return null;
 		}
 
 		public IMyProductionBlock GetAssembler() {

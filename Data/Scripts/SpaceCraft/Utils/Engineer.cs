@@ -41,8 +41,7 @@ namespace SpaceCraft.Utils {
 
     public IMyCharacter Character;
 
-		public MatrixD WorldMatrix
-		{
+		public MatrixD WorldMatrix {
 			get {
 				return Character == null ? MatrixD.Zero : Character.WorldMatrix;
 			}
@@ -51,8 +50,7 @@ namespace SpaceCraft.Utils {
 			}
 		}
 
-		public float Integrity
-		{
+		public float Integrity {
 			get {
 				return Character == null ? 0.0f : Character.Integrity;
 			}
@@ -78,7 +76,7 @@ namespace SpaceCraft.Utils {
 			if( !Character.EnabledDamping ) {
 				Character.SwitchDamping();
 			}
-			if( !Character.EnabledThrusts ) {
+			if( Character.EnabledThrusts ) {
 				Character.SwitchThrusts();
 			}
 		}

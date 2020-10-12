@@ -49,11 +49,8 @@ namespace SpaceCraft {
     public override void Init(MyObjectBuilder_SessionComponent session) {
       base.Init(session);
 
-      //SaveName = MyAPIGateway.Session.Name;
+      SaveName = MyAPIGateway.Session.Name;
 
-      //MyLog.Default.WriteLineAndConsole("SpaceCraftSession Init()");
-      //MyAPIGateway.Utilities.ShowMessage("SC:","SpaceCraftSession Init()");
-      MyAPIGateway.Utilities.ShowNotification("SpaceCraftSession Init()");
 
 			MyAPIGateway.Utilities.GetVariable<bool>("SC-Spawned", out Spawned);
 			Server = MyAPIGateway.Multiplayer.IsServer;
@@ -147,44 +144,6 @@ namespace SpaceCraft {
 					Character = Engineer.Spawn(MatrixD.CreateWorld(position))
 				} as Controllable );
 
-				//matrix.Translation = new Vector3D(0,1,0);
-				//string prefabName = faction.Groups[0].Prefabs[0].SubtypeId;
-				/*string prefabName = "TerranPlanetPod";
-
-				//Matrix matrix = Vector3D.Transform(new Vector3D(0,100,0), MatrixD.CreateWorld(position));
-				MyPrefabDefinition prefab = MyDefinitionManager.Static.GetPrefabDefinition(prefabName);
-
-				if( prefab == null ) {
-					MyAPIGateway.Utilities.ShowNotification("Prefab not found");
-					return;
-				}
-
-				foreach( MyObjectBuilder_CubeGrid grid in prefab.CubeGrids ) {
-					MyAPIGateway.Utilities.ShowNotification("Trying to create: " + grid.DisplayName);
-					MyEntity entity = (MyEntity)MyAPIGateway.Entities.CreateFromObjectBuilder(grid);
-
-					if( entity == null ) {
-						MyAPIGateway.Utilities.ShowNotification("Failed to create entity");
-						return;
-					}
-
-					entity.Flags &= ~EntityFlags.Save;
-					//ent.Flags &= ~EntityFlags.NeedsUpdate;
-
-					entity.Render.Visible = true;
-					entity.WorldMatrix = matrix;
-					//entity.PositionComp.SetPosition(new Vector3D(10,0,0));
-					MyAPIGateway.Entities.AddEntity(entity);
-
-					Engineer e = faction.AddEngineer( entity.WorldMatrix );
-				}
-				//MyAPIGateway.PrefabManager.AddShipPrefab(prefabName, matrix);
-				//MyAPIGateway.PrefabManager.SpawnPrefab( prefabName, position, Vector3.Forward, Vector3.Up, Vector3.Zero, Vector3.Zero, null, SpawningOptions.None, 0, false, null );
-				//MyAPIGateway.Utilities.ShowNotification("Added to " + Name + " " + group.DescriptionText);
-
-				//var bot = CreatePlayer();
-				//bot.Spawn
-				*/
 				Spawned = true;
 				MyAPIGateway.Utilities.SetVariable<bool>("SC-Spawned", true);
 			}
@@ -198,18 +157,16 @@ namespace SpaceCraft {
 
 			if( !Server ) return;
 
-			//MyAPIGateway.Utilities.ShowNotification("SpaceCraftSession::UpdateBeforeSimulation()");
+			Tick++;
 
 			foreach( Faction faction in Factions ) {
 				faction.UpdateBeforeSimulation();
+				if( Tick % 10 == 0 ) faction.UpdateBeforeSimulation10();
+				if( Tick == 100 ) faction.UpdateBeforeSimulation100();
 			}
 
-			Tick++;
-      if( Tick % 10 == 0 ) UpdateBeforeSimulation10();
-      if( Tick == 100 ) {
-        UpdateBeforeSimulation100();
-        Tick = 0;
-      }
+
+      if( Tick == 100 ) Tick = 0;
 
       /*if(SaveName != MyAPIGateway.Session.Name) {
         // Saved
@@ -218,19 +175,6 @@ namespace SpaceCraft {
       }*/
     }
 
-		public void UpdateBeforeSimulation10() {
-			if( !Server ) return;
-			foreach( Faction faction in Factions ) {
-				faction.UpdateBeforeSimulation10();
-			}
-		}
-
-		public void UpdateBeforeSimulation100() {
-			if( !Server ) return;
-			foreach( Faction faction in Factions ) {
-				faction.UpdateBeforeSimulation100();
-			}
-		}
 
 
   }

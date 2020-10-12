@@ -43,6 +43,17 @@ namespace SpaceCraft.Utils {
     public void AssessProgression() {
       switch( Progress ) {
         case Progression.None:
+          if( MainBase.Grid.GridSizeEnum == MyCubeSize.Small ) {
+            IMySlimBlock slim = AddLargeGridConverter( MainBase );
+
+            if( slim == null ) {
+              MyAPIGateway.Utilities.ShowMessage( "Faction", "FAILED to AddLargeGridConverter!!!!!!!!!!!!!!" );
+            } else {
+              MyAPIGateway.Utilities.ShowMessage( "Faction", "Successfully added large grid converter" );
+            }
+
+          }
+          break;
         case Progression.BasicAssembler:
         case Progression.BasicRefinery:
         case Progression.Assembler:
@@ -65,9 +76,17 @@ namespace SpaceCraft.Utils {
     }
 
     public void UpdateBeforeSimulation100() {
+      bool needs = false;
       foreach( Controllable c in Controlled ) {
         c.UpdateBeforeSimulation100();
+
+        if( c is CubeGrid && (c as CubeGrid).Need != CubeGrid.Needs.None ) needs = true;
       }
+
+      if( !needs ) {
+        AssessProgression();
+      }
+
     }
 
     public void AddControllable( Controllable c ) {
@@ -105,6 +124,7 @@ namespace SpaceCraft.Utils {
     }
 
     public MatrixD GetSpawnLocation() {
+
       if( RespawnPoint == null ) {
         foreach( Controllable c in Controlled ) {
           if( c is CubeGrid ) {
@@ -119,15 +139,50 @@ namespace SpaceCraft.Utils {
       }
 
       if( RespawnPoint != null ) {
-        MyAPIGateway.Utilities.ShowNotification("Respawn Point Found");
-        return Translate(RespawnPoint.CubeGrid.WorldMatrix, new Vector3D(-5,0,0) );
+        MatrixD matrix = RespawnPoint.CubeGrid.WorldMatrix;
+        Vector3D translation = matrix.Translation;
+        Vector3D forward = matrix.GetDirectionVector(Base6Directions.Direction.Forward);
+        //translation.X += 5;
+
+        return MatrixD.CreateWorld( translation + forward );
+        //return Translate(matrix, new Vector3D(5,0,0) );
         //return Translate(RespawnPoint.CubeGrid.WorldMatrix, RespawnPoint.CubeGrid.WorldMatrix.GetDirectionVector(Base6Directions.Direction.Forward));
       } else {
-        MyAPIGateway.Utilities.ShowNotification("DID NOT FIND RESPAWN POINT!!!");
+        // TODO: Respawn Drop Pod
       }
 
-      // TODO: Respawn Drop Pod
+
       return MatrixD.Zero;
+    }
+
+
+    public IMySlimBlock AddLargeGridConverter( CubeGrid grid ) {
+      // Create Adv Rotor
+      Vector3I pos = Vector3I.Zero;
+      grid.FindOpenSlot(out pos, MyCubeSize.Small);
+
+      MyObjectBuilder_CubeBlock rotor = new MyObjectBuilder_CubeBlock() {
+        EntityId = 0,
+        //BlockOrientation = new SerializableBlockOrientation(Base6Directions.Direction.Up, Base6Directions.Direction.Backward),
+        //SubtypeName = "SmallAdvancedStator",
+        SubtypeName = "SmallBlockSmallGenerator",
+        Name = string.Empty,
+        //Min = new SerializableVector3I(-1,1,-1),
+        Min = pos,
+        Owner = 0,
+        ShareMode = MyOwnershipShareModeEnum.None,
+        DeformationRatio = 0,
+        //BuildPercent = 0.0f,
+        //ConstructionInventory = new MyObjectBuilder_Inventory()
+      };
+
+      IMySlimBlock slim = grid.Grid.AddBlock( rotor, false );
+
+      if( slim != null ) {
+        slim.SetToConstructionSite();
+      }
+
+      return slim;
     }
 
 
