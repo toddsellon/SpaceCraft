@@ -2,6 +2,7 @@ using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
 using Sandbox.Game;
 using Sandbox.Definitions;
+using Sandbox.Common.ObjectBuilders.Definitions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -44,12 +45,47 @@ namespace SpaceCraft.Utils {
       switch( Progress ) {
         case Progression.None:
           if( MainBase.Grid.GridSizeEnum == MyCubeSize.Small ) {
-            IMySlimBlock slim = AddLargeGridConverter( MainBase );
+            /*IMySlimBlock slim = MainBase.TryPlace( new MyObjectBuilder_MotorAdvancedStator{
+              SubtypeName = "SmallAdvancedStator",
+              Orientation =  Quaternion.CreateFromForwardUp(Vector3.Down, Vector3.Right),
+              //BuildPercent = 0.0f,
+              //ConstructionInventory = new MyObjectBuilder_Inventory()
+            } );*/
+
+            // IMySlimBlock slim = MainBase.TryPlace( new MyObjectBuilder_MotorAdvancedStator{
+            //   SubtypeName = "SmallAdvancedStator",
+            //   Orientation =  Quaternion.CreateFromForwardUp(Vector3.Down, Vector3.Right),
+            //   Min = new Vector3I(4,-1,2)
+            // } );
+
+            IMySlimBlock slim = MainBase.TryPlace( new MyObjectBuilder_MotorAdvancedStator{
+              SubtypeName = "SmallAdvancedStator",
+              Orientation =  Quaternion.CreateFromForwardUp(Vector3.Left, Vector3.Forward),
+              Min = new Vector3I(-1,-1,-3),
+              //BuildPercent = 0.0f,
+              ConstructionInventory = new MyObjectBuilder_Inventory()
+            } );
+
+            /*IMySlimBlock slim = MainBase.TryPlace( new MyObjectBuilder_Assembler{
+              SubtypeName = "BasicAssembler",
+              Min = RespawnPoint.Position + new Vector3I(0,0,3)
+            });*/
+
+            // IMySlimBlock slim = MainBase.TryPlace( new MyObjectBuilder_CargoContainer{
+            //   SubtypeName = "SmallBlockMediumContainer",
+            //   Min = RespawnPoint.Position + new Vector3I(0,1,0)
+            // });
 
             if( slim == null ) {
               MyAPIGateway.Utilities.ShowMessage( "Faction", "FAILED to AddLargeGridConverter!!!!!!!!!!!!!!" );
             } else {
               MyAPIGateway.Utilities.ShowMessage( "Faction", "Successfully added large grid converter" );
+
+              slim.CubeGrid.AddBlock( new MyObjectBuilder_MotorAdvancedRotor{
+                SubtypeName = "SmallAdvancedRotor",
+                BuildPercent = 0.0f
+              },false );
+              Progress = Progression.BasicAssembler;
             }
 
           }
@@ -153,36 +189,6 @@ namespace SpaceCraft.Utils {
 
 
       return MatrixD.Zero;
-    }
-
-
-    public IMySlimBlock AddLargeGridConverter( CubeGrid grid ) {
-      // Create Adv Rotor
-      Vector3I pos = Vector3I.Zero;
-      grid.FindOpenSlot(out pos, MyCubeSize.Small);
-
-      MyObjectBuilder_CubeBlock rotor = new MyObjectBuilder_CubeBlock() {
-        EntityId = 0,
-        //BlockOrientation = new SerializableBlockOrientation(Base6Directions.Direction.Up, Base6Directions.Direction.Backward),
-        //SubtypeName = "SmallAdvancedStator",
-        SubtypeName = "SmallBlockSmallGenerator",
-        Name = string.Empty,
-        //Min = new SerializableVector3I(-1,1,-1),
-        Min = pos,
-        Owner = 0,
-        ShareMode = MyOwnershipShareModeEnum.None,
-        DeformationRatio = 0,
-        //BuildPercent = 0.0f,
-        //ConstructionInventory = new MyObjectBuilder_Inventory()
-      };
-
-      IMySlimBlock slim = grid.Grid.AddBlock( rotor, false );
-
-      if( slim != null ) {
-        slim.SetToConstructionSite();
-      }
-
-      return slim;
     }
 
 

@@ -3,9 +3,11 @@ using VRage;
 using VRage.ModAPI;
 using VRage.Game;
 using VRage.Game.Entity;
+using VRage.Game.ModAPI;
 using Sandbox.ModAPI;
 using Sandbox.Definitions;
 //using Sandbox.ModAPI.Ingame;
+using Sandbox.Game.Screens.Terminal.Controls;
 using Sandbox.Game.AI;
 using Sandbox.Game.Multiplayer;
 using Sandbox.Game.Entities.Cube;
@@ -68,6 +70,9 @@ namespace SpaceCraft.Utils {
 			if( Grid == null ) return;
 
 			ControlledEntity = Grid as Sandbox.Game.Entities.IMyControllableEntity;
+
+			// Determine available Conveyers
+			//MyAPIGateway.Utilities.ShowMessage( "Init:", "" );
 			// Wheels = Grid.GetFirstBlockOfType<IMyMotorSuspension>() != null;
 			// Flying = Grid.GetFirstBlockOfType<MyThrust>() != null;
 	    // Drill = Grid.GetFirstBlockOfType<IMyShipDrill>() != null;
@@ -181,8 +186,25 @@ namespace SpaceCraft.Utils {
 			return false;
 		}
 
+		public IMySlimBlock TryPlace( MyObjectBuilder_CubeBlock block ) {
+			if( block.Min.X == 0 && block.Min.Y == 0 && block.Min.Z == 0 ) {
+				Vector3I pos = Vector3I.Zero;
+				MyCubeBlockDefinition def = MyDefinitionManager.Static.GetCubeBlockDefinition( block );
+				FindOpenSlot(out pos, def.Size, def.CubeSize );
+				block.Min = pos;
+			}
+
+			IMySlimBlock slim = Grid.AddBlock( block, false );
+
+			if( block.BuildPercent == 0.0f ) {
+				slim.SetToConstructionSite();
+			}
+
+			return slim;
+		}
+
 		//public Vector3I FindOpenSlot( SerializableVector3I size, Grid.GridSizeEnum gridSize = MyCubeSize.Large ) {
-		public bool FindOpenSlot( out Vector3I slot, MyCubeSize gridSize = MyCubeSize.Large ) {
+		public bool FindOpenSlot( out Vector3I slot, Vector3I size, MyCubeSize gridSize = MyCubeSize.Large ) {
 			List<IMySlimBlock> blocks = new List<IMySlimBlock>();
 			slot = Vector3I.Zero;
 			Grid.GetBlocks( blocks );
@@ -195,10 +217,13 @@ namespace SpaceCraft.Utils {
 					//SerializableDefinitionId def = block.FatBlock.BlockDefinition;
 					MyCubeBlockDefinition def = MyDefinitionManager.Static.GetCubeBlockDefinition(block.FatBlock.BlockDefinition);
 					foreach( MyCubeBlockDefinition.MountPoint point in def.MountPoints ) {
-						IMySlimBlock hit = Grid.GetCubeBlock( point.Normal + block.Position );
+						//IMySlimBlock hit = Grid.GetCubeBlock( point.Normal + block.Position );
+						IMySlimBlock hit = Grid.GetCubeBlock( (point.Normal*size) + block.Position );
+
 						//MyAPIGateway.Utilities.ShowMessage( "point.Normal", point.Normal.ToString() );
 						if( hit == null ) {
-							slot = point.Normal + block.Position;
+							//slot = point.Normal + block.Position;
+							slot = (point.Normal*size) + block.Position;
 							return true;
 						}
 					}

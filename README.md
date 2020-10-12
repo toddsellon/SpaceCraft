@@ -3,6 +3,9 @@
 # SpaceCraft
 A mod for Space Engineers
 
+# Testing
+You can test in a limited fashion by loading a new **Custom Game** on the **Alien Planet**. Simply include the clone the repository into *Users\UserName\AppData\Roaming\SpaceEngineers\Mods\SpaceCraft* before launching the game and include it in the mod list for your game.
+
 # Factions
 Factions are defined inside Spawn Groups. Spawn Groups are defined inside XML formated .sbc files.
 
