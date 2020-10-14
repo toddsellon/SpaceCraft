@@ -32,12 +32,14 @@ namespace SpaceCraft.Utils {
 		Gun
 	}
 
+	//[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
 	public class Engineer : Controllable {
 
 		protected bool Flying = true;
     protected bool Drill = true;
     protected bool Welder = true;
     protected bool Grider = true;
+		public Vector3 Color;
 
     public IMyCharacter Character;
 
@@ -56,19 +58,35 @@ namespace SpaceCraft.Utils {
 			}
 		}
 
-		public Engineer( string data = "" ) {
+		public Engineer( IMyCharacter character ) {
+			Character = character;
+			ControlledEntity = Character as Sandbox.Game.Entities.IMyControllableEntity;
+
+
+			//MyAPIGateway.Session.RegisterComponent(this, MyUpdateOrder.BeforeSimulation, 0);
 			/*if( data == string.Empty ) return;
 			try {
 				var npcData = MyAPIGateway.Utilities.SerializeFromBinary<Engineer>(Convert.FromBase64String(data));
 			}*/
+			Initialize();
 		}
 
 
 
-		public override void Init() {
-			if( Character == null ) return;
-			//ControlledEntity = Character as IMyControllableEntity;
+		public override void Init( MyObjectBuilder_SessionComponent session ) {
 
+			base.Init(session);
+
+			//ControlledEntity = Character as IMyControllableEntity;
+			Initialize();
+
+		}
+
+		public void Initialize() {
+			if( Character == null ) {
+				MyAPIGateway.Utilities.ShowMessage( "Engineer", "Character was null" );
+				return;
+			}
 			TakeControl(Character);
 
 			Character.DoDamage(0.0f, MyStringHash.Get(string.Empty), true); // Hack to property init Physics
@@ -154,8 +172,8 @@ namespace SpaceCraft.Utils {
 			//Character.Physics.SetSpeeds( new Vector3(0,1,0), Vector3.Zero );
 			if( Character == null || Character.Integrity == 0 ) {
 				MatrixD matrix = Character.WorldMatrix;
-				Character = Spawn(Owner.GetSpawnLocation());
-				Init();
+				Character = Spawn(Owner.GetSpawnLocation(), Owner );
+				Initialize();
 			}
 
 
@@ -165,9 +183,8 @@ namespace SpaceCraft.Utils {
 
 		}
 
-    public override void UpdateBeforeSimulation100() {
-
-
+    //public override void UpdateBeforeSimulation100() {
+		public void UpdateBeforeSimulation100() {
 
       MyCharacterJetpackComponent jetpack = Character.Components.Get<MyCharacterJetpackComponent>();
 
@@ -194,7 +211,7 @@ namespace SpaceCraft.Utils {
 
       MyAPIGateway.Utilities.ShowNotification("Static: " + Character.Physics.IsStatic );
       MyAPIGateway.Utilities.ShowNotification("Kinematic: " + Character.Physics.IsKinematic );*/
-      MyAPIGateway.Utilities.ShowNotification("Moving: " + Character.Physics.IsMoving );
+      //MyAPIGateway.Utilities.ShowNotification("Moving: " + Character.Physics.IsMoving );
 
 
     }
@@ -212,7 +229,7 @@ namespace SpaceCraft.Utils {
 
 
 
-		public static IMyCharacter Spawn( MatrixD matrix ) {
+		public static IMyCharacter Spawn( MatrixD matrix, Faction owner ) {
 			if( matrix == null ) return null;
 
 			MyObjectBuilder_Character character = new MyObjectBuilder_Character(){
@@ -223,6 +240,7 @@ namespace SpaceCraft.Utils {
         PersistentFlags = MyPersistentEntityFlags2.InScene,
         Name = "NPC",
         DisplayName = "NPC",
+				ColorMaskHSV = owner.Color,
         Inventory = new MyObjectBuilder_Inventory(){
 					Items = new List<MyObjectBuilder_InventoryItem>(){
 						new MyObjectBuilder_InventoryItem() {

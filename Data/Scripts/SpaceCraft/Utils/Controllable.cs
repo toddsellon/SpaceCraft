@@ -2,10 +2,13 @@ using SpaceCraft.Utils;
 using System;
 using System.Collections.Generic;
 using Sandbox.Game.World;
+using Sandbox.Definitions;
 using VRage.Game.Entity;
 
 namespace SpaceCraft.Utils {
 
+  //[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
+  //public class Controllable : MySessionComponentBase, IMyEntityController {
   public class Controllable : IMyEntityController {
 
     public Order CurrentOrder;
@@ -46,6 +49,48 @@ namespace SpaceCraft.Utils {
       if (old != entity && ControlledEntityChanged != null) ControlledEntityChanged(old, entity);
     }
 
+    public int Prioritize( IMyCharacter character ) {
+      return 1000;
+    }
+
+    public int Prioritize( IMyCubeGrid grid ) {
+      return 999;
+    }
+
+    public int Prioritize( IMySlimBlock slim ) {
+			if( slim.FatBlock == null ) return 0;
+      IMyCubeBlock block = slim.FatBlock;
+      //BlockDefinition
+
+      //MyCubeBlockDefinition GetCubeBlockDefinition (MyDefinitionId id)
+      //MyObjectBuilder_DefinitionBase def = MyDefinitionManager.Static.GetObjectBuilder(slim.BlockDefinition);
+      //MyCubeBlockDefinition def = MyDefinitionManager.Static.GetCubeBlockDefinition(slim.BlockDefinition.Id);
+      string subtypeName = slim.BlockDefinition.Id.SubtypeName;
+      if( block is IMyAssembler ) {
+        //MyAPIGateway.Utilities.ShowMessage( "Prioritize", "slim.BlockDefinition.DisplayNameString" + slim.BlockDefinition.DisplayNameString );
+        //switch( slim.BlockDefinition.DisplayNameString ) {
+        switch(subtypeName) {
+          case "LargeAssembler":
+            return 100;
+          case "BasicAssembler":
+            return 50;
+        }
+        return 49;
+      }
+
+      if( block is IMyRefinery ) {
+        //return 48;
+        return subtypeName == "LargeRefinery" ? 99 : 48;
+      }
+
+      if( block is IMyProductionBlock ) {
+        return 47;
+      }
+
+      return 1;
+		}
+
+
     public void IssueOrder( Order order, bool force = false ) {
 
       if( force ) {
@@ -68,6 +113,13 @@ namespace SpaceCraft.Utils {
         TakeControl(null);
     }
 
+    public virtual void Init( MyObjectBuilder_SessionComponent session ) {
+			//base.Init(session);
+		}
+
+    public virtual void UpdateBeforeSimulation() {
+    }
+
     public void CompleteOrder() {
       MyAPIGateway.Utilities.ShowNotification("Order Completed " + CurrentOrder.ToString() );
       if( OrderQueue.Count > 0 ) {
@@ -82,14 +134,12 @@ namespace SpaceCraft.Utils {
 
     public virtual void StartOrder() {
     }
-    public virtual void Init() {
-    }
-    public virtual void UpdateBeforeSimulation() {
-    }
-    public virtual void UpdateBeforeSimulation10() {
-    }
-    public virtual void UpdateBeforeSimulation100() {
-    }
+
+    // public Vector3D UpVector {
+    //   get {
+    //     return (position - ControlledEntity.WorldMatrix.Translation).Normalize();
+    //   }
+    // }
 
     private IMyEntityController m_controller;
     public IMyEntityController Controller

@@ -39,12 +39,15 @@ namespace SpaceCraft {
 
 			if( inv == null ) return;
 
-			if( block.IsQueueEmpty )
-				block.AddQueueItem( MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/StoneOreToIngotBasic"), (VRage.MyFixedPoint)1 );
+			if( block.IsQueueEmpty || !block.IsProducing )
+				block.AddQueueItem( MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/StoneOreToIngotBasic"), (VRage.MyFixedPoint)10 );
 
-			inv.AddItems((VRage.MyFixedPoint)1, new MyObjectBuilder_Ore(){
-        SubtypeName = "Stone"
-      } );
+			inv.RemoveItemsOfType( (MyFixedPoint)1, MyDefinitionId.Parse("MyObjectBuilder_Ingot/Stone") );
+
+			if( (int)(inv.CurrentVolume) < (int)(inv.MaxVolume) / 2 )
+				inv.AddItems((VRage.MyFixedPoint)1, new MyObjectBuilder_Ore(){
+	        SubtypeName = "Stone"
+	      } );
     }
 
 

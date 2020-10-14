@@ -1,16 +1,16 @@
 ![](https://raw.githubusercontent.com/toddsellon/SpaceCraft/main/thumbnail.jpg?token=AB6IMWOXRSLL2T76BAYSH327RTGKW)
 
 # SpaceCraft
-A mod for Space Engineers
+A mod for Space Engineers. Simply include the clone the repository into *Users\UserName\AppData\Roaming\SpaceEngineers\Mods\SpaceCraft* before launching the game and include it in the mod list for your game.
 
 # Testing
-You can test in a limited fashion by loading a new **Custom Game** on the **Alien Planet**. Simply include the clone the repository into *Users\UserName\AppData\Roaming\SpaceEngineers\Mods\SpaceCraft* before launching the game and include it in the mod list for your game.
+You can test in a limited fashion by loading a new **Custom Game** on the **Alien Planet** (untested on other worlds). Use the Entity List (Alt + F10) to locate the AI grids.
 
 # Factions
 Factions are defined inside Spawn Groups. Spawn Groups are defined inside XML formated .sbc files.
 
 # Example
-The &lt;SpawnGroup&gt; Description is parsed using a Command Line syntax. The first argument of "SpaceCraft" defines a new Faction. The Faction tag is the second argument. Any faction-specific parameters can be defined with flags (i.e. -aggressive).
+The &lt;SpawnGroup&gt; Description is parsed using a Command Line syntax. The first argument of "SpaceCraft" defines a new Faction. The Faction tag is the second argument. Optionally, an HSV color may be specified as the first argument. Also, any faction-specific parameters can optionally be defined with flags (i.e. -aggressive).
 
 ```xml
 <?xml version="1.0"?>
@@ -20,9 +20,9 @@ The &lt;SpawnGroup&gt; Description is parsed using a Command Line syntax. The fi
 <SpawnGroup>
 	<Id>
 		<TypeId>SpawnGroupDefinition</TypeId>
-		<SubtypeId>TerranPlanetPod</SubtypeId>
+		<SubtypeId>Cavalry</SubtypeId>
 	</Id>
-	<Description>SpaceCraft HVS -scavenger</Description>
+	<Description>SpaceCraft HVS "207.4,80.0,45.0" -scavenger</Description>
 	<Icon>Textures\GUI\Icons\Fake.dds</Icon>
 	<Frequency>1.0</Frequency>
 	<IsPirate>true</IsPirate>

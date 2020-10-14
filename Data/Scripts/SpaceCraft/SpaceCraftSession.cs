@@ -36,7 +36,6 @@ using SpaceCraft.Utils;
 namespace SpaceCraft {
 
 	[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
-
 	public class SpaceCraftSession:MySessionComponentBase {
 
 		public int Tick = 0;
@@ -45,10 +44,13 @@ namespace SpaceCraft {
 		public bool Spawned = false;
 		public bool Server = false;
     public List<Faction> Factions = new List<Faction>();
-
+		public static List<MyPlanet> Planets = new List<MyPlanet>();
+		public static MyPlanet ClosestPlanet { get; protected set; }
+		protected MyObjectBuilder_SessionComponent Session;
     public override void Init(MyObjectBuilder_SessionComponent session) {
       base.Init(session);
-
+			Session = session;
+			MyAPIGateway.Utilities.ShowNotification("SpaceCraft Session Init()" );
       SaveName = MyAPIGateway.Session.Name;
 
 
@@ -58,7 +60,43 @@ namespace SpaceCraft {
 			//MyAPIGateway.Utilities.IsDedicated;
     }
 
-    public void LoadFactions() {
+		public static MyPlanet GetClosestPlanet( Vector3D position ) {
+			// planet.PositionLeftBottomCorner
+
+			MyPlanet best = null;
+			double bestDistance = 0.0f;
+			double distance = 0.0f;
+			foreach( MyPlanet planet in Planets ) {
+				distance = Vector3D.Distance(position, planet.PositionLeftBottomCorner + (planet.SizeInMetres / 2));
+				if( best == null || distance < bestDistance ) {
+					best = planet;
+					bestDistance = distance;
+				}
+
+
+			}
+			return best;
+		}
+
+		public void ScanEntities() {
+			HashSet<IMyEntity> entities = new HashSet<IMyEntity>();
+			MyAPIGateway.Entities.GetEntities(entities);
+
+			foreach( IMyEntity entity in entities ) {
+				if( entity is MyPlanet ) {
+					Planets.Add( entity as MyPlanet );
+				}
+
+				// Remove Pirates
+				if( entity is IMyCubeGrid && entity.DisplayName.Substring(0,6) == "Pirate" ) {
+					MyAPIGateway.Entities.RemoveEntity(entity);
+				}
+			}
+		}
+
+    public void Preload() {
+
+			ScanEntities();
 
 			//var planetDefList = MyDefinitionManager.Static.GetPlanetsGeneratorsDefinitions();
 
@@ -69,36 +107,31 @@ namespace SpaceCraft {
 
       ListReader<MySpawnGroupDefinition> groups = MyDefinitionManager.Static.GetSpawnGroupDefinitions();
 
-      foreach(MySpawnGroupDefinition group in groups ){
-				if(group.Enabled == false){
-					continue;
-				}
+			foreach(MySpawnGroupDefinition group in groups ){
+				//if(group.Enabled == false || String.IsNullOrWhiteSpace(group.DescriptionText) ) continue;
+				if( String.IsNullOrWhiteSpace(group.DescriptionText) ) continue;
 
+				//MyAPIGateway.Utilities.ShowMessage( "Preload", group.DescriptionText );
 				MyCommandLine cmd = new MyCommandLine();
 
 
         if (cmd.TryParse(group.DescriptionText) && cmd.Argument(0).ToLower() == "spacecraft") {
 
-					//MyAPIGateway.Utilities.ShowNotification("Found: " + group.DescriptionText);
-
           string Name = cmd.Argument(1).ToUpper();
 
-          if( Name != String.Empty ) {
+          if( Name != string.Empty ) {
 
-						Faction faction = GetFaction( Name );
+						Faction faction = GetFaction( Name, group.Id.SubtypeId.ToString() );
 						faction.CommandLine = cmd;
+						if( !String.IsNullOrWhiteSpace(cmd.Argument(2)) ) {
+							string[] colors = cmd.Argument(2).Split(',');
+							faction.Color = new SerializableVector3(float.Parse(colors[0]),float.Parse(colors[1]),float.Parse(colors[2]));
+						}
 						faction.Groups.Add( group );
 
 
           }
         }
-
-
-
-
-				if( !Spawned ) {
-					SpawnFactions();
-				}
 
 				//MyDefinitionManager.Static.GetPrefabDefinition();
 				//MyAPIGateway.Session.Factions.TryGetFactionByTag(
@@ -111,62 +144,72 @@ namespace SpaceCraft {
 
     }
 
-		public Faction GetFaction( string Name ) {
-			if( !MyAPIGateway.Session.Factions.FactionTagExists(Name) ) {
-				MyAPIGateway.Session.Factions.CreateFaction(0,Name,"SpaceCraft Faction","Description","Private Info");
+		public Faction GetFaction( string tag, string name ) {
+			if( !MyAPIGateway.Session.Factions.FactionTagExists(tag) ) {
+				MyAPIGateway.Session.Factions.CreateFaction(0,tag,name,"Description","Private Info");
 			}
 			foreach( Faction f in Factions) {
-				if( f.Name == Name ) {
+				if( f.Name == tag ) {
 					return f;
 				}
 			}
 			Faction faction = new Faction{
-				Name = Name
+				Name = tag
 			};
+
+			if( faction == null ) {
+				MyAPIGateway.Utilities.ShowMessage( "GetFaction", tag + " faction was null..." );
+			}
+
 			Factions.Add(faction);
+			//faction.Init(Session);
 			return faction;
 		}
 
 		public void SpawnFactions() {
+			//if( MyAPIGateway.Session.ControlledObject == null ) return;
+			if( ClosestPlanet == null ) ClosestPlanet = GetClosestPlanet( MyAPIGateway.Session.Player.GetPosition() );
+
+
+
 			foreach( Faction faction in Factions ) {
 				//var position = MyAPIGateway.Session.Player.GetPosition() + new Vector3D(0,100,0);
-				Vector3D position = MyAPIGateway.Session.Player.GetPosition();
-				position.Y -= 1000;
 
-				//CubeGrid grid = faction.AddPrefab("TerranPlanetPod", MatrixD.CreateWorld(position) );
-				faction.AddControllable( new CubeGrid(){
-					Grid = CubeGrid.Spawn("TerranPlanetPod", MatrixD.CreateWorld(position))
-				} as Controllable );
+				//MyAPIGateway.Utilities.ShowMessage( "SpawnFactions", "Spawning " + faction.Name + " faction" );
 
-				position.X += 5;
-				//Engineer e = faction.AddEngineer( MatrixD.CreateWorld(position) );
-				faction.AddControllable( new Engineer(){
-					Character = Engineer.Spawn(MatrixD.CreateWorld(position))
-				} as Controllable );
+				if( ClosestPlanet == null ) {
+					MyAPIGateway.Utilities.ShowMessage( "SpawnFactions", "Could not find closest planet" );
+					Vector3D position = MyAPIGateway.Session.Player.GetPosition();
+					position.Y -= 500;
+					position.Z += 100;
+					faction.Spawn(position);
+				} else {
+					faction.Spawn(Vector3D.Zero);
+				}
 
-				Spawned = true;
-				MyAPIGateway.Utilities.SetVariable<bool>("SC-Spawned", true);
+				// faction.Spawn(position);
+				//faction.Spawn(Vector3D.Zero);
 			}
+
+			Spawned = true;
+			MyAPIGateway.Utilities.SetVariable<bool>("SC-Spawned", true);
 		}
 
     public override void UpdateBeforeSimulation() {
 
-			if( !Loaded ) {
-				LoadFactions();
-			}
-
 			if( !Server ) return;
 
-			Tick++;
+			if( !Loaded ) {
+				Preload();
+			}
+
+			if( !Spawned ) {
+				SpawnFactions();
+			}
 
 			foreach( Faction faction in Factions ) {
 				faction.UpdateBeforeSimulation();
-				if( Tick % 10 == 0 ) faction.UpdateBeforeSimulation10();
-				if( Tick == 100 ) faction.UpdateBeforeSimulation100();
 			}
-
-
-      if( Tick == 100 ) Tick = 0;
 
       /*if(SaveName != MyAPIGateway.Session.Name) {
         // Saved

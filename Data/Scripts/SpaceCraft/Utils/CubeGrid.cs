@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using VRage;
 using VRage.ModAPI;
@@ -5,8 +6,10 @@ using VRage.Game;
 using VRage.Game.Entity;
 using VRage.Game.ModAPI;
 using Sandbox.ModAPI;
+using Sandbox.ModAPI.Interfaces;
 using Sandbox.Definitions;
 //using Sandbox.ModAPI.Ingame;
+using Sandbox.Game;
 using Sandbox.Game.Screens.Terminal.Controls;
 using Sandbox.Game.AI;
 using Sandbox.Game.Multiplayer;
@@ -27,6 +30,7 @@ using SpaceCraft.Utils;
 
 namespace SpaceCraft.Utils {
 
+	//[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
 	public class CubeGrid : Controllable {
 
 		public enum Needs {
@@ -36,9 +40,13 @@ namespace SpaceCraft.Utils {
 			Storage
 	  };
 
+		public IMySlimBlock ConstructionSite;
 		public Needs Need = Needs.None;
     public IMyCubeGrid Grid;
 		public string Prefab;
+		public IMyCubeGrid SuperGrid;
+		protected static int NumGrids = 0;
+		public int Tick = 0;
 
 		public MatrixD WorldMatrix
 		{
@@ -52,27 +60,23 @@ namespace SpaceCraft.Utils {
 			}
 		}
 
-		public bool IsStatic
-		{
-			get
-			{
-				 return Grid == null ? false : Grid.IsStatic;
-			}
-			set
-			{
-				 if( Grid == null ) return;
-				 //if( value && !Grid.IsStatic ) Grid.ConvertToStatic();
-				 //else if( !value && Grid.IsStatic ) Grid.ConvertToDynamic();
-			}
-		}
+		// public bool IsStatic
+		// {
+		// 	get
+		// 	{
+		// 		 return Grid == null ? false : Grid.IsStatic;
+		// 	}
+		// 	set
+		// 	{
+		// 		 if( Grid == null ) return;
+		// 		 if( value && !Grid.IsStatic ) Grid.Physics.ConvertToStatic();
+		// 		 else if( !value && Grid.IsStatic ) Grid.ConvertToDynamic();
+		// 	}
+		// }
 
-		public override void Init() {
-			if( Grid == null ) return;
-
+		public CubeGrid( IMyCubeGrid grid ) {
+			Grid = grid;
 			ControlledEntity = Grid as Sandbox.Game.Entities.IMyControllableEntity;
-
-			// Determine available Conveyers
-			//MyAPIGateway.Utilities.ShowMessage( "Init:", "" );
 			// Wheels = Grid.GetFirstBlockOfType<IMyMotorSuspension>() != null;
 			// Flying = Grid.GetFirstBlockOfType<MyThrust>() != null;
 	    // Drill = Grid.GetFirstBlockOfType<IMyShipDrill>() != null;
@@ -80,14 +84,327 @@ namespace SpaceCraft.Utils {
 	    // Grider = Grid.GetFirstBlockOfType<IMyShipGrinder>() != null;
 		}
 
-		public override void UpdateBeforeSimulation () {
+
+		public override void Init( MyObjectBuilder_SessionComponent session ) {
+			base.Init(session);
+		}
+
+		public List<IMySlimBlock> GetBlocks<t>() {
+			List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+
+			Grid.GetBlocks( blocks );
+			if( SuperGrid != null ) {
+				SuperGrid.GetBlocks( blocks );
+			}
+
+			if( blocks.Count > 0 && !(blocks[0] is t) ) {
+				List<IMySlimBlock> ret = new List<IMySlimBlock>();
+
+				foreach( IMySlimBlock block in blocks ) {
+					if( block.FatBlock == null || !(block.FatBlock is t) ) continue;
+					ret.Add(block);
+				}
+
+				return ret;
+			}
+
+			return blocks;
+		}
+
+		public override void UpdateBeforeSimulation() {
+			Tick++;
+			CheckOrder();
+			if( Tick == 99 )
+				AssessInventory();
+			//MyAPIGateway.Utilities.ShowNotification("Needs: " + Need );
+			if( Need == Needs.None ) {
+				AssessNeed();
+			} else {
+				switch( Need ) {
+					case Needs.Power:
+						// AddPowerSource()
+						break;
+					case Needs.Components:
+						break;
+					case Needs.Storage:
+						// AddStorageCapacity()
+						break;
+				}
+			}
+
+			if( Tick == 99 ) {
+				Tick = 0;
+			}
+		}
+
+		// public override void UpdateBeforeSimulation100() {
+		// 	CheckOrder();
+		// 	MyAPIGateway.Utilities.ShowNotification("Needs: " + Need );
+		// 	if( Need == null || Need == Needs.None ) {
+		// 		AssessNeed();
+		// 	} else {
+		// 		switch( Need ) {
+		// 	    case Needs.Power:
+		// 				// AddPowerSource()
+		// 				break;
+		// 	    case Needs.Components:
+		// 				AssessInventory();
+		// 				break;
+		// 			case Needs.Storage:
+		// 				// AddStorageCapacity()
+		// 				break;
+		// 		}
+		// 	}
+		// }
+
+		public void AssessInventory() {
+			MyObjectBuilderType ORE = MyObjectBuilderType.Parse("MyObjectBuilder_Ore");
+			//if( ConstructionSite == null || ConstructionSite.FatBlock == null ) return;
+
+			float old = ConstructionSite == null ? 1.0f : ConstructionSite.BuildIntegrity;
+			List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
+			List<IMyInventory> inventories = new List<IMyInventory>();
+			List<IMyAssembler> factories = new List<IMyAssembler>();
+			List<IMyRefinery> refineries = new List<IMyRefinery>();
+
+			// Update Construction Site
+			foreach( IMySlimBlock block in blocks ) {
+				if( block.FatBlock == null ) continue;
+				if( block.FatBlock is IMyAssembler )
+					factories.Add( block.FatBlock as IMyAssembler );
+				if( block.FatBlock is IMyRefinery )
+					refineries.Add( block.FatBlock as IMyRefinery );
+				//MyInventoryBase inv = block.FatBlock.Components.Get<MyInventoryBase>();
+				//IMyInventory inv = IMyTerminalBlock.GetInventory( block.FatBlock as IMyTerminalBlock, 0 );
+				for( int i = 0; i < 2; i++ ) {
+					IMyInventory inv = block.FatBlock.GetInventory(i);
+					if( inv != null ) {
+						inventories.Add( inv );
+						if( ConstructionSite != null )
+							ConstructionSite.MoveItemsToConstructionStockpile( inv );
+					}
+				}
+
+			}
+
+			// <MyProductionQueueItem>
+			// MyFixedPoint 	Amount
+			// MyDefinitionBase 	Blueprint
+			// uint 	ItemId
+			//MyObjectBuilder_PhysicalObject ob = new MyObjectBuilder_PhysicalObject();
+
+			// Pull Ore
+			foreach( IMyRefinery refinery in refineries ) {
+				if( refinery.IsProducing ) continue;
+
+				IMyInventory inventory = refinery.GetInventory(0);
+
+				foreach( IMyInventory inv in inventories ) {
+					bool found = false;
+					if( inv == inventory ) continue;
+
+					List<IMyInventoryItem> itms = inv.GetItems();
+					for( int i = 0; i < itms.Count; i++ ) {
+						IMyInventoryItem itm = itms[i];
+						if( itm.Content.TypeId == ORE ) {
+							found = true;
+							inv.TransferItemTo(inventory, i, null, true, (VRage.MyFixedPoint)100, false);
+							break;
+						}
+					}
+					if( found ) break;
+				}
+			}
+
+			// Pull Components
+			foreach( IMyAssembler factory in factories ) {
+				if( factory.IsQueueEmpty ) continue;
+
+				List<MyProductionQueueItem> queue = factory.GetQueue();
+				MyProductionQueueItem item = queue[0];
+				//item.Blueprint.Id.SubtypeName;
+				MyBlueprintDefinitionBase bp =	MyDefinitionManager.Static.GetBlueprintDefinition(item.Blueprint.Id);
+				IMyInventory inventory = factory.GetInventory(0);
+
+				// Check if pull needed since IsProducing is useless
+				List<MyBlueprintDefinitionBase.Item> needs = new List<MyBlueprintDefinitionBase.Item>();
+				List<IMyInventoryItem> items = inventory.GetItems();
+				foreach( MyBlueprintDefinitionBase.Item prereq in bp.Prerequisites ) {
+					bool fnd = false;
+					foreach( IMyInventoryItem i in items ) {
+
+						if( i.Amount >= prereq.Amount && prereq.Id.TypeId == i.Content.TypeId && prereq.Id.SubtypeName == i.Content.SubtypeName ) {
+							fnd = true;
+						}
+					}
+					if( !fnd )
+						needs.Add(prereq);
+				}
+
+				if( needs.Count == 0 ) continue;
+
+				//MyAPIGateway.Utilities.ShowMessage( "AssessInventory", String.Join( ", ", needs ) );
+
+				foreach( MyBlueprintDefinitionBase.Item need in needs ) {
+					bool found = false;
+
+					foreach( IMyInventory inv in inventories ) {
+						if( inv == inventory ) continue;
+
+						List<IMyInventoryItem> itms = inv.GetItems();
+						for( int i = 0; i < itms.Count; i++ ) {
+							IMyInventoryItem itm = itms[i];
+							if( need.Id.TypeId == itm.Content.TypeId && need.Id.SubtypeName == itm.Content.SubtypeName ) {
+								// Transfer
+								found = true;
+								//MyAPIGateway.Utilities.ShowMessage( "AssessInventory","Trying to pull items" );
+								inv.TransferItemTo(inventory, i, null, true, need.Amount, false);
+								break;
+							} else if( need.Id.TypeId == itm.Content.TypeId ) {
+								//MyAPIGateway.Utilities.ShowMessage( "AssessInventory", "itm.Amount:" + itm.Amount.ToString() + " != need.Amount:" + need.Amount.ToString() );
+							}
+						}
+
+						if( found ) break; // Inventories
+					}
+				}
+
+				// MyAPIGateway.Utilities.ShowNotification("Stopped Factory Queue: " + factory.IsProducing.ToString() + "("+queue.Count.ToString()+")" );
+				// bool found = false;
+				//
+				// foreach( IMyInventory inv in inventories ) {
+				// 	foreach( var prereq in bp.Prerequisites ) {
+				//
+				//
+				// 		for( int i = 0; i < items.Count; i++ ) {
+				// 			IMyInventoryItem itm = items[i];
+				//
+				// 			MyAPIGateway.Utilities.ShowMessage( "AssessInventory","prereq.Id.SubtypeName == itm.Content.SubtypeName: " + prereq.Id.SubtypeName + " == " + itm.Content.SubtypeName );
+				// 			if( itm.Amount >= prereq.Amount && prereq.Id.SubtypeName == itm.Content.SubtypeName ) {
+				// 				// Transfer
+				// 				found = true;
+				// 				MyAPIGateway.Utilities.ShowMessage( "AssessInventory","Trying to pull items" );
+				// 				inv.TransferItemTo(factory.GetInventory(), i, null, true, itm.Amount, false);
+				// 				break;
+				// 			}
+				// 		}
+				//
+				// 		if( found ) break;
+				// 	}
+				//
+				// 	if( found ) break;
+
+
+
+
+
+					//inv.ContainItems (VRage.MyFixedPoint amount, MyObjectBuilder_PhysicalObject ob)
+					// foreach( MyBlueprintDefinitionBase.ProductionInfo info in blueprints ) {
+					// 	List<IMyInventoryItem> items = inv.GetItems();
+					// 	for( int i = 0; i < items.Count; i++ ) {
+					// 		IMyInventoryItem item = items[i];
+					// 		//															MyBlueprintDefinitionBase
+					// 		if( item.Amount >= info.Amount && info.Blueprint == item.ItemId )
+					// 	}
+					// 	// ob.SubtypeName = info.Blueprint.Id.SubtypeName;
+					// 	// if( inv.ContainItems((VRage.MyFixedPoint)3, ob ) ) {
+					// 	// 	inv.TransferItemTo(factory.GetInventory(0));
+					// 	// }
+					// }
+
+				}
+			//}
+
+
+			if( ConstructionSite != null ) {
+				ConstructionSite.IncreaseMountLevel(5.0f,(long)0);
+
+
+				if( ConstructionSite.IsFullIntegrity ) {
+					ConstructionSite.PlayConstructionSound(MyIntegrityChangeEnum.ConstructionEnd);
+					FindConstructionSite();
+				} else if( old < ConstructionSite.BuildIntegrity ) {
+					ConstructionSite.PlayConstructionSound(MyIntegrityChangeEnum.ConstructionProcess);
+				}
+			}
+		}
+
+		public void FindConstructionSite() {
+			ConstructionSite = null;
+			List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
+			IMySlimBlock best = null;
+			int priority = 0;
+
+			foreach( IMySlimBlock block in blocks ) {
+				if( block.IsFullIntegrity ) continue;
+
+				int p = Prioritize(block);
+				//MyAPIGateway.Utilities.ShowMessage( "Priority", block.ToString() + " " + p.ToString() );
+				if( best == null || p > priority ) {
+					best = block;
+					priority = p;
+				}
+			}
+
+			if( best != null ) {
+				SetConstructionSite(best);
+			}
+		}
+
+		public void TransferAllTo( MyInventoryBase from, MyInventoryBase to ) {
+
+			List<MyPhysicalInventoryItem> items = from.GetItems();
+			foreach( MyPhysicalInventoryItem item in items ) {
+				//from.TransferItemsFrom(to, item, item.Amount);
+				to.Add( item, item.Amount );
+			}
+
 
 		}
 
-		public override void UpdateBeforeSimulation100() {
-			CheckOrder();
-			if( Need == null )
-				AssessNeed();
+		public bool AddQueueItems( IMyCubeBlock block, bool clear = false ) {
+			IMyAssembler ass = GetAssembler();
+			bool success = true;
+
+			if( ass == null ) return false;
+
+			if( clear ) ass.ClearQueue();
+
+			MyCubeBlockDefinition def = MyDefinitionManager.Static.GetCubeBlockDefinition(block.BlockDefinition);
+
+			//VRage.Game.MyObjectBuilder_CubeBlockDefinition.Component.CubeBlockComponent
+			foreach( var component in def.Components ){
+				MyBlueprintDefinitionBase blueprint = null;
+				MyDefinitionManager.Static.TryGetComponentBlueprintDefinition(component.Definition.Id, out blueprint);
+
+				if( blueprint == null ) continue;
+
+				//MyDefinitionBase 	GetDefinition (MyDefinitionId id)
+				if( ass.CanUseBlueprint(blueprint) ) {
+					ass.AddQueueItem( blueprint, component.Count );
+				} else {
+					success = false;
+				}
+			}
+
+			if( success ) {
+				MyAPIGateway.Utilities.ShowMessage( "AddQueueItems", block.ToString() + " components queued with " + ass.ToString()  );
+			} else {
+				MyAPIGateway.Utilities.ShowMessage( "AddQueueItems", block.ToString() + " failed to queue!! with " + ass.ToString() );
+			}
+
+			return success;
+		}
+
+		public bool AddQueueItem( MyDefinitionBase blueprint, VRage.MyFixedPoint amount ) {
+			// InsertQueueItem (int idx, MyDefinitionBase blueprint, MyFixedPoint amount)
+			IMyAssembler ass = GetAssembler();
+			if( ass != null ) {
+				ass.AddQueueItem( blueprint, amount );
+				return true;
+			}
+
+			return false;
 		}
 
 		public void AssessNeed() {
@@ -113,6 +430,7 @@ namespace SpaceCraft.Utils {
 
 
 			foreach( IMySlimBlock block in blocks ) {
+				if( block.FatBlock == null ) continue;
 
 				if( !block.FatBlock.IsFunctional ) {
 					Need = Needs.Components;
@@ -174,16 +492,6 @@ namespace SpaceCraft.Utils {
 					CompleteOrder();
 					break;
 			}
-		}
-
-		public bool AddQueueItem( MyDefinitionBase blueprint, VRage.MyFixedPoint amount ) {
-			IMyProductionBlock ass = GetAssembler();
-			if( ass != null ) {
-				ass.AddQueueItem( blueprint, amount );
-				return true;
-			}
-
-			return false;
 		}
 
 		public IMySlimBlock TryPlace( MyObjectBuilder_CubeBlock block ) {
@@ -251,37 +559,101 @@ namespace SpaceCraft.Utils {
 			return null;
 		}
 
-		public IMyProductionBlock GetAssembler() {
-			if( Grid == null ) return null;
-			List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+		// public void PullResources() {
+		// 	List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+		// 	Grid.GetBlocks( blocks );
+		// 	List<IMyInventory> inventories = new List<IMyInventory>();
+		// 	List<IMyAssembler> requests = new List<IMyAssembler>();
+		// 	List<IMyRefinery> refs = new List<IMyRefinery>();
+		//
+		// 	foreach( IMySlimBlock block in blocks ) {
+		// 		if( block.FatBlock == null) continue;
+		// 		IMyInventory inv = block.FatBlock.GetInventory(0);
+		//
+		// 		if( inv != null && inv.CurrentVolume > (VRage.MyFixedPoint)0 ) {
+		// 			inventories.Add( inv );
+		// 		}
+		// 		if( block.FatBlock is IMyProductionBlock ) {
+		// 			IMyProductionBlock b = block.FatBlock as IMyProductionBlock;
+		// 			if( b is IMyAssembler && !b.IsQueueEmpty && !b.IsProducing ) {
+		// 				requests.Add( b as IMyAssembler );
+		// 			} else if( b is IMyRefinery && b.Enabled ) {
+		// 				refs.Add( b as IMyRefinery );
+		// 			}
+		// 		}
+		// 	}
+		// }
 
-			Grid.GetBlocks( blocks );
+		public IMyAssembler GetAssembler() {
+			List<IMySlimBlock> blocks = GetBlocks<IMyAssembler>();
+			IMyAssembler best = null;
+			int priority = 0;
 
 			foreach( IMySlimBlock block in blocks ) {
-				//if(block.BlockDefinition.Id.TypeId == typeof(MyObjectBuilder_StoreBlock) == true) {}
-				if( block is IMyProductionBlock ) {
-					return block as IMyProductionBlock;
+				if( !block.FatBlock.IsFunctional ) continue;
+
+				int p = Prioritize( block );
+				//MyAPIGateway.Utilities.ShowMessage( "GetAssembler", block.ToString() + " Priority: " + p.ToString() );
+				if( best == null || p > priority ) {
+					best = block.FatBlock as IMyAssembler;
+					priority = p;
 				}
 			}
 
-			return null;
+			return best;
 		}
+
+		// public IMyProductionBlock GetAssembler() {
+		// 	if( Grid == null ) return null;
+		// 	IMyProductionBlock best = null;
+		// 	List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+		// 	List<IMyProductionBlock> prod = new List<IMyProductionBlock>();
+		// 	Grid.GetBlocks( blocks );
+		//
+		// 	foreach( IMySlimBlock block in blocks ) {
+		// 		if( block.FatBlock == null ) continue;
+		// 		IMyProductionBlock p = block.FatBlock as IMyProductionBlock;
+		// 		//if(block.BlockDefinition.Id.TypeId == typeof(MyObjectBuilder_StoreBlock) == true) {}
+		// 		if( p != null && !(p is IMyRefinery) ) {
+		// 			if( p.DisplayNameText == "Assembler" )
+		// 				return p;
+		// 			prod.Add( p );
+		// 		}
+		// 	}
+		//
+		//
+		// 	foreach( IMyProductionBlock block in prod ) {
+		// 		if( best == null || block is IMyAssembler ) {
+		// 			best = block;
+		// 		}
+		// 	}
+		//
+		// 	return best;
+		// }
 
 		public static IMyCubeGrid Spawn(string prefabName, MatrixD matrix) {
 			MyPrefabDefinition prefab = MyDefinitionManager.Static.GetPrefabDefinition(prefabName);
       IMyCubeGrid g = null;
+			List<IMyCubeGrid> subgrids = new List<IMyCubeGrid>();
 
       if( prefab == null ) {
-        MyAPIGateway.Utilities.ShowNotification("Prefab not found");
+        MyAPIGateway.Utilities.ShowMessage( "CubeGrid", "Prefab not found " + prefabName );
         return null;
       }
 
       foreach( MyObjectBuilder_CubeGrid grid in prefab.CubeGrids ) {
-        MyAPIGateway.Utilities.ShowNotification("Trying to create: " + grid.DisplayName);
+				grid.Name = "StarCraft Grid" + NumGrids.ToString();
+				grid.DisplayName = "StarCraft Grid" + NumGrids.ToString();
+				grid.EntityId = (long)0;
+				grid.PositionAndOrientation = new MyPositionAndOrientation(ref matrix);
+				NumGrids++;
+
+				foreach( MyObjectBuilder_CubeBlock block in grid.CubeBlocks ) {
+					block.EntityId = (long)0;
+				}
         MyEntity entity = (MyEntity)MyAPIGateway.Entities.CreateFromObjectBuilder(grid);
 
         if( entity == null ) {
-          MyAPIGateway.Utilities.ShowNotification("Failed to create entity " + prefabName);
           return null;
         }
 
@@ -289,15 +661,164 @@ namespace SpaceCraft.Utils {
         //ent.Flags &= ~EntityFlags.NeedsUpdate;
 
         entity.Render.Visible = true;
-        entity.WorldMatrix = matrix;
+        //entity.WorldMatrix = matrix;
         //entity.PositionComp.SetPosition(new Vector3D(10,0,0));
         MyAPIGateway.Entities.AddEntity(entity);
 
-        g = entity as IMyCubeGrid;
+				if( g == null ) {
+	        g = entity as IMyCubeGrid;
+				} else {
+					subgrids.Add(entity as IMyCubeGrid);
+				}
       }
 
       return g;
 		}
+
+
+
+		public static IMyCubeGrid Spawn(MyObjectBuilder_CubeGrid grid, MatrixD matrix) {
+			/*if( String.IsNullOrWhiteSpace(grid.Name) ) {
+				grid.Name =
+			}*/
+			grid.Name = "StarCraft Grid" + NumGrids.ToString();
+			grid.DisplayName = "StarCraft Grid" + NumGrids.ToString();
+			grid.PositionAndOrientation = new MyPositionAndOrientation(ref matrix);
+			NumGrids++;
+			MyEntity entity = (MyEntity)MyAPIGateway.Entities.CreateFromObjectBuilder(grid);
+			IMyCubeGrid g = null;
+
+			if( entity != null ) {
+				entity.Flags &= ~EntityFlags.Save;
+
+        entity.Render.Visible = true;
+        //entity.WorldMatrix = matrix;
+        MyAPIGateway.Entities.AddEntity(entity);
+
+        g = entity as IMyCubeGrid;
+			}
+
+			return g;
+		}
+
+		public bool AddPowerSource() {
+			if( Grid.Physics.Gravity != Vector3.Zero ) {
+
+			}
+
+			return true;
+		}
+
+		public bool AddLargeGridConverter() {
+			IMyCubeGrid grid;
+			MyAPIGateway.Utilities.ShowMessage( "AddLargeGridConverter", "Trying AddLargeGridConverter()" );
+			IMySlimBlock slim = TryPlace( new MyObjectBuilder_MotorAdvancedRotor{
+				SubtypeName = "SmallAdvancedRotor",
+				Orientation =  Quaternion.CreateFromForwardUp(Vector3.Left, Vector3.Backward),
+				Min = new Vector3I(-1,-1,-3),
+				BuildPercent = 0.0f,
+				ConstructionInventory = new MyObjectBuilder_Inventory()
+			} );
+
+			if( slim == null ) {
+				return false;
+			} else {
+				slim.SetToConstructionSite();
+				grid = Spawn( new MyObjectBuilder_CubeGrid {
+					Name = "Converter",
+					DisplayName = "Converter",
+					GridSizeEnum = MyCubeSize.Large,
+					CubeBlocks = new List<MyObjectBuilder_CubeBlock> {
+						new MyObjectBuilder_MotorAdvancedStator{
+							SubtypeName = "LargeAdvancedStator",
+							Orientation =  Quaternion.CreateFromForwardUp(Vector3.Left, Vector3.Backward),
+							BuildPercent = 0.0f,
+							ConstructionInventory = new MyObjectBuilder_Inventory()
+						}
+					}
+				}, slim.FatBlock.WorldMatrix );
+
+				if( grid == null ) {
+					return false;
+				} else {
+
+					IMyMotorAdvancedStator stator = grid.GetCubeBlock( Vector3I.Zero ).FatBlock as IMyMotorAdvancedStator;
+					if( stator == null ) {
+						return false;
+					} else {
+						stator.Attach();
+						stator.SlimBlock.SetToConstructionSite();
+
+						Block.DoAction( stator as IMyTerminalBlock, "Share inertia tensor On/Off" );
+
+						//Block.DoAction( stator as IMyTerminalBlock, "Safety lock override On/Off" ); // Doesn't work
+						//Block.DoAction( stator as IMyTerminalBlock, "Toggle block On/Off" );
+
+						//stator.SetValue("RotorLock", true);
+						//Block.ListProperties( stator as IMyTerminalBlock );
+
+						slim = grid.AddBlock( new MyObjectBuilder_Refinery{
+							SubtypeName = "Blast Furnace",
+							Min = new Vector3I(0,-1,-1),
+							Orientation =  Quaternion.CreateFromForwardUp(Vector3.Forward, Vector3.Down),
+							BuildPercent = 0.0f,
+							ConstructionInventory = new MyObjectBuilder_Inventory()
+						}, false );
+
+						if( slim == null ) {
+							return false;
+						} else {
+							slim.SetToConstructionSite();
+						}
+
+						slim = grid.AddBlock( new MyObjectBuilder_Assembler{
+							SubtypeName = "BasicAssembler",
+							Min = new Vector3I(0,0,-2),
+							Orientation =  Quaternion.CreateFromForwardUp(Vector3.Backward, Vector3.Right),
+							BuildPercent = 0.0f,
+							ConstructionInventory = new MyObjectBuilder_Inventory()
+						}, false );
+
+						if( slim == null ) {
+							return false;
+						} else {
+							slim.SetToConstructionSite();
+							SetConstructionSite( slim );
+						}
+
+						// for( int i = 1; i < 6; i++ ) {
+						// 	grid.AddBlock( new MyObjectBuilder_CubeBlock{
+						// 	  SubtypeName = "LargeBlockArmorBlock",
+						// 	  Min = new Vector3I(i,0,-2),
+						// 	}, false );
+						// }
+
+
+					}
+
+				}
+
+			}
+
+			SuperGrid = grid;
+			return true;
+		}
+
+		public void SetConstructionSite( IMySlimBlock block ) {
+			ConstructionSite = block;
+			Need = Needs.Components;
+			block.SetToConstructionSite();
+			block.PlayConstructionSound(MyIntegrityChangeEnum.ConstructionBegin);
+			AddQueueItems( block.FatBlock, true );
+		}
+
+		// public void SetToConstructionSite() {
+		// 	List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
+		//
+		// 	foreach( IMySlimBlock block in blocks ) {
+		// 		block.SetToConstructionSite();
+		// 	}
+		// }
 
 	}
 

@@ -14,7 +14,7 @@ namespace SpaceCraft.Utils {
     Refuel,
     Unload,
     Scout
-  }
+  };
 
   public class Order {
     public Orders Type;
