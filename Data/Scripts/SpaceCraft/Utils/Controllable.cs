@@ -3,7 +3,13 @@ using System;
 using System.Collections.Generic;
 using Sandbox.Game.World;
 using Sandbox.Definitions;
+using Sandbox.Game.Entities;
+using VRage;
+using VRageMath;
 using VRage.Game.Entity;
+using VRage.Game.ModAPI.Interfaces;
+//using IMyControllableEntity = Sandbox.Game.Entities.IMyControllableEntity;
+using IMyControllableEntity = VRage.Game.ModAPI.Interfaces.IMyControllableEntity;
 
 namespace SpaceCraft.Utils {
 
@@ -13,6 +19,7 @@ namespace SpaceCraft.Utils {
 
     public Order CurrentOrder;
     public List<Order> OrderQueue;
+
     public IMyControllableEntity ControlledEntity { get; protected set; }
 
     protected bool Flying = false;
@@ -90,19 +97,48 @@ namespace SpaceCraft.Utils {
       return 1;
 		}
 
+    public void Stop() {
+      OrderQueue.Clear();
+      CurrentOrder = null;
+    }
 
-    public void IssueOrder( Order order, bool force = false ) {
+    public bool Execute( Order order, bool force = false ) {
 
-      if( force ) {
-        OrderQueue.Clear();
-        CurrentOrder = null;
+      if( force ) Stop();
+
+      if( CurrentOrder == null && order != null ) {
+        CurrentOrder = order;
+        return true;
+      } else if( order != null ) {
+        OrderQueue.Add(order);
+        return true;
       }
 
-      if( CurrentOrder == null ) {
-        CurrentOrder = order;
-        StartOrder();
+      return false;
+
+    }
+
+    public virtual void Move() {
+      if( CurrentOrder.Target == null && CurrentOrder.Destination == null ) {
+        CurrentOrder = null;
+        return;
+      }
+
+      Vector3D destination = CurrentOrder.Target == null ? CurrentOrder.Destination : CurrentOrder.Target.WorldMatrix.GetDirectionVector(Base6Directions.Direction.Forward);
+      ControlledEntity.MoveAndRotate( Vector3.Normalize(destination), Vector2.Zero, 0.0f );
+		}
+
+    public void BeginShoot( MyShootActionEnum action ) {
+      ((Sandbox.Game.Entities.IMyControllableEntity)ControlledEntity).BeginShoot(action);
+    }
+
+    public Order Next() {
+      if( OrderQueue.Count > 0 ) {
+        Order o = OrderQueue[0];
+        OrderQueue.Remove(o);
+        return o;
       } else {
-        OrderQueue.Add(order);
+        return Owner.NeedsOrder(this);
       }
 
     }
@@ -120,20 +156,11 @@ namespace SpaceCraft.Utils {
     public virtual void UpdateBeforeSimulation() {
     }
 
-    public void CompleteOrder() {
-      MyAPIGateway.Utilities.ShowNotification("Order Completed " + CurrentOrder.ToString() );
-      if( OrderQueue.Count > 0 ) {
-        CurrentOrder = OrderQueue[0];
-        OrderQueue.Remove(CurrentOrder);
-        StartOrder();
-      } else {
-        CurrentOrder = null;
-      }
-
+    public virtual List<IMyInventory> GetInventory( List<IMySlimBlock> blocks = null ) {
+      return new List<IMyInventory>();
     }
 
-    public virtual void StartOrder() {
-    }
+
 
     // public Vector3D UpVector {
     //   get {

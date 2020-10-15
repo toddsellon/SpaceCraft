@@ -5,6 +5,28 @@
 <SpawnGroup>
 	<Id>
 		<TypeId>SpawnGroupDefinition</TypeId>
+		<SubtypeId>TerranOutpost</SubtypeId>
+	</Id>
+	<Description>SpaceCraft</Description>
+	<Icon>Textures\GUI\Icons\Fake.dds</Icon>
+	<Frequency>1.0</Frequency>
+	<IsPirate>true</IsPirate>
+	<Prefabs>
+		<Prefab SubtypeId="TerranOutpost">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Terran Outpost</BeaconText>
+			<Speed>0.0</Speed>
+		</Prefab>
+	</Prefabs>
+</SpawnGroup>
+
+<SpawnGroup>
+	<Id>
+		<TypeId>SpawnGroupDefinition</TypeId>
 		<SubtypeId>Hooves</SubtypeId>
 	</Id>
 	<Description>SpaceCraft HVS "207.4,80.0,45.0" -scavenger</Description>

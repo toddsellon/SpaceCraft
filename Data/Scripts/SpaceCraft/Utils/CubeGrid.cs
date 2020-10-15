@@ -27,6 +27,8 @@ using SpaceEngineers.Game.Entities.Blocks;
 using SpaceEngineers.Game.EntityComponents.GameLogic.Discovery;
 using Sandbox.Common.ObjectBuilders;
 using SpaceCraft.Utils;
+//using IMyControllableEntity = Sandbox.Game.Entities.IMyControllableEntity;
+using IMyControllableEntity = VRage.Game.ModAPI.Interfaces.IMyControllableEntity;
 
 namespace SpaceCraft.Utils {
 
@@ -43,6 +45,7 @@ namespace SpaceCraft.Utils {
 		public IMySlimBlock ConstructionSite;
 		public Needs Need = Needs.None;
     public IMyCubeGrid Grid;
+		public List<IMyCubeGrid> Subgrids = new List<IMyCubeGrid>();
 		public string Prefab;
 		public IMyCubeGrid SuperGrid;
 		protected static int NumGrids = 0;
@@ -76,7 +79,7 @@ namespace SpaceCraft.Utils {
 
 		public CubeGrid( IMyCubeGrid grid ) {
 			Grid = grid;
-			ControlledEntity = Grid as Sandbox.Game.Entities.IMyControllableEntity;
+			ControlledEntity = Grid as IMyControllableEntity;
 			// Wheels = Grid.GetFirstBlockOfType<IMyMotorSuspension>() != null;
 			// Flying = Grid.GetFirstBlockOfType<MyThrust>() != null;
 	    // Drill = Grid.GetFirstBlockOfType<IMyShipDrill>() != null;
@@ -88,6 +91,24 @@ namespace SpaceCraft.Utils {
 		public override void Init( MyObjectBuilder_SessionComponent session ) {
 			base.Init(session);
 		}
+
+		public override List<IMyInventory> GetInventory( List<IMySlimBlock> blocks = null ) {
+			List<IMyInventory> list = new List<IMyInventory>();
+			if( blocks == null ) {
+				blocks = GetBlocks<IMySlimBlock>();
+			}
+
+			foreach( IMySlimBlock block in blocks ) {
+				if( block.FatBlock == null ) continue;
+				for( int i = 0; i < 2; i++ ) {
+					IMyInventory inv = block.FatBlock.GetInventory(i);
+					if( inv != null )
+						list.Add( inv );
+				}
+			}
+
+      return list;
+    }
 
 		public List<IMySlimBlock> GetBlocks<t>() {
 			List<IMySlimBlock> blocks = new List<IMySlimBlock>();
@@ -116,21 +137,6 @@ namespace SpaceCraft.Utils {
 			CheckOrder();
 			if( Tick == 99 )
 				AssessInventory();
-			//MyAPIGateway.Utilities.ShowNotification("Needs: " + Need );
-			if( Need == Needs.None ) {
-				AssessNeed();
-			} else {
-				switch( Need ) {
-					case Needs.Power:
-						// AddPowerSource()
-						break;
-					case Needs.Components:
-						break;
-					case Needs.Storage:
-						// AddStorageCapacity()
-						break;
-				}
-			}
 
 			if( Tick == 99 ) {
 				Tick = 0;
@@ -174,8 +180,7 @@ namespace SpaceCraft.Utils {
 					factories.Add( block.FatBlock as IMyAssembler );
 				if( block.FatBlock is IMyRefinery )
 					refineries.Add( block.FatBlock as IMyRefinery );
-				//MyInventoryBase inv = block.FatBlock.Components.Get<MyInventoryBase>();
-				//IMyInventory inv = IMyTerminalBlock.GetInventory( block.FatBlock as IMyTerminalBlock, 0 );
+
 				for( int i = 0; i < 2; i++ ) {
 					IMyInventory inv = block.FatBlock.GetInventory(i);
 					if( inv != null ) {
@@ -366,34 +371,32 @@ namespace SpaceCraft.Utils {
 			IMyAssembler ass = GetAssembler();
 			bool success = true;
 
-			if( ass == null ) return false;
+			if( ass == null || block == null ) return false;
 
 			if( clear ) ass.ClearQueue();
 
 			MyCubeBlockDefinition def = MyDefinitionManager.Static.GetCubeBlockDefinition(block.BlockDefinition);
-
+			if( def == null ) return false;
 			//VRage.Game.MyObjectBuilder_CubeBlockDefinition.Component.CubeBlockComponent
+
 			foreach( var component in def.Components ){
 				MyBlueprintDefinitionBase blueprint = null;
 				MyDefinitionManager.Static.TryGetComponentBlueprintDefinition(component.Definition.Id, out blueprint);
 
 				if( blueprint == null ) continue;
 
-				//MyDefinitionBase 	GetDefinition (MyDefinitionId id)
-				if( ass.CanUseBlueprint(blueprint) ) {
-					ass.AddQueueItem( blueprint, component.Count );
-				} else {
-					success = false;
-				}
+				if( !ass.CanUseBlueprint(blueprint) ) return false;
 			}
 
-			if( success ) {
-				MyAPIGateway.Utilities.ShowMessage( "AddQueueItems", block.ToString() + " components queued with " + ass.ToString()  );
-			} else {
-				MyAPIGateway.Utilities.ShowMessage( "AddQueueItems", block.ToString() + " failed to queue!! with " + ass.ToString() );
+			foreach( var component in def.Components ){
+				MyBlueprintDefinitionBase blueprint = null;
+				MyDefinitionManager.Static.TryGetComponentBlueprintDefinition(component.Definition.Id, out blueprint);
+				ass.AddQueueItem( blueprint, component.Count );
 			}
 
-			return success;
+			MyAPIGateway.Utilities.ShowMessage( "AddQueueItems", block.ToString() + " components queued with " + ass.ToString()  );
+
+			return true;
 		}
 
 		public bool AddQueueItem( MyDefinitionBase blueprint, VRage.MyFixedPoint amount ) {
@@ -489,7 +492,6 @@ namespace SpaceCraft.Utils {
 
 			switch( CurrentOrder.Type ) {
 				case Orders.Move:
-					CompleteOrder();
 					break;
 			}
 		}
@@ -511,7 +513,6 @@ namespace SpaceCraft.Utils {
 			return slim;
 		}
 
-		//public Vector3I FindOpenSlot( SerializableVector3I size, Grid.GridSizeEnum gridSize = MyCubeSize.Large ) {
 		public bool FindOpenSlot( out Vector3I slot, Vector3I size, MyCubeSize gridSize = MyCubeSize.Large ) {
 			List<IMySlimBlock> blocks = new List<IMySlimBlock>();
 			slot = Vector3I.Zero;
@@ -559,31 +560,6 @@ namespace SpaceCraft.Utils {
 			return null;
 		}
 
-		// public void PullResources() {
-		// 	List<IMySlimBlock> blocks = new List<IMySlimBlock>();
-		// 	Grid.GetBlocks( blocks );
-		// 	List<IMyInventory> inventories = new List<IMyInventory>();
-		// 	List<IMyAssembler> requests = new List<IMyAssembler>();
-		// 	List<IMyRefinery> refs = new List<IMyRefinery>();
-		//
-		// 	foreach( IMySlimBlock block in blocks ) {
-		// 		if( block.FatBlock == null) continue;
-		// 		IMyInventory inv = block.FatBlock.GetInventory(0);
-		//
-		// 		if( inv != null && inv.CurrentVolume > (VRage.MyFixedPoint)0 ) {
-		// 			inventories.Add( inv );
-		// 		}
-		// 		if( block.FatBlock is IMyProductionBlock ) {
-		// 			IMyProductionBlock b = block.FatBlock as IMyProductionBlock;
-		// 			if( b is IMyAssembler && !b.IsQueueEmpty && !b.IsProducing ) {
-		// 				requests.Add( b as IMyAssembler );
-		// 			} else if( b is IMyRefinery && b.Enabled ) {
-		// 				refs.Add( b as IMyRefinery );
-		// 			}
-		// 		}
-		// 	}
-		// }
-
 		public IMyAssembler GetAssembler() {
 			List<IMySlimBlock> blocks = GetBlocks<IMyAssembler>();
 			IMyAssembler best = null;
@@ -603,43 +579,20 @@ namespace SpaceCraft.Utils {
 			return best;
 		}
 
-		// public IMyProductionBlock GetAssembler() {
-		// 	if( Grid == null ) return null;
-		// 	IMyProductionBlock best = null;
-		// 	List<IMySlimBlock> blocks = new List<IMySlimBlock>();
-		// 	List<IMyProductionBlock> prod = new List<IMyProductionBlock>();
-		// 	Grid.GetBlocks( blocks );
-		//
-		// 	foreach( IMySlimBlock block in blocks ) {
-		// 		if( block.FatBlock == null ) continue;
-		// 		IMyProductionBlock p = block.FatBlock as IMyProductionBlock;
-		// 		//if(block.BlockDefinition.Id.TypeId == typeof(MyObjectBuilder_StoreBlock) == true) {}
-		// 		if( p != null && !(p is IMyRefinery) ) {
-		// 			if( p.DisplayNameText == "Assembler" )
-		// 				return p;
-		// 			prod.Add( p );
-		// 		}
-		// 	}
-		//
-		//
-		// 	foreach( IMyProductionBlock block in prod ) {
-		// 		if( best == null || block is IMyAssembler ) {
-		// 			best = block;
-		// 		}
-		// 	}
-		//
-		// 	return best;
-		// }
+		public static IMyCubeGrid Spawn(Prefab prefab, MatrixD matrix) {
+			return Spawn( prefab.Definition, matrix );
+		}
 
 		public static IMyCubeGrid Spawn(string prefabName, MatrixD matrix) {
 			MyPrefabDefinition prefab = MyDefinitionManager.Static.GetPrefabDefinition(prefabName);
+			return Spawn( prefab, matrix );
+		}
+
+		public static IMyCubeGrid Spawn(MyPrefabDefinition prefab, MatrixD matrix) {
+			if( prefab == null ) return null;
+
       IMyCubeGrid g = null;
 			List<IMyCubeGrid> subgrids = new List<IMyCubeGrid>();
-
-      if( prefab == null ) {
-        MyAPIGateway.Utilities.ShowMessage( "CubeGrid", "Prefab not found " + prefabName );
-        return null;
-      }
 
       foreach( MyObjectBuilder_CubeGrid grid in prefab.CubeGrids ) {
 				grid.Name = "StarCraft Grid" + NumGrids.ToString();
@@ -709,7 +662,7 @@ namespace SpaceCraft.Utils {
 			return true;
 		}
 
-		public bool AddLargeGridConverter() {
+		public bool AddLargeGridConverter( bool skipRefinery = true ) {
 			IMyCubeGrid grid;
 			MyAPIGateway.Utilities.ShowMessage( "AddLargeGridConverter", "Trying AddLargeGridConverter()" );
 			IMySlimBlock slim = TryPlace( new MyObjectBuilder_MotorAdvancedRotor{
@@ -757,23 +710,25 @@ namespace SpaceCraft.Utils {
 						//stator.SetValue("RotorLock", true);
 						//Block.ListProperties( stator as IMyTerminalBlock );
 
-						slim = grid.AddBlock( new MyObjectBuilder_Refinery{
-							SubtypeName = "Blast Furnace",
-							Min = new Vector3I(0,-1,-1),
-							Orientation =  Quaternion.CreateFromForwardUp(Vector3.Forward, Vector3.Down),
-							BuildPercent = 0.0f,
-							ConstructionInventory = new MyObjectBuilder_Inventory()
-						}, false );
+						if( !skipRefinery ) {
+							slim = grid.AddBlock( new MyObjectBuilder_Refinery{
+								SubtypeName = "Blast Furnace",
+								Min = new Vector3I(0,-1,-1),
+								Orientation =  Quaternion.CreateFromForwardUp(Vector3.Forward, Vector3.Down),
+								BuildPercent = 0.0f,
+								ConstructionInventory = new MyObjectBuilder_Inventory()
+							}, false );
 
-						if( slim == null ) {
-							return false;
-						} else {
-							slim.SetToConstructionSite();
+							if( slim == null ) {
+								return false;
+							} else {
+								slim.SetToConstructionSite();
+							}
 						}
 
 						slim = grid.AddBlock( new MyObjectBuilder_Assembler{
 							SubtypeName = "BasicAssembler",
-							Min = new Vector3I(0,0,-2),
+							Min = new Vector3I(0,0,skipRefinery ? -1 : -2),
 							Orientation =  Quaternion.CreateFromForwardUp(Vector3.Backward, Vector3.Right),
 							BuildPercent = 0.0f,
 							ConstructionInventory = new MyObjectBuilder_Inventory()
@@ -785,13 +740,6 @@ namespace SpaceCraft.Utils {
 							slim.SetToConstructionSite();
 							SetConstructionSite( slim );
 						}
-
-						// for( int i = 1; i < 6; i++ ) {
-						// 	grid.AddBlock( new MyObjectBuilder_CubeBlock{
-						// 	  SubtypeName = "LargeBlockArmorBlock",
-						// 	  Min = new Vector3I(i,0,-2),
-						// 	}, false );
-						// }
 
 
 					}
@@ -812,13 +760,18 @@ namespace SpaceCraft.Utils {
 			AddQueueItems( block.FatBlock, true );
 		}
 
-		// public void SetToConstructionSite() {
-		// 	List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
-		//
-		// 	foreach( IMySlimBlock block in blocks ) {
-		// 		block.SetToConstructionSite();
-		// 	}
-		// }
+		public void SetToConstructionSite() {
+			List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
+
+			foreach( IMySlimBlock block in blocks ) {
+				block.SetToConstructionSite();
+				block.IncreaseMountLevel( 0f, (long)0 );	
+			}
+
+			FindConstructionSite();
+		}
+
+
 
 	}
 

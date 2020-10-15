@@ -21,6 +21,8 @@ using SpaceEngineers.Game.EntityComponents.GameLogic.Discovery;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.Common.ObjectBuilders.Definitions;
 using SpaceCraft.Utils;
+//using IMyControllableEntity = Sandbox.Game.Entities.IMyControllableEntity;
+using IMyControllableEntity = VRage.Game.ModAPI.Interfaces.IMyControllableEntity;
 
 namespace SpaceCraft.Utils {
 
@@ -36,9 +38,6 @@ namespace SpaceCraft.Utils {
 	public class Engineer : Controllable {
 
 		protected bool Flying = true;
-    protected bool Drill = true;
-    protected bool Welder = true;
-    protected bool Grider = true;
 		public Vector3 Color;
 
     public IMyCharacter Character;
@@ -58,10 +57,75 @@ namespace SpaceCraft.Utils {
 			}
 		}
 
+		// Main loop
+		public override void UpdateBeforeSimulation() {
+			if( Character == null || Character.Integrity == 0 ) {
+				MatrixD matrix = Character.WorldMatrix;
+				Character = Spawn(Owner.GetSpawnLocation(), Owner );
+				Initialize();
+			}
+
+			if( CurrentOrder == null || CurrentOrder.Step == Steps.Completed ) Next();
+			if( CurrentOrder == null ) return;
+
+			switch( CurrentOrder.Type ) {
+				case Orders.Attack:
+					Attack();
+					break;
+				case Orders.Move:
+					Move();
+					break;
+				case Orders.Drill:
+					Drill();
+					break;
+			}
+
+
+		}
+
+		public void Attack() {
+			if( CurrentOrder.Target == null || CurrentOrder.Target.MarkedForClose || CurrentOrder.Target.Closed ) {
+				CurrentOrder = null;
+				return;
+			}
+
+			//Sandbox.Game.Entities.IMyControllableEntity e = Character as Sandbox.Game.Entities.IMyControllableEntity;
+			if( CurrentOrder.Step == Steps.Pending ) {
+				SwitchToWeapon( Weapons.Grinder );
+				SwitchToWeapon( Weapons.Gun );
+				BeginShoot( MyShootActionEnum.PrimaryAction );
+				CurrentOrder.Progress();
+			}
+		}
+
+
+		// https://github.com/KeenSoftwareHouse/SpaceEngineers/blob/a109106fc0ded66bdd5da70e099646203c56550f/Sources/Sandbox.Game/Game/Weapons/Guns/MyHandDrill.cs
+		// MyHandDrillDefinition
+		public void Drill() {
+			if( CurrentOrder.Step == Steps.Pending ) {
+				SwitchToWeapon( Weapons.Drill );
+				BeginShoot( MyShootActionEnum.PrimaryAction );
+
+				CurrentOrder.Progress();
+			} else {
+				// Add resources to inventory
+				IMyInventory inv = GetInventory()[0];
+				if( inv.CurrentVolume < inv.MaxVolume ) {
+					inv.AddItems((VRage.MyFixedPoint)1, new MyObjectBuilder_Ore(){
+		        SubtypeName = CurrentOrder.SubtypeName ?? "Stone"
+		      } );
+				} else {
+					CurrentOrder = null;
+				}
+			}
+		}
+
+
+
 		public Engineer( IMyCharacter character ) {
 			Character = character;
-			ControlledEntity = Character as Sandbox.Game.Entities.IMyControllableEntity;
-
+			//ControlledEntity = Character as Sandbox.Game.Entities.IMyControllableEntity;
+			ControlledEntity = Character as IMyControllableEntity;
 
 			//MyAPIGateway.Session.RegisterComponent(this, MyUpdateOrder.BeforeSimulation, 0);
 			/*if( data == string.Empty ) return;
@@ -82,11 +146,15 @@ namespace SpaceCraft.Utils {
 
 		}
 
+		public override List<IMyInventory> GetInventory( List<IMySlimBlock> blocks = null ) {
+      return new List<IMyInventory>(){
+				Character.GetInventory()
+			};
+    }
+
 		public void Initialize() {
-			if( Character == null ) {
-				MyAPIGateway.Utilities.ShowMessage( "Engineer", "Character was null" );
-				return;
-			}
+			if( Character == null ) return;
+
 			TakeControl(Character);
 
 			Character.DoDamage(0.0f, MyStringHash.Get(string.Empty), true); // Hack to property init Physics
@@ -96,44 +164,6 @@ namespace SpaceCraft.Utils {
 			}
 			if( Character.EnabledThrusts ) {
 				Character.SwitchThrusts();
-			}
-		}
-
-		public void CheckOrder() {
-			if( CurrentOrder == null ) return;
-
-			if( CurrentOrder.Target != null || CurrentOrder.Destination != null ) {
-				Vector3D destination = CurrentOrder.Target == null ? CurrentOrder.Destination : CurrentOrder.Target.WorldMatrix.GetDirectionVector(Base6Directions.Direction.Forward);
-				ControlledEntity.MoveAndRotate( Vector3.Normalize(destination), Vector2.Zero, 0.0f );
-			}
-
-
-		}
-
-		public override void StartOrder() {
-			if( CurrentOrder == null ) return;
-
-			MyAPIGateway.Utilities.ShowNotification("Starting Order " + CurrentOrder.ToString() );
-
-			Sandbox.Game.Entities.IMyControllableEntity e = Character as Sandbox.Game.Entities.IMyControllableEntity;
-			e.EndShoot( MyShootActionEnum.PrimaryAction );
-
-			switch( CurrentOrder.Type ) {
-				case Orders.Move:
-					SwitchToWeapon();
-					break;
-				case Orders.Drill:
-					SwitchToWeapon( Weapons.Drill );
-					e.BeginShoot( MyShootActionEnum.PrimaryAction );
-					break;
-				case Orders.Grind:
-					SwitchToWeapon( Weapons.Grinder );
-					e.BeginShoot( MyShootActionEnum.PrimaryAction );
-					break;
-				case Orders.Weld:
-					SwitchToWeapon( Weapons.Welder );
-					e.BeginShoot( MyShootActionEnum.PrimaryAction );
-					break;
 			}
 		}
 
@@ -168,20 +198,7 @@ namespace SpaceCraft.Utils {
 			//MyAPIGateway.Physics.CalculateArtificialGravityAt()
 		}
 
-		public override void UpdateBeforeSimulation() {
-			//Character.Physics.SetSpeeds( new Vector3(0,1,0), Vector3.Zero );
-			if( Character == null || Character.Integrity == 0 ) {
-				MatrixD matrix = Character.WorldMatrix;
-				Character = Spawn(Owner.GetSpawnLocation(), Owner );
-				Initialize();
-			}
 
-
-			//MyAPIGateway.Utilities.ShowNotification("Engineer Position " + Character.WorldMatrix.ToString() );
-			CheckOrder();
-
-
-		}
 
     //public override void UpdateBeforeSimulation100() {
 		public void UpdateBeforeSimulation100() {

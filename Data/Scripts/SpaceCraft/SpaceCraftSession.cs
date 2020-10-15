@@ -61,8 +61,6 @@ namespace SpaceCraft {
     }
 
 		public static MyPlanet GetClosestPlanet( Vector3D position ) {
-			// planet.PositionLeftBottomCorner
-
 			MyPlanet best = null;
 			double bestDistance = 0.0f;
 			double distance = 0.0f;
@@ -72,8 +70,6 @@ namespace SpaceCraft {
 					best = planet;
 					bestDistance = distance;
 				}
-
-
 			}
 			return best;
 		}
@@ -94,32 +90,33 @@ namespace SpaceCraft {
 			}
 		}
 
+		public void CheckMods() {
+			// Not Implemented
+			//foreach(var mod in MyAPIGateway.Session.Mods) {}
+		}
+
     public void Preload() {
 
 			ScanEntities();
 
-			//var planetDefList = MyDefinitionManager.Static.GetPlanetsGeneratorsDefinitions();
-
-			//foreach(var mod in MyAPIGateway.Session.Mods) {}
-
-			/*foreach(var id in MyAPIGateway.Session.Factions.Factions.Keys) {
-			}*/
-
       ListReader<MySpawnGroupDefinition> groups = MyDefinitionManager.Static.GetSpawnGroupDefinitions();
 
 			foreach(MySpawnGroupDefinition group in groups ){
-				//if(group.Enabled == false || String.IsNullOrWhiteSpace(group.DescriptionText) ) continue;
-				if( String.IsNullOrWhiteSpace(group.DescriptionText) ) continue;
+				if(group.Enabled == false || String.IsNullOrWhiteSpace(group.DescriptionText) ) continue;
 
-				//MyAPIGateway.Utilities.ShowMessage( "Preload", group.DescriptionText );
 				MyCommandLine cmd = new MyCommandLine();
 
+        if( cmd.TryParse(group.DescriptionText) && cmd.Argument(0).ToLower() == "spacecraft") {
 
-        if (cmd.TryParse(group.DescriptionText) && cmd.Argument(0).ToLower() == "spacecraft") {
+					string Name = cmd.Argument(1) ?? String.Empty;
 
-          string Name = cmd.Argument(1).ToUpper();
+					foreach( 	MySpawnGroupDefinition.SpawnGroupPrefab prefab in group.Prefabs ) {
+						Prefab.Add(prefab.SubtypeId, Name);
+					}
 
-          if( Name != string.Empty ) {
+          if( !String.IsNullOrWhiteSpace(Name) ) {
+
+						Name = Name.ToUpper();
 
 						Faction faction = GetFaction( Name, group.Id.SubtypeId.ToString() );
 						faction.CommandLine = cmd;
@@ -129,14 +126,8 @@ namespace SpaceCraft {
 						}
 						faction.Groups.Add( group );
 
-
           }
         }
-
-				//MyDefinitionManager.Static.GetPrefabDefinition();
-				//MyAPIGateway.Session.Factions.TryGetFactionByTag(
-				//MyAPIGateway.PrefabManager.SpawnPrefab(
-
 
       }
 
@@ -145,6 +136,7 @@ namespace SpaceCraft {
     }
 
 		public Faction GetFaction( string tag, string name ) {
+			// MyAPIGateway.Session.Factions.TryGetFactionByTag(
 			if( !MyAPIGateway.Session.Factions.FactionTagExists(tag) ) {
 				MyAPIGateway.Session.Factions.CreateFaction(0,tag,name,"Description","Private Info");
 			}
@@ -156,10 +148,6 @@ namespace SpaceCraft {
 			Faction faction = new Faction{
 				Name = tag
 			};
-
-			if( faction == null ) {
-				MyAPIGateway.Utilities.ShowMessage( "GetFaction", tag + " faction was null..." );
-			}
 
 			Factions.Add(faction);
 			//faction.Init(Session);
@@ -173,9 +161,6 @@ namespace SpaceCraft {
 
 
 			foreach( Faction faction in Factions ) {
-				//var position = MyAPIGateway.Session.Player.GetPosition() + new Vector3D(0,100,0);
-
-				//MyAPIGateway.Utilities.ShowMessage( "SpawnFactions", "Spawning " + faction.Name + " faction" );
 
 				if( ClosestPlanet == null ) {
 					MyAPIGateway.Utilities.ShowMessage( "SpawnFactions", "Could not find closest planet" );
