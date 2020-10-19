@@ -37,6 +37,13 @@ namespace SpaceCraft.Utils {
     Defend
   };
 
+  public enum Tech {
+    Primitive,
+    Established,
+    Space,
+    Advanced
+  };
+
   //[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
   //public class Faction:MySessionComponentBase {
   public class Faction {
@@ -47,25 +54,23 @@ namespace SpaceCraft.Utils {
     public List<MySpawnGroupDefinition> Groups = new List<MySpawnGroupDefinition>();
     public bool Spawned = false;
     public SerializableVector3 Color;
-    public Goal CurrentGoal;
+    public Goal CurrentGoal = new Goal{ Type = Goals.Stabilize };
     private IMyCubeBlock RespawnPoint;
     private Progression Progress = Progression.None;
     private string Roadblock = string.Empty;
-    private List<Engineer> Engineers = new List<Engineer>();
     private List<Controllable> Controlled = new List<Controllable>();
     private List<IMyEntity> Enemies = new List<IMyEntity>();
     private CubeGrid MainBase;
     private List<string> Resources = new List<string>(){"Stone","Iron","Silicon","Nickel"};
     protected static Random Randy = new Random();
     protected int Tick = 0;
-    protected MyPlanet Homeworld;
+    public MyPlanet Homeworld;
     private static bool First = true;
+    public Tech Teir = Tech.Primitive;
 
     // Main loop
     public void UpdateBeforeSimulation() {
       Tick++;
-      //bool ten = Tick % 10 == 0;
-      //bool needs = false;
 
       AssessGoal();
 
@@ -74,18 +79,11 @@ namespace SpaceCraft.Utils {
       }
 
       if( Tick == 99 ) Tick = 0;
+    }
 
-      // if( Tick == 99 ) {
-      //   Tick = 0;
-      //
-      //   foreach( Controllable c in Controlled ) {
-      //     if( c is CubeGrid && (c as CubeGrid).Need != CubeGrid.Needs.None ) needs = true;
-      //   }
-      //
-      //   if( !needs ) {
-      //     AssessProgression();
-      //   }
-      // }
+    public void DetectedEnemy( IMyEntity enemy ) {
+      if( !Enemies.Contains( enemy ) )
+        Enemies.Add( enemy );
     }
 
     public void AssessGoal() {
@@ -170,6 +168,8 @@ namespace SpaceCraft.Utils {
 
         grid.SetToConstructionSite();
 
+        MainBase.AddQueueItems( CurrentGoal.Prefab );
+
         CurrentGoal.Progress();
 
       } else if( CurrentGoal.Step == Steps.Started ) {
@@ -203,8 +203,7 @@ namespace SpaceCraft.Utils {
       //Dictionary<string, byte[]> maps = MyAPIGateway.Session.GetVoxelMapsArray();
 
       //if( maps[Homeworld] )
-      int MAX = 1000;
-      Vector3D position = Vector3D.Zero;
+      int MAX = 100;
 
       //if( prefab.IsStatic ) {
         // Place further away
@@ -212,10 +211,36 @@ namespace SpaceCraft.Utils {
         int rand = Randy.Next(MAX);
         Vector3 p = new Vector3(MAX,rand,rand) + Vector3.Normalize(MainBase.Grid.WorldMatrix.Translation);
         //position = planet.GetClosestSurfacePointLocal( ref p );
-        position = Homeworld.GetClosestSurfacePointGlobal( p );
-        Vector3D up = (position - Homeworld.WorldMatrix.Translation);
-        up.Normalize();
-        position = position + (up * 2 );
+        Vector3D position = Homeworld.GetClosestSurfacePointGlobal( p );
+        Vector3D up = Vector3D.Normalize(position - Homeworld.WorldMatrix.Translation);
+
+        if( !prefab.IsStatic )
+          position = position + (up * 2 );
+        //MatrixD matrix = MatrixD.CreateWorld( position );
+        MatrixD reference = Homeworld.WorldMatrix;
+
+        MyPositionAndOrientation origin = prefab.PositionAndOrientation.HasValue ? prefab.PositionAndOrientation.Value : MyPositionAndOrientation.Default;
+
+        MatrixD matrix = MatrixD.CreateWorld( position );
+        //MatrixD matrix = MatrixD.CreateWorld( position, origin.Forward,  origin.Up );
+        MatrixD rotation = MatrixD.AlignRotationToAxes(ref matrix, ref reference);
+        //MatrixD rotationDelta = MatrixD.Invert(origin.GetMatrix()) * rotation;
+        //rotation = rotation * rotationDelta;
+
+
+        // Vector3D 	SwapYZCoordinates (Vector3D v)
+        //MatrixD matrix = MatrixD.CreateWorld( position, Vector3D.CalculatePerpendicularVector(up), up );
+
+        //matrix = MatrixD.CreateWorld( position, rotation.Forward, rotation.Up );
+        matrix = MatrixD.CreateWorld( position, rotation.Up, rotation.Left );
+
+        //matrix = MatrixD.CreateWorld( position, up, Vector3D.CalculatePerpendicularVector(up) );
+
+        //Matrix hitGridRotation = hitGrid.WorldMatrix.GetOrientation();
+        //Base6Directions.Direction direction = matrix.GetClosestDirection(up);
+        //matrix.Up = up;
+        //Vector3D direction = matrix.GetDirectionVector(Base6Directions.Direction.Up);
+        //matrix.SetDirectionVector( direction, up );
       //} else {
         // Place close to base
       //}
@@ -223,34 +248,7 @@ namespace SpaceCraft.Utils {
 
       MyAPIGateway.Utilities.ShowMessage( Name, "Building " + prefab.ToString() + " at " + position.ToString() );
 
-      // Vector3I min = new Vector3I(0,0,0);
-      // Vector3I max = new Vector3I(100,100,100);
-      // using (Homeworld.Storage.Pin()) { // Pin() is forbidden :(
-      //   Homeworld.Storage.ReadRange(cache, MyStorageDataTypeFlags.ContentAndMaterial, 1, min, max);
-      // }
-      // Vector3I c;
-      // for (c.Z = 0; c.Z < max.Z; ++c.Z)
-      //     for (c.Y = 0; c.Y < max.Y; ++c.Y)
-      //         for (c.X = 0; c.X < max.X; ++c.X) {
-      //             int i = cache.ComputeLinear(ref c);
-      //             if (cache.Content(i) > MyVoxelConstants.VOXEL_ISO_LEVEL) {
-      //               byte material = cache.Material(i);
-      //               MyVoxelMaterialDefinition def = MyDefinitionManager.Static.GetVoxelMaterialDefinition((byte)material);
-      //               if( def != null && def.MinedOre != "Stone" ) {
-      //                 MyAPIGateway.Utilities.ShowMessage( "Material", def.MinedOre );
-      //               }
-      //             }
-      //         }
-
-      // BoundingSphereD sphere = new BoundingSphereD( MainBase.Grid.WorldMatrix.Translation, (double)5000 );
-      // List<IMyEntity> entities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
-      //
-      // foreach( IMyEntity entity in entities ) {
-      //   IMyEntity root = entity.GetTopMostParent();
-      //   MyObjectBuilder_EntityBase ob = root.GetObjectBuilder();
-      //   MyAPIGateway.Utilities.ShowMessage( "Entity", entity.ToString() + " " + ob.Name );
-      // }
-      return MatrixD.CreateWorld( position );
+      return matrix;
     }
 
     public void Attack() {
@@ -291,27 +289,154 @@ namespace SpaceCraft.Utils {
     }
 
     public Order NeedsOrder( Controllable c ) {
-      if( CommandLine.Switch("aggressive") ) {
-        return new Order {
-          Type = Orders.Scout
-        };
+      if( c == null ) {
+        MyAPIGateway.Utilities.ShowMessage( "NeedsOrder", "Controllable is null" );
+        return null;
       }
+      if( CurrentGoal != null ) switch( CurrentGoal.Type ) {
+
+        case Goals.Construct:
+          if( c == CurrentGoal.Entity ) break;
+          // Determine if unit should transfer items
+          if( c.Cargo && !c.IsStatic && CurrentGoal.Entity != MainBase && GetWithdrawlSource(c) != null ) {
+            return null;
+          } else if( c.Drills ) {
+            break;
+          }
+          goto case Goals.Defend;
+
+        case Goals.Defend:
+          if( CurrentGoal.Type == Goals.Defend && Enemies.Count == 0 ) {
+            CurrentGoal.Complete();
+            break;
+          }
+          goto case Goals.Attack;
+
+        case Goals.Attack:
+          if( !CommandLine.Switch("defensive") ) {
+            return new Order {
+              Type = Enemies.Count == 0 ? Orders.Scout : Orders.Attack
+            };
+          }
+          break;
+      }
+
+      if( c.Entity == null ) {
+        MyAPIGateway.Utilities.ShowMessage( "NeedsOrder", c.ToString() + ": c.Entity is null" );
+        return null;
+      }
+      Vector3D position = c.Entity.WorldMatrix.Translation;
+      MyPlanet planet = SpaceCraftSession.GetClosestPlanet( position );
+      if( planet == null ) {
+        MyAPIGateway.Utilities.ShowMessage( "NeedsOrder", c.ToString() + ": planet is null" );
+        return null;
+      }
+      return new Order {
+        Type = Orders.Drill,
+        Destination = planet.GetClosestSurfacePointGlobal(position),
+        // TODO: Determine best drill location
+        //Destination = Homeworld.GetClosestSurfacePointGlobal(c.Entity.WorldMatrix.Translation),
+        Range = 20f
+      };
+    }
+
+    public CubeGrid GetWithdrawlSource( Controllable controllable ) {
+      int available = controllable.AvailableVolume.ToIntSafe();
+      float volume = (float)available;
+
+      IMySlimBlock target = (CurrentGoal.Entity as CubeGrid).ConstructionSite;
+      if( target == null ) return null;
+
+      Dictionary<string,int> total = new Dictionary<string,int>();
+      target.GetMissingComponents(total);
+
+      Dictionary<string,int> missing = new Dictionary<string,int>(total);
+      MyAPIGateway.Utilities.ShowMessage( "Missing", string.Join(",", missing.Keys ) );
+
+      foreach(Controllable c in Controlled ) {
+        if( !(c is CubeGrid) ) continue;
+        CubeGrid grid = c as CubeGrid;
+        if( CurrentGoal.Type == Goals.Construct && grid == CurrentGoal.Entity ) continue;
+        Dictionary<string,int> surplus = c.GetSurplus();
+        MyAPIGateway.Utilities.ShowMessage( "Surplus", string.Join(",", surplus.Keys ) );
+        foreach( string st in total.Keys ) {
+          if( surplus.ContainsKey( st ) ) {
+            MyPhysicalItemDefinition def = MyDefinitionManager.Static.GetPhysicalItemDefinition( MyDefinitionId.Parse("MyObjectBuilder_Component/" + st) );
+            if( surplus[st] >= missing[st] ) {
+              volume -= def.Volume * (missing[st]-surplus[st]);
+              missing[st] = 0;
+            } else {
+              volume -= def.Volume * surplus[st];
+              missing[st] -= surplus[st];
+            }
+          }
+        }
+
+        bool fulfilled = true;
+        foreach( int amount in missing.Values ) {
+          if( amount > 0 ) {
+            fulfilled = false;
+            break;
+          }
+        }
+
+        // VRage.MyFixedPoint v = volume;
+        // foreach( string st in surplus.Keys ) {
+        //   MyPhysicalItemDefinition def = MyDefinitionManager.Static.GetPhysicalItemDefinition(  MyDefinitionId.Static.Parse(st) );
+        //   v -= def.Volume * surplus[ob];
+        //   if( missing.HasKey( def.Id.SubtypeName ) ) {
+        //     if( missing[def.Id.SubtypeName] > surplus[def.Id.SubtypeName] )
+        //   }
+        // }
+        // TODO: Check if order is fulfilled, not just volume check
+        //if( target.IsFullyDismounted && v / volume > 0.1  ) {
+        if( fulfilled || volume <= 0 ) {
+          controllable.Drop( OBTypes.Ore );
+          controllable.Execute( new Order {
+            Type = Orders.Withdraw,
+            Entity = grid,
+            Target = grid.Grid
+          });
+          return grid;
+        }
+      }
+
       return null;
     }
 
-    public void DetermineNextGoal() {
-      if( CommandLine.Switch("aggressive") || CommandLine.Switch("scavenger") ) {
-        CurrentGoal = new Goal{
-          Type = Goals.Attack
-        };
-        return;
+    public CubeGrid GetClosestGrid( Controllable from ) {
+      CubeGrid best = null;
+      double distance = 0;
+      foreach( Controllable c in Controlled ) {
+        if( c == from || c is Engineer ) continue;
+        CubeGrid grid = c as CubeGrid;
+        double d = Vector3D.Distance( grid.Grid.WorldMatrix.Translation, from.Entity.WorldMatrix.Translation );
+        if( best == null || d < distance ) {
+          best = grid;
+          d = distance;
+        }
       }
 
+      return best;
+    }
+
+    public void DetermineNextGoal() {
+      // if( CommandLine.Switch("aggressive") || CommandLine.Switch("scavenger") ) {
+      //   CurrentGoal = new Goal{
+      //     Type = Goals.Attack
+      //   };
+      //   return;
+      // }
+
       CubeGrid building = null;
+      CubeGrid needs = null;
       foreach( Controllable c in Controlled ) {
         if( c is CubeGrid ) {
           CubeGrid grid = c as CubeGrid;
           if( grid.ConstructionSite != null ) building = grid;
+          // else if( building == null ) {
+          //   grid.AssessNeed();
+          // }
         }
       }
 
@@ -324,9 +449,16 @@ namespace SpaceCraft.Utils {
         return;
       }
 
-      CurrentGoal = new Goal{
-        Type = Goals.Construct
-      };
+      //if( Enemies.Count == 0 || CommandLine.Switch("defensive") ) {
+        CurrentGoal = new Goal{
+          Type = Goals.Construct
+        };
+      // } else {
+      //   CurrentGoal = new Goal{
+      //     Type = Goals.Attack,
+      //     Target = Enemies[0]
+      //   };
+      // }
 
     }
 
@@ -386,7 +518,7 @@ namespace SpaceCraft.Utils {
     public void Mulligan() {
       MyAPIGateway.Utilities.ShowMessage( "Mulligan", Name + " took a mulligan" );
       foreach( Controllable c in Controlled ) {
-        MyAPIGateway.Entities.RemoveEntity( c.ControlledEntity as IMyEntity );
+        MyAPIGateway.Entities.RemoveEntity( c.Entity );
       }
       Controlled = new List<Controllable>();
 
@@ -400,22 +532,6 @@ namespace SpaceCraft.Utils {
       c.Owner = this;
       //c.Init( Session );
       Controlled.Add( c );
-      if( c is Engineer ) {
-        Engineer e = c as Engineer;
-        Engineers.Add( e );
-
-        if( CommandLine.Switch("scavenger") ) {
-          e.Execute( new Order() {
-            Type = Orders.Scout
-          } );
-        } else {
-          e.Execute( new Order() {
-            Type = Orders.Grind,
-            Destination = MyAPIGateway.Session.Player.GetPosition()
-          } );
-        }
-
-      }
 
       return c;
     }
@@ -436,14 +552,14 @@ namespace SpaceCraft.Utils {
       }
 
       if( RespawnPoint != null ) {
-        MatrixD matrix = RespawnPoint.CubeGrid.WorldMatrix;
+        MatrixD matrix = RespawnPoint.WorldMatrix;
         Vector3D translation = matrix.Translation;
         Vector3D forward = matrix.GetDirectionVector(Base6Directions.Direction.Forward);
         //translation.X += 5;
 
-        return MatrixD.CreateWorld( translation + forward );
+        return MatrixD.CreateWorld( translation + (forward*3) );
       } else {
-        // TODO: Respawn Drop Pod
+        Mulligan();
       }
 
 
@@ -451,7 +567,7 @@ namespace SpaceCraft.Utils {
     }
 
     public IMyEntity GetClosestEnemy( Controllable to ) {
-      IMyEntity source = to.ControlledEntity as IMyEntity;
+      IMyEntity source = to.Entity;
       if( source == null ) return null;
 
       Vector3D center = source.WorldMatrix.Translation;
@@ -491,17 +607,13 @@ namespace SpaceCraft.Utils {
         if( Homeworld == null ) {
           Homeworld = SpaceCraftSession.ClosestPlanet;
         }
-        int rand = Randy.Next(Homeworld.Size.X);
-        Vector3 p = new Vector3(rand,rand,rand) + Vector3.Normalize(Homeworld.PositionLeftBottomCorner);
+        //int rand = Randy.Next(Homeworld.Size.X);
+        Vector3 p = new Vector3(Randy.Next(Homeworld.Size.X),Randy.Next(Homeworld.Size.Y),Randy.Next(Homeworld.Size.Z)) + Vector3.Normalize(Homeworld.PositionLeftBottomCorner);
         //position = planet.GetClosestSurfacePointLocal( ref p );
         position = Homeworld.GetClosestSurfacePointGlobal( p );
         Vector3D up = (position - Homeworld.WorldMatrix.Translation);
         up.Normalize();
         position = position + (up * 150);
-        //MyAPIGateway.Utilities.ShowMessage( Name, "Random Spawn " + position.ToString() );
-        //planet.CorrectSpawnLocation( ref position, (double)planet.MaximumRadius );
-      } else {
-        //MyAPIGateway.Utilities.ShowMessage( Name, "Fixed Spawn " + position.ToString() );
       }
 
       MainBase = new CubeGrid(CubeGrid.Spawn("TerranPlanetPod", MatrixD.CreateWorld(position)));
@@ -525,22 +637,6 @@ namespace SpaceCraft.Utils {
       if( engineer == null ) return false;
 
       AddControllable( engineer );
-
-      // AddControllable( new Engineer(){
-      //   Character = Engineer.Spawn(MatrixD.CreateWorld(position))
-      // } as Controllable );
-
-      if( CommandLine.Switch("aggressive") ) {
-        CurrentGoal = new Goal{
-          Type = Goals.Attack,
-          Target = GetClosestEnemy( engineer )
-        };
-      } else {
-        CurrentGoal = new Goal{
-          Type = Goals.Stabilize,
-          Entity = MainBase
-        };
-      }
 
       return true;
     }

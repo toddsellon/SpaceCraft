@@ -14,17 +14,22 @@ namespace SpaceCraft.Utils {
     Drill,
     Patrol,
     Refuel,
-    Unload,
     Scout,
-    Attack
+    Attack,
+    Deposit,
+    Withdraw
   };
 
   public class Order {
     public Orders Type;
-    public Vector3D Destination;
+    public Vector3D Destination = Vector3D.Zero;
     public IMyEntity Target;
+    public Controllable Entity;
     public Steps Step = Steps.Pending;
     public string SubtypeName = String.Empty;
+    public double Range = 10f;
+    public int Tick = 0;
+    public MyObjectBuilderType Filter = MyObjectBuilderType.Invalid;
 
     public void Progress() {
       if( Step < Steps.Completed )

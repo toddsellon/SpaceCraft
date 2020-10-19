@@ -44,10 +44,10 @@ namespace SpaceCraft {
 
 			inv.RemoveItemsOfType( (MyFixedPoint)1, MyDefinitionId.Parse("MyObjectBuilder_Ingot/Stone") );
 
-			if( (int)(inv.CurrentVolume) < (int)(inv.MaxVolume) / 2 )
-				inv.AddItems((VRage.MyFixedPoint)1, new MyObjectBuilder_Ore(){
-	        SubtypeName = "Stone"
-	      } );
+			// if( (int)(inv.CurrentVolume) < (int)(inv.MaxVolume) / 2 )
+			// 	inv.AddItems((VRage.MyFixedPoint)1, new MyObjectBuilder_Ore(){
+	    //     SubtypeName = "Stone"
+	    //   } );
     }
 
 

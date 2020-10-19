@@ -15,6 +15,7 @@ namespace SpaceCraft.Utils {
   public enum Steps : ushort {
     Pending,
     Started,
+    //Commencing,
     Completed
   };
 

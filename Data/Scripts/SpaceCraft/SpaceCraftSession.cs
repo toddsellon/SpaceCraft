@@ -50,7 +50,7 @@ namespace SpaceCraft {
     public override void Init(MyObjectBuilder_SessionComponent session) {
       base.Init(session);
 			Session = session;
-			MyAPIGateway.Utilities.ShowNotification("SpaceCraft Session Init()" );
+			Limits.Speed = MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed;
       SaveName = MyAPIGateway.Session.Name;
 
 
@@ -97,6 +97,7 @@ namespace SpaceCraft {
 
     public void Preload() {
 
+			OBTypes.Init();
 			ScanEntities();
 
       ListReader<MySpawnGroupDefinition> groups = MyDefinitionManager.Static.GetSpawnGroupDefinitions();
@@ -155,7 +156,7 @@ namespace SpaceCraft {
 		}
 
 		public void SpawnFactions() {
-			//if( MyAPIGateway.Session.ControlledObject == null ) return;
+			if( MyAPIGateway.Session.ControlledObject == null ) return;
 			if( ClosestPlanet == null ) ClosestPlanet = GetClosestPlanet( MyAPIGateway.Session.Player.GetPosition() );
 
 

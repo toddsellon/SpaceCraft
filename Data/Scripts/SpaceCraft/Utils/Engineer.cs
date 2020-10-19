@@ -20,6 +20,7 @@ using Sandbox.Game.Entities.Character.Components;
 using SpaceEngineers.Game.EntityComponents.GameLogic.Discovery;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.Common.ObjectBuilders.Definitions;
+using SpaceCraft;
 using SpaceCraft.Utils;
 //using IMyControllableEntity = Sandbox.Game.Entities.IMyControllableEntity;
 using IMyControllableEntity = VRage.Game.ModAPI.Interfaces.IMyControllableEntity;
@@ -37,10 +38,13 @@ namespace SpaceCraft.Utils {
 	//[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
 	public class Engineer : Controllable {
 
-		protected bool Flying = true;
 		public Vector3 Color;
+		protected MyCharacterJetpackComponent Jetpack = null;
+		protected MyCharacterRagdollComponent Ragdoll = null;
+		protected MyAnimationControllerComponent Animation = null;
 
     public IMyCharacter Character;
+		//public MyGhostCharacter Ghost = null;
 
 		public MatrixD WorldMatrix {
 			get {
@@ -57,13 +61,19 @@ namespace SpaceCraft.Utils {
 			}
 		}
 
+		protected float Speed = 0f;
+		protected int Tick = 0;
+
 		// Main loop
 		public override void UpdateBeforeSimulation() {
-			if( Character == null || Character.Integrity == 0 ) {
+			if( (Character == null || Character.Integrity == 0) ) {
+				CurrentOrder = null;
 				MatrixD matrix = Character.WorldMatrix;
 				Character = Spawn(Owner.GetSpawnLocation(), Owner );
 				Initialize();
 			}
+
+			Jetpack.FuelDefinition.EnergyDensity = 1.0f;
 
 			if( CurrentOrder == null || CurrentOrder.Step == Steps.Completed ) Next();
 			if( CurrentOrder == null ) return;
@@ -72,15 +82,73 @@ namespace SpaceCraft.Utils {
 				case Orders.Attack:
 					Attack();
 					break;
-				case Orders.Move:
-					Move();
-					break;
 				case Orders.Drill:
 					Drill();
 					break;
+				case Orders.Move:
+					Move();
+					break;
+				case Orders.Deposit:
+					Deposit();
+					break;
+				case Orders.Withdraw:
+					Withdraw();
+					break;
+			}
+			Tick++;
+			if( Tick == 99 ) {
+				Tick = 0;
 			}
 
+		}
 
+		public override bool Execute( Order order, bool force = false ) {
+
+			if( base.Execute( order, force ) ) {
+				switch( CurrentOrder.Type ) {
+					case Orders.Drill:
+						SwitchToWeapon( Weapons.Drill );
+						break;
+					case Orders.Attack:
+						SwitchToWeapon( Weapons.Grinder );
+						SwitchToWeapon( Weapons.Gun );
+						break;
+					default:
+						SwitchToWeapon();
+						break;
+				}
+				return true;
+			}
+
+			return false;
+		}
+
+		public override bool Move() {
+			if( CurrentOrder == null ) return false;
+			if( Character == null || Character.Integrity == 0 || (CurrentOrder.Destination == Vector3D.Zero && CurrentOrder.Target == null) ) {
+				CurrentOrder.Complete();
+				return false;
+			}
+			Vector2 rotation = Vector2.Zero;
+			// Vector3 destination = Vector3.Normalize(MyAPIGateway.Session.Player.GetPosition() - Character.WorldMatrix.Translation);
+			// double distance = Vector3D.Distance(MyAPIGateway.Session.Player.GetPosition(),Character.WorldMatrix.Translation);
+			//Vector3 destination = Vector3.Normalize(CurrentOrder.Destination - Character.WorldMatrix.Translation);
+			Vector3 destination = (CurrentOrder.Target == null ? CurrentOrder.Destination : CurrentOrder.Target.WorldMatrix.Translation);
+			double distance = Vector3D.Distance(destination,Character.WorldMatrix.Translation);
+
+			if( distance < CurrentOrder.Range ) {
+				destination = Vector3.Zero;
+				Character.Physics.ClearSpeed();
+				return false;
+			} else {
+				if( !Character.EnabledThrusts ) {
+					Character.SwitchThrusts();
+				}
+				destination.Normalize();
+				Jetpack.MoveAndRotate( ref destination, ref rotation, 0.0f, false );
+			}
+
+			return true;
 		}
 
 		public void Attack() {
@@ -91,8 +159,6 @@ namespace SpaceCraft.Utils {
 
 			//Sandbox.Game.Entities.IMyControllableEntity e = Character as Sandbox.Game.Entities.IMyControllableEntity;
 			if( CurrentOrder.Step == Steps.Pending ) {
-				SwitchToWeapon( Weapons.Grinder );
-				SwitchToWeapon( Weapons.Gun );
 				BeginShoot( MyShootActionEnum.PrimaryAction );
 				CurrentOrder.Progress();
 			}
@@ -102,21 +168,53 @@ namespace SpaceCraft.Utils {
 		// https://github.com/KeenSoftwareHouse/SpaceEngineers/blob/a109106fc0ded66bdd5da70e099646203c56550f/Sources/Sandbox.Game/Game/Weapons/Guns/MyHandDrill.cs
 		// MyHandDrillDefinition
 		public void Drill() {
-			if( CurrentOrder.Step == Steps.Pending ) {
-				SwitchToWeapon( Weapons.Drill );
-				BeginShoot( MyShootActionEnum.PrimaryAction );
+			if( Character == null || Character.Integrity == 0 ) {
+				CurrentOrder = null;
+				return;
+			}
+			//if( CurrentOrder.Destination == null ) {
+				//Vector3D position = Entity.WorldMatrix.Translation;
+				//MyPlanet planet = SpaceCraftSession.GetClosestPlanet( position );
+				//MyPlanet planet = Owner.Homeworld;
+				//CurrentOrder.Destination = planet.GetClosestSurfacePointGlobal(position);
+				//Vector3D up = Vector3D.Normalize(CurrentOrder.Destination - (planet as IMyEntity).LocalVolume.Center);
+				//CurrentOrder.Destination = CurrentOrder.Destination + (up * 100);
+				//Vector3D forward = Vector3D.Normalize(CurrentOrder.Destination - position);
+				//Vector3D forward = Vector3D.Normalize(CurrentOrder.Destination - (planet as IMyEntity).LocalVolume.Center);
+				//CurrentOrder.Destination = CurrentOrder.Destination - (forward * 100);
+			//}
 
-				CurrentOrder.Progress();
+			if( CurrentOrder.Step == Steps.Pending ) {
+
+				if( !Move() ) {
+					if( Character == null ) {
+						CurrentOrder = null;
+						return;
+					} else {
+						Character.SwitchThrusts();
+						//SwitchToWeapon( Weapons.Drill );
+						//BeginShoot( MyShootActionEnum.PrimaryAction );
+					}
+					if( CurrentOrder != null )
+						CurrentOrder.Progress();
+				}
 			} else {
 				// Add resources to inventory
 				IMyInventory inv = GetInventory()[0];
-				if( inv.CurrentVolume < inv.MaxVolume ) {
-					inv.AddItems((VRage.MyFixedPoint)1, new MyObjectBuilder_Ore(){
-		        SubtypeName = CurrentOrder.SubtypeName ?? "Stone"
-		      } );
+				if( inv.IsFull ) {
+					//MyAPIGateway.Utilities.ShowMessage( "Drill", "Inventory Full: " + ToString() );
+					Execute( new Order{
+						Type = Orders.Deposit,
+						Range = 50f
+					}, true );
+					return;
 				} else {
-					CurrentOrder = null;
+					inv.AddItems((VRage.MyFixedPoint)1, new MyObjectBuilder_Ore(){
+		        //SubtypeName = CurrentOrder.SubtypeName ?? "Stone"
+						SubtypeName = "Stone"
+		      } );
 				}
+
 			}
 		}
 
@@ -124,9 +222,13 @@ namespace SpaceCraft.Utils {
 
 		public Engineer( IMyCharacter character ) {
 			Character = character;
-			//ControlledEntity = Character as Sandbox.Game.Entities.IMyControllableEntity;
-			ControlledEntity = Character as IMyControllableEntity;
-
+			Entity = Character;
+			Flying = true;
+	    Spacecraft = true;
+	    Drills = true;
+	    Welders = true;
+	    Griders = true;
+			Cargo = true;
 			//MyAPIGateway.Session.RegisterComponent(this, MyUpdateOrder.BeforeSimulation, 0);
 			/*if( data == string.Empty ) return;
 			try {
@@ -137,14 +239,12 @@ namespace SpaceCraft.Utils {
 
 
 
-		public override void Init( MyObjectBuilder_SessionComponent session ) {
-
-			base.Init(session);
-
-			//ControlledEntity = Character as IMyControllableEntity;
-			Initialize();
-
-		}
+		// public override void Init( MyObjectBuilder_SessionComponent session ) {
+		//
+		// 	base.Init(session);
+		// 	Initialize();
+		//
+		// }
 
 		public override List<IMyInventory> GetInventory( List<IMySlimBlock> blocks = null ) {
       return new List<IMyInventory>(){
@@ -155,16 +255,24 @@ namespace SpaceCraft.Utils {
 		public void Initialize() {
 			if( Character == null ) return;
 
-			TakeControl(Character);
+			Jetpack = Character.Components.Get<MyCharacterJetpackComponent>();
+			Ragdoll = Character.Components.Get<MyCharacterRagdollComponent>();
+			Animation = Character.Components.Get<MyAnimationControllerComponent>();
+
+			//MyAPIGateway.Players.SetControlledEntity(MyAPIGateway.Session.Player.SteamUserId, Character as IMyEntity);
 
 			Character.DoDamage(0.0f, MyStringHash.Get(string.Empty), true); // Hack to property init Physics
 
 			if( !Character.EnabledDamping ) {
 				Character.SwitchDamping();
 			}
-			if( Character.EnabledThrusts ) {
+			if( !Character.EnabledThrusts ) {
 				Character.SwitchThrusts();
 			}
+
+			Character.Physics.Activate();
+
+
 		}
 
 		public void SwitchToWeapon( Weapons weapon = Weapons.None ) {
@@ -184,7 +292,8 @@ namespace SpaceCraft.Utils {
 						e.SwitchToWeapon( MyDefinitionId.Parse( "MyObjectBuilder_PhysicalGunObject/AutomaticRifleItem" ) );
 						break;
 					default:
-						e.SwitchToWeapon( MyDefinitionId.Parse( string.Empty ) );
+						//e.SwitchToWeapon( MyDefinitionId.Parse( string.Empty ) );
+						e.SwitchToWeapon( null );
 						break;
 				}
 			}
@@ -198,41 +307,6 @@ namespace SpaceCraft.Utils {
 			//MyAPIGateway.Physics.CalculateArtificialGravityAt()
 		}
 
-
-
-    //public override void UpdateBeforeSimulation100() {
-		public void UpdateBeforeSimulation100() {
-
-      MyCharacterJetpackComponent jetpack = Character.Components.Get<MyCharacterJetpackComponent>();
-
-      /*if( destination == null ) {
-        destination = MyAPIGateway.Session.Player.GetPosition();
-      }
-
-      //ControllerInfo.Controller.Player.IsRealPlayer
-      Vector3 d = Vector3.Normalize(destination);
-
-      if( jetpack != null ) {
-        jetpack.TurnOnJetpack(true);
-        jetpack.UpdateFall();
-        jetpack.UpdatePhysicalMovement();
-        jetpack.EnableDampeners(true);
-        jetpack.ClearMovement();
-
-        jetpack.MoveAndRotate(ref d, ref Vector2.Zero, 0.0f, true);
-      }*/
-
-      //Character.MoveAndRotate(d, Vector2.Zero, 0.0f);
-
-      /*Character.Physics.SetSpeeds( new Vector3(0,1,0), Vector3.Zero );
-
-      MyAPIGateway.Utilities.ShowNotification("Static: " + Character.Physics.IsStatic );
-      MyAPIGateway.Utilities.ShowNotification("Kinematic: " + Character.Physics.IsKinematic );*/
-      //MyAPIGateway.Utilities.ShowNotification("Moving: " + Character.Physics.IsMoving );
-
-
-    }
-
 		public void DrillFor( string SubtypeName = "Stone", int amount = 1 ) {
 			MyInventoryBase inv = Character.Components.Get<MyInventoryBase>();
 
@@ -245,9 +319,15 @@ namespace SpaceCraft.Utils {
 
 
 
-
 		public static IMyCharacter Spawn( MatrixD matrix, Faction owner ) {
 			if( matrix == null ) return null;
+			MyEntity ent = null;
+
+			// if( Ghost == null ) {
+			// 	MyObjectBuilder_GhostCharacter ob = new MyObjectBuilder_GhostCharacter();
+			// 	Ghost = (MyEntity)MyAPIGateway.Entities.CreateFromObjectBuilder(ob);
+			// 	MyAPIGateway.Entities.AddEntity(Ghost);
+			// }
 
 			MyObjectBuilder_Character character = new MyObjectBuilder_Character(){
         CharacterModel = "Astronaut",
@@ -255,8 +335,8 @@ namespace SpaceCraft.Utils {
         //BotDefId = SerializableDefinitionId(MyObjectBuilderType.Parse("MyObjectBuilder_Character"), "MyObjectBuilder_BarbarianBot"),
         JetpackEnabled = true,
         PersistentFlags = MyPersistentEntityFlags2.InScene,
-        Name = "NPC",
-        DisplayName = "NPC",
+        Name = owner.Name,
+        DisplayName = owner.Name,
 				ColorMaskHSV = owner.Color,
         Inventory = new MyObjectBuilder_Inventory(){
 					Items = new List<MyObjectBuilder_InventoryItem>(){
@@ -280,7 +360,6 @@ namespace SpaceCraft.Utils {
 						}
 					}
 				},
-        HandWeapon = new MyObjectBuilder_HandDrill(),
         //Battery = new MyObjectBuilder_Battery(),
         PositionAndOrientation = new MyPositionAndOrientation(matrix),
         Health = 1.0f,
@@ -288,7 +367,7 @@ namespace SpaceCraft.Utils {
         SubtypeName = "Default_Astronaut"
       };
 
-      MyEntity ent = (MyEntity)MyAPIGateway.Entities.CreateFromObjectBuilder(character);
+      ent = (MyEntity)MyAPIGateway.Entities.CreateFromObjectBuilder(character);
 
 			if( ent != null ) {
         ent.Flags &= ~EntityFlags.Save;
@@ -303,6 +382,10 @@ namespace SpaceCraft.Utils {
 
 			return null;
 		}
+
+		public override string ToString() {
+      return Owner.Name + " " + base.ToString();
+    }
 
 
 	}

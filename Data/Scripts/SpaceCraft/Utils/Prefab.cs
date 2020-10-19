@@ -2,15 +2,25 @@ using System;
 using System.Collections.Generic;
 using Sandbox.Definitions;
 using VRage.Game;
-
+using VRageMath;
 namespace SpaceCraft.Utils {
 
   public class Prefab {
     public string SubtypeId = String.Empty;
     public string Faction = String.Empty;
-    public int Cost = 0;
+    public int Count = 0; // Block count
+    public int Price = 0; // Component count
     public bool IsStatic = false;
+    public bool IsFactory = false;
+    public bool IsRefinery = false;
+    public bool IsCargo = false;
+    public bool IsRespawn = false;
+    public bool Wheels = false;
+    public bool Flying = false;
+    public bool Spacecraft = false;
+
     public MyPrefabDefinition Definition;
+    public MyPositionAndOrientation? PositionAndOrientation;
 
     public static List<Prefab> Prefabs = new List<Prefab>();
 
@@ -29,7 +39,48 @@ namespace SpaceCraft.Utils {
       foreach( MyObjectBuilder_CubeGrid grid in Definition.CubeGrids ) {
         if( grid == null ) continue;
         if( grid.IsStatic ) IsStatic = true;
-        Cost += grid.CubeBlocks.Count;
+        PositionAndOrientation = grid.PositionAndOrientation;
+        Count += grid.CubeBlocks.Count;
+
+        foreach( MyObjectBuilder_CubeBlock block in grid.CubeBlocks ) {
+          MyCubeBlockDefinition def = MyDefinitionManager.Static.GetCubeBlockDefinition(block);
+          if( block is MyObjectBuilder_CargoContainer ) IsCargo = true;
+          if( block is MyObjectBuilder_MedicalRoom || block is MyObjectBuilder_SurvivalKit ) IsRespawn = true;
+          if( block is MyObjectBuilder_Assembler ) IsFactory = true;
+          if( block is MyObjectBuilder_Refinery ) IsRefinery = true;
+          if( block is MyObjectBuilder_MotorSuspension ) Wheels = true;
+          if( block is MyObjectBuilder_Thrust ) {
+            if( def != null )
+              switch( def.Id.SubtypeName ) {
+                case "LargeBlockLargeAtmosphericThrust":
+                case "LargeBlockSmallAtmosphericThrust":
+                case "SmallBlockLargeAtmosphericThrust":
+                case "SmallBlockSmallAtmosphericThrust":
+                  Flying = true;
+                  break;
+                case "SmallBlockSmallThrust":
+                case "SmallBlockLargeThrust":
+                case "LargeBlockSmallThrust":
+                case "LargeBlockLargeThrust":
+                  Spacecraft = true;
+                  break;
+                default:
+                  Flying = true;
+                  Spacecraft = true;
+                  break;
+              }
+          }
+
+          if( def != null ) {
+            foreach( var component in def.Components ) {
+              Price += component.Count;
+            }
+
+          }
+
+        }
+
+
       }
     }
 
