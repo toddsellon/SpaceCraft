@@ -37,7 +37,7 @@ namespace SpaceCraft.Utils {
     Defend
   };
 
-  public enum Tech {
+  public enum Tech : ushort {
     Primitive,
     Established,
     Space,
@@ -47,6 +47,19 @@ namespace SpaceCraft.Utils {
   //[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
   //public class Faction:MySessionComponentBase {
   public class Faction {
+
+    public class Stats {
+      public int Grids = 0;
+      public int Static = 0;
+      public int Workers = 0;
+      public int Fighters = 0;
+      public int Factories = 0;
+      public int Refineries = 0;
+      public bool InSpace = false; // TODO
+      public Dictionary<string,float> Ratio = new Dictionary<string,float>{};
+      public Dictionary<string,float> Desired = new Dictionary<string,float>{};
+    }
+
     public static int LIMIT = 20;
 
     public string Name;
@@ -61,12 +74,16 @@ namespace SpaceCraft.Utils {
     private List<Controllable> Controlled = new List<Controllable>();
     private List<IMyEntity> Enemies = new List<IMyEntity>();
     private CubeGrid MainBase;
-    private List<string> Resources = new List<string>(){"Stone","Iron","Silicon","Nickel"};
+    private List<string> Resources = new List<string>(){"Stone","Iron","Silicon","Nickel","Cobalt"};
     protected static Random Randy = new Random();
     protected int Tick = 0;
     public MyPlanet Homeworld;
     private static bool First = true;
     public Tech Teir = Tech.Primitive;
+    public IMyFaction MyFaction;
+    public string SpawnPrefab;
+    public Stats MyStats = new Stats();
+
 
     // Main loop
     public void UpdateBeforeSimulation() {
@@ -164,18 +181,23 @@ namespace SpaceCraft.Utils {
           return;
         }
 
-        CurrentGoal.Entity = AddControllable(grid);
+        AddControllable(grid);
+        CurrentGoal.Entity = grid;
 
         grid.SetToConstructionSite();
 
-        MainBase.AddQueueItems( CurrentGoal.Prefab );
-
+        MainBase.ToggleDocked( grid );
+        //MainBase.AddQueueItems( CurrentGoal.Prefab );
+        MainBase.FindConstructionSite();
         CurrentGoal.Progress();
 
       } else if( CurrentGoal.Step == Steps.Started ) {
         // Facilitate Production
-        if( (CurrentGoal.Entity as CubeGrid).ConstructionSite == null ) {
+        CubeGrid grid = CurrentGoal.Entity as CubeGrid;
+        if( grid == null || grid.ConstructionSite == null ) {
           MyAPIGateway.Utilities.ShowMessage( Name, "Completed construction" );
+          if( grid.DockedTo != null )
+            grid.DockedTo.ToggleDocked( grid );
           CurrentGoal.Complete();
           return;
         }
@@ -205,19 +227,37 @@ namespace SpaceCraft.Utils {
       //if( maps[Homeworld] )
       int MAX = 100;
 
+      CubeGrid last = GetLastCreated();
+
       //if( prefab.IsStatic ) {
         // Place further away
 
-        int rand = Randy.Next(MAX);
-        Vector3 p = new Vector3(MAX,rand,rand) + Vector3.Normalize(MainBase.Grid.WorldMatrix.Translation);
+        //int rand = Randy.Next(MAX);
+        //Vector3 p = new Vector3(MAX,rand,rand) + Vector3.Normalize(MainBase.Grid.WorldMatrix.Translation);
+        MatrixD m = last.Grid.WorldMatrix;
+        Vector3D p = m.Translation;
+        MyPlanet planet = StarCraftSession.GetClosestPlanet(p);
+        //Quaternion q = Quaternion.CreateFromRotationMatrix(m);
+        //q.W += Controlled.Count;
+
+        Vector3 blocked = last.Grid.LocalAABB.Size; // size of last base
+        Vector3 size = prefab.Definition.BoundingBox.Size; // size of prefab
+        Vector3D offset = m.Forward + m.Up;
+        if( prefab.IsStatic ) {
+          p = p + (m.Forward*100) + (m.Up*100);
+          //p = p + blocked + (offset*(size+10)*Controlled.Count);
+        } else {
+          p = p + blocked + (size*1.25);
+        }
+        //p = Vector3D.Transform( p, q );
         //position = planet.GetClosestSurfacePointLocal( ref p );
-        Vector3D position = Homeworld.GetClosestSurfacePointGlobal( p );
-        Vector3D up = Vector3D.Normalize(position - Homeworld.WorldMatrix.Translation);
+        Vector3D position = planet.GetClosestSurfacePointGlobal( p );
+        Vector3D up = Vector3D.Normalize(position - planet.WorldMatrix.Translation);
 
         if( !prefab.IsStatic )
           position = position + (up * 2 );
         //MatrixD matrix = MatrixD.CreateWorld( position );
-        MatrixD reference = Homeworld.WorldMatrix;
+        MatrixD reference = planet.WorldMatrix;
 
         MyPositionAndOrientation origin = prefab.PositionAndOrientation.HasValue ? prefab.PositionAndOrientation.Value : MyPositionAndOrientation.Default;
 
@@ -298,9 +338,9 @@ namespace SpaceCraft.Utils {
         case Goals.Construct:
           if( c == CurrentGoal.Entity ) break;
           // Determine if unit should transfer items
-          if( c.Cargo && !c.IsStatic && CurrentGoal.Entity != MainBase && GetWithdrawlSource(c) != null ) {
+          /*if( c.Cargo && !c.IsStatic && CurrentGoal.Entity != MainBase && GetWithdrawlSource(c) != null ) {
             return null;
-          } else if( c.Drills ) {
+          } else*/ if( c.Drills ) {
             break;
           }
           goto case Goals.Defend;
@@ -321,23 +361,36 @@ namespace SpaceCraft.Utils {
           break;
       }
 
-      if( c.Entity == null ) {
-        MyAPIGateway.Utilities.ShowMessage( "NeedsOrder", c.ToString() + ": c.Entity is null" );
-        return null;
-      }
+      if( c.Entity == null ) return null;
+
       Vector3D position = c.Entity.WorldMatrix.Translation;
       MyPlanet planet = SpaceCraftSession.GetClosestPlanet( position );
-      if( planet == null ) {
-        MyAPIGateway.Utilities.ShowMessage( "NeedsOrder", c.ToString() + ": planet is null" );
-        return null;
-      }
+      if( planet == null ) return null;
+
       return new Order {
         Type = Orders.Drill,
+        //Target = planet,
+        Resources = GetDrillResources( planet ),
         Destination = planet.GetClosestSurfacePointGlobal(position),
         // TODO: Determine best drill location
         //Destination = Homeworld.GetClosestSurfacePointGlobal(c.Entity.WorldMatrix.Translation),
         Range = 20f
       };
+    }
+
+    public Dictionary<string,VRage.MyFixedPoint> GetDrillResources( MyPlanet planet ) {
+      Dictionary<string,VRage.MyFixedPoint> resources = new Dictionary<string,VRage.MyFixedPoint>();
+      switch( Teir ) {
+        case Tech.Primitive:
+          resources.Add("Stone",(VRage.MyFixedPoint)1);
+          break;
+        case Tech.Established:
+          resources.Add("Iron",(VRage.MyFixedPoint)0.6);
+          resources.Add("Nickel",(VRage.MyFixedPoint)0.3);
+          resources.Add("Cobalt",(VRage.MyFixedPoint)0.1);
+          break;
+      }
+      return resources;
     }
 
     public CubeGrid GetWithdrawlSource( Controllable controllable ) {
@@ -404,6 +457,15 @@ namespace SpaceCraft.Utils {
       return null;
     }
 
+    public CubeGrid GetLastCreated() {
+      CubeGrid last = null;
+      foreach( Controllable c in Controlled ) {
+        if( c is CubeGrid )
+          last = c as CubeGrid;
+      }
+      return last;
+    }
+
     public CubeGrid GetClosestGrid( Controllable from ) {
       CubeGrid best = null;
       double distance = 0;
@@ -428,17 +490,41 @@ namespace SpaceCraft.Utils {
       //   return;
       // }
 
+      MyStats = new Stats();
+
       CubeGrid building = null;
       CubeGrid needs = null;
       foreach( Controllable c in Controlled ) {
         if( c is CubeGrid ) {
           CubeGrid grid = c as CubeGrid;
+          MyStats.Grids++;
           if( grid.ConstructionSite != null ) building = grid;
+          if( grid.Drills ) MyStats.Workers++;
+          if( grid.IsStatic ) MyStats.Static++;
+          if( grid.Fighter ) MyStats.Fighters++;
+          if( grid.IsFactory ) MyStats.Factories++;
+          if( grid.IsRefinery ) MyStats.Refineries++;
           // else if( building == null ) {
           //   grid.AssessNeed();
           // }
         }
       }
+
+      if( MyStats.Grids == 0 ) {
+        Mulligan();
+        return;
+      }
+      MyStats.Ratio.Add("Workers", MyStats.Workers/MyStats.Grids);
+      MyStats.Ratio.Add("Fighters", MyStats.Fighters/MyStats.Grids);
+      MyStats.Ratio.Add("Factories", MyStats.Factories/MyStats.Grids);
+      MyStats.Ratio.Add("Refineries", MyStats.Refineries/MyStats.Grids);
+      MyStats.Ratio.Add("Static", MyStats.Static/MyStats.Grids);
+
+      MyStats.Desired.Add("Workers", .5f);
+      MyStats.Desired.Add("Fighters", CommandLine.Switch("aggressive") ? 1f : .5f );
+      MyStats.Desired.Add("Factories", .5f);
+      MyStats.Desired.Add("Refineries", .5f);
+      MyStats.Desired.Add("Static", CommandLine.Switch("aggressive") ? .75f : .5f );
 
       if( building != null ) {
         CurrentGoal = new Goal{
@@ -646,7 +732,62 @@ namespace SpaceCraft.Utils {
     // }
 
     protected float Prioritize( Prefab prefab ) {
-      return prefab.IsStatic ? 1f : 0f;
+      if( Teir < prefab.Teir ) return 0f;
+      //MyAPIGateway.Utilities.ShowMessage( "Prioritize", prefab.ToString() + " Cost: " + String.Join(",",prefab.Cost.Keys) );
+      //MyAPIGateway.Utilities.ShowMessage( "Prioritize", "Available: " + String.Join(",",Resources) );
+      foreach( string resource in prefab.Cost.Keys ) {
+        // Doesn't have access to resources
+        if( !Resources.Contains(resource) ) return 0f;
+      }
+      float priority = (float)prefab.Price; // Build highest grid you can afford to reduce quantity of grids
+
+      if( MyStats.InSpace && !prefab.Spacecraft && !prefab.IsStatic ) return 0f;
+
+      if( CommandLine.Switch("grounded") && !prefab.Wheels && !prefab.IsStatic ) return 0f;
+
+      //if( CommandLine.Switch("aerial") && !prefab.Flying && !prefab.IsStatic ) return 0f;
+
+
+      if( prefab.IsFactory ) {
+        priority *= MyStats.Ratio["Factories"] < MyStats.Desired["Factories"] ? 2f : 1f;
+      }
+      if( prefab.IsRefinery ) {
+        priority *= MyStats.Ratio["Refineries"] < MyStats.Desired["Refineries"] ? 2f : 1f;
+      }
+
+      if( prefab.Worker ) {
+        priority *= MyStats.Ratio["Workers"] < MyStats.Desired["Workers"] ? 2f : 1f;
+      }
+      if( prefab.Fighter ) {
+
+          priority *= MyStats.Ratio["Fighters"] <= MyStats.Desired["Fighters"] ? 2f : 1f;
+
+      }
+
+      if( prefab.IsStatic ) {
+
+          priority *= MyStats.Ratio["Static"] >= MyStats.Desired["Static"] ? .5f : 1f;
+
+      }
+
+
+      return priority;
+    }
+
+    public void BlockCompleted( IMySlimBlock block ) {
+      if( block.FatBlock == null ) return;
+      if( block.FatBlock is IMyRefinery ) {
+        if( Teir == Tech.Primitive ) Teir = Tech.Established;
+
+        if( block.BlockDefinition.Id.SubtypeName == "LargeRefinery" && !Resources.Contains("Silver")) {
+          Resources.Add("Silver");
+          Resources.Add("Gold");
+          // if( MyStats.InSpace ) {
+          //   Resources.Add("Platinum");
+          //   Resources.Add("Uranium");
+          // }
+        }
+      }
     }
 
 

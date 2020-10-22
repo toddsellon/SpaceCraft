@@ -60,11 +60,13 @@ namespace SpaceCraft {
 			//MyAPIGateway.Utilities.IsDedicated;
     }
 
-		public static MyPlanet GetClosestPlanet( Vector3D position ) {
+		public static MyPlanet GetClosestPlanet( Vector3D position, List<MyPlanet> exclude = null ) {
+			if( exclude == null ) exclude = new List<MyPlanet>();
 			MyPlanet best = null;
 			double bestDistance = 0.0f;
 			double distance = 0.0f;
 			foreach( MyPlanet planet in Planets ) {
+				if( exclude.Contains(planet) ) continue;
 				distance = Vector3D.Distance(position, planet.PositionLeftBottomCorner + (planet.SizeInMetres / 2));
 				if( best == null || distance < bestDistance ) {
 					best = planet;
@@ -106,13 +108,17 @@ namespace SpaceCraft {
 				if(group.Enabled == false || String.IsNullOrWhiteSpace(group.DescriptionText) ) continue;
 
 				MyCommandLine cmd = new MyCommandLine();
+				string first = String.Empty;
 
         if( cmd.TryParse(group.DescriptionText) && cmd.Argument(0).ToLower() == "spacecraft") {
 
 					string Name = cmd.Argument(1) ?? String.Empty;
 
 					foreach( 	MySpawnGroupDefinition.SpawnGroupPrefab prefab in group.Prefabs ) {
-						Prefab.Add(prefab.SubtypeId, Name);
+						if( first == String.Empty ) first = prefab.SubtypeId;
+
+						if( prefab.SubtypeId != "TerranPlanetPod" )
+							Prefab.Add(prefab.SubtypeId, Name);
 					}
 
           if( !String.IsNullOrWhiteSpace(Name) ) {
@@ -126,7 +132,7 @@ namespace SpaceCraft {
 							faction.Color = new SerializableVector3(float.Parse(colors[0]),float.Parse(colors[1]),float.Parse(colors[2]));
 						}
 						faction.Groups.Add( group );
-
+						faction.SpawnPrefab = first;
           }
         }
 
@@ -146,8 +152,11 @@ namespace SpaceCraft {
 					return f;
 				}
 			}
+
+
 			Faction faction = new Faction{
-				Name = tag
+				Name = tag,
+				MyFaction = MyAPIGateway.Session.Factions.TryGetFactionByTag(tag)
 			};
 
 			Factions.Add(faction);

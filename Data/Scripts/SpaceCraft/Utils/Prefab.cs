@@ -10,6 +10,8 @@ namespace SpaceCraft.Utils {
     public string Faction = String.Empty;
     public int Count = 0; // Block count
     public int Price = 0; // Component count
+    public Dictionary<string,int> Components = new Dictionary<string,int>();
+    public Dictionary<string,int> Cost = new Dictionary<string,int>(); // Ingot cost
     public bool IsStatic = false;
     public bool IsFactory = false;
     public bool IsRefinery = false;
@@ -18,6 +20,10 @@ namespace SpaceCraft.Utils {
     public bool Wheels = false;
     public bool Flying = false;
     public bool Spacecraft = false;
+    public bool Fighter = false;
+    public bool Worker = false;
+    public bool Atmosphere = false;
+    public Tech Teir = Tech.Primitive;
 
     public MyPrefabDefinition Definition;
     public MyPositionAndOrientation? PositionAndOrientation;
@@ -44,11 +50,23 @@ namespace SpaceCraft.Utils {
 
         foreach( MyObjectBuilder_CubeBlock block in grid.CubeBlocks ) {
           MyCubeBlockDefinition def = MyDefinitionManager.Static.GetCubeBlockDefinition(block);
+
           if( block is MyObjectBuilder_CargoContainer ) IsCargo = true;
           if( block is MyObjectBuilder_MedicalRoom || block is MyObjectBuilder_SurvivalKit ) IsRespawn = true;
           if( block is MyObjectBuilder_Assembler ) IsFactory = true;
-          if( block is MyObjectBuilder_Refinery ) IsRefinery = true;
+          if( block is MyObjectBuilder_Refinery ) {
+            if( block.SubtypeName == "LargeRefinery" )
+              Tech = Tech.Established;
+            IsRefinery = true;
+          }
           if( block is MyObjectBuilder_MotorSuspension ) Wheels = true;
+          if( block is MyObjectBuilder_Drill ) Worker = true;
+          if( block is MyObjectBuilder_WindTurbine ) Atmosphere = true;
+          if( block is MyObjectBuilder_Reactor && !Cost.ContainsKey("Uranium") ) {
+            Cost.Add("Uranium",1);
+          }
+          if( block is 	MyObjectBuilder_LargeGatlingTurret || block is 	MyObjectBuilder_LargeMissileTurret || block is 	MyObjectBuilder_SmallGatlingGun || block is 	MyObjectBuilder_SmallMissileLauncher )
+            Fighter = true;
           if( block is MyObjectBuilder_Thrust ) {
             if( def != null )
               switch( def.Id.SubtypeName ) {
@@ -74,6 +92,24 @@ namespace SpaceCraft.Utils {
           if( def != null ) {
             foreach( var component in def.Components ) {
               Price += component.Count;
+              string subtype = component.Definition.Id.SubtypeName;
+              MyBlueprintDefinitionBase blueprint = null;
+      				MyDefinitionManager.Static.TryGetComponentBlueprintDefinition(component.Definition.Id, out blueprint);
+              if( Components.ContainsKey(subtype) ) {
+                Components[subtype] += component.Count;
+              } else {
+                Components.Add(subtype,component.Count);
+              }
+              if( blueprint != null) {
+                foreach( var item in blueprint.Prerequisites ) {
+                  subtype = item.Id.SubtypeName;
+                  if( Cost.ContainsKey(subtype) ) {
+                    Cost[subtype] += item.Amount.ToIntSafe();
+                  } else {
+                    Cost.Add(subtype,item.Amount.ToIntSafe());
+                  }
+                }
+              }
             }
 
           }
@@ -82,6 +118,9 @@ namespace SpaceCraft.Utils {
 
 
       }
+
+      if( Worker ) Fighter = false;
+      if( !IsStatic && Flying && !Spacecraft ) Atmosphere = true;
     }
 
     public static Prefab Get( string subtypeId ) {
@@ -90,17 +129,16 @@ namespace SpaceCraft.Utils {
     }
 
     public static Prefab Add( string subtypeId, string faction ) {
-      if( null == Prefab.Get(subtypeId) ) {
-        Prefab prefab = new Prefab{
+      Prefab prefab = Prefab.Get(subtypeId);
+      if( prefab == null ) {
+        prefab = new Prefab{
           SubtypeId = subtypeId,
           Faction = faction
         };
 
         prefab.Init();
-
-        return prefab;
       }
-      return null;
+      return prefab;
     }
 
     public override string ToString() {

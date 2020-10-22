@@ -21,6 +21,79 @@
 			<BeaconText>Terran Outpost</BeaconText>
 			<Speed>0.0</Speed>
 		</Prefab>
+		<Prefab SubtypeId="Terran SCV">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Terran SCV</BeaconText>
+			<Speed>0.0</Speed>
+		</Prefab>
+		<Prefab SubtypeId="Terran MAR-1NE">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Terran MAR-1NE</BeaconText>
+			<Speed>0.0</Speed>
+		</Prefab>
+		<Prefab SubtypeId="Terran SCV (Atmo)">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Terran SCV</BeaconText>
+			<Speed>0.0</Speed>
+		</Prefab>
+		<Prefab SubtypeId="Terran Reaper">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Terran Reaper</BeaconText>
+			<Speed>0.0</Speed>
+		</Prefab>
+		<Prefab SubtypeId="Terran Battlecruiser">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Terran Battlecruiser</BeaconText>
+			<Speed>0.0</Speed>
+		</Prefab>
+		<Prefab SubtypeId="Terran SCV (Space)">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Terran SCV</BeaconText>
+			<Speed>0.0</Speed>
+		</Prefab>
+		<!-- Currently Bugged -->
+		<!-- <Prefab SubtypeId="Terran Space Outpost">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Terran Space Outpost</BeaconText>
+			<Speed>0.0</Speed>
+		</Prefab> -->
+		<Prefab SubtypeId="Planetary Fortress">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Planetary Fortress</BeaconText>
+			<Speed>0.0</Speed>
+		</Prefab>
 	</Prefabs>
 </SpawnGroup>
 

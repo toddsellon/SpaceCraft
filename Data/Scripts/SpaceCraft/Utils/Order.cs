@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using VRageMath;
 using VRage;
 using VRage.Game.Entity;
@@ -26,7 +27,7 @@ namespace SpaceCraft.Utils {
     public IMyEntity Target;
     public Controllable Entity;
     public Steps Step = Steps.Pending;
-    public string SubtypeName = String.Empty;
+    public Dictionary<string,VRage.MyFixedPoint> Resources;
     public double Range = 10f;
     public int Tick = 0;
     public MyObjectBuilderType Filter = MyObjectBuilderType.Invalid;

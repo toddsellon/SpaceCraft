@@ -133,7 +133,9 @@ namespace SpaceCraft.Utils {
 			// Vector3 destination = Vector3.Normalize(MyAPIGateway.Session.Player.GetPosition() - Character.WorldMatrix.Translation);
 			// double distance = Vector3D.Distance(MyAPIGateway.Session.Player.GetPosition(),Character.WorldMatrix.Translation);
 			//Vector3 destination = Vector3.Normalize(CurrentOrder.Destination - Character.WorldMatrix.Translation);
+
 			Vector3 destination = (CurrentOrder.Target == null ? CurrentOrder.Destination : CurrentOrder.Target.WorldMatrix.Translation);
+			//Vector3 destination = (CurrentOrder.Destination == Vector3D.Zero ? CurrentOrder.Target.WorldMatrix.Translation : CurrentOrder.Destination);
 			double distance = Vector3D.Distance(destination,Character.WorldMatrix.Translation);
 
 			if( distance < CurrentOrder.Range ) {
@@ -209,10 +211,14 @@ namespace SpaceCraft.Utils {
 					}, true );
 					return;
 				} else {
-					inv.AddItems((VRage.MyFixedPoint)1, new MyObjectBuilder_Ore(){
-		        //SubtypeName = CurrentOrder.SubtypeName ?? "Stone"
-						SubtypeName = "Stone"
-		      } );
+					foreach( string ore in CurrentOrder.Resources.Keys ) {
+						inv.AddItems(CurrentOrder.Resources[ore], new MyObjectBuilder_Ore(){
+			        SubtypeName = ore
+			      } );
+					}
+					// inv.AddItems((VRage.MyFixedPoint)1, new MyObjectBuilder_Ore(){
+		      //   SubtypeName = CurrentOrder.SubtypeName ?? "Stone"
+		      // } );
 				}
 
 			}

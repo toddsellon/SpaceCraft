@@ -29,7 +29,11 @@ namespace SpaceCraft.Utils {
     public bool Wheels = false;
     public bool Cargo = false;
     public bool Destroyed = false;
+    public bool Fighter = false;
+    public bool IsFactory = false;
+    public bool IsRefinery = false;
     public Faction Owner;
+
 
     public virtual bool IsStatic
 		{
@@ -114,8 +118,13 @@ namespace SpaceCraft.Utils {
         return 101;
       }
 
-      if( block is IMySolarPanel ) {
+      if( block is IMySolarPanel || subtypeName == "LargeBlockWindTurbine" ) {
         return 100;
+      }
+
+      if( block is IMyRefinery ) {
+        //return 48;
+        return subtypeName == "LargeRefinery" ? 99 : 50;
       }
 
       if( block is IMyAssembler ) {
@@ -123,17 +132,14 @@ namespace SpaceCraft.Utils {
         //switch( slim.BlockDefinition.DisplayNameString ) {
         switch(subtypeName) {
           case "LargeAssembler":
-            return 99;
+            return 98;
           case "BasicAssembler":
-            return 50;
+            return 49;
         }
-        return 49;
+        return 48;
       }
 
-      if( block is IMyRefinery ) {
-        //return 48;
-        return subtypeName == "LargeRefinery" ? 98 : 48;
-      }
+
 
       if( block is IMyProductionBlock ) {
         return 47;
