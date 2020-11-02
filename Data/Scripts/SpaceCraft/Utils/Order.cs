@@ -4,6 +4,7 @@ using VRageMath;
 using VRage;
 using VRage.Game.Entity;
 using VRage.ModAPI;
+using Sandbox.Game.Entities;
 
 namespace SpaceCraft.Utils {
 
@@ -31,6 +32,7 @@ namespace SpaceCraft.Utils {
     public double Range = 10f;
     public int Tick = 0;
     public MyObjectBuilderType Filter = MyObjectBuilderType.Invalid;
+    public MyPlanet Planet;
 
     public void Progress() {
       if( Step < Steps.Completed )

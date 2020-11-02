@@ -58,17 +58,65 @@ namespace SpaceCraft {
 			Server = MyAPIGateway.Multiplayer.IsServer;
 			Loaded = !Server;
 			//MyAPIGateway.Utilities.IsDedicated;
+
+			if( Server ) {
+				//IMyDamageSystem
+				//MyAPIGateway.Session.DamageSystem.RegisterAfterDamageHandler (int priority, Action< object, MyDamageInformation > handler);
+				// MyAPIGateway.Multiplayer.RegisterMessageHandler(8877, ChatCommand.MessageHandler);
+				MyAPIGateway.Utilities.MessageEntered += MessageEntered;
+			}
     }
 
-		public static MyPlanet GetClosestPlanet( Vector3D position, List<MyPlanet> exclude = null ) {
+		public static void MessageEntered(string message, ref bool broadcast){
+			if(!message.StartsWith("/sc")) return;
+			IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
+			if( player.PromoteLevel != MyPromoteLevel.Admin && player.PromoteLevel != MyPromoteLevel.Owner ) return;
+
+			MyCommandLine cmd = new MyCommandLine();
+			if( !cmd.TryParse(message.Substring(3)) ) return;
+			broadcast = false;
+
+			switch( cmd.Argument(0) ) {
+				case "set":
+					break;
+			}
+
+		}
+
+		// public static void MessageHandler(byte[] data){
+		//
+		// 	var receivedData = MyAPIGateway.Utilities.SerializeFromBinary<SyncData>(data);
+		//
+		// 	if(receivedData.Instruction.StartsWith("MESChatMsg") == true){
+		//
+		// 		ServerChatProcessing(receivedData);
+		//
+		// 	}
+		//
+		//
+		// }
+
+		public static MyPlanet GetClosestPlanet( Vector3D position, List<MyPlanet> exclude = null, string containing = "" ) {
 			if( exclude == null ) exclude = new List<MyPlanet>();
 			MyPlanet best = null;
 			double bestDistance = 0.0f;
 			double distance = 0.0f;
 			foreach( MyPlanet planet in Planets ) {
 				if( exclude.Contains(planet) ) continue;
+				if( containing != String.Empty ) {
+					bool found = false;
+					foreach( MyPlanetOreMapping mapping in planet.Generator.OreMappings ) {
+						if( mapping.Type == containing ) {
+							found = true;
+							break;
+						}
+					}
+					if( !found ) continue;
+				}
 				distance = Vector3D.Distance(position, planet.PositionLeftBottomCorner + (planet.SizeInMetres / 2));
+				//distance = Vector3D.Distance(position, (planet as IMyEntity).LocalVolume.Center);
 				if( best == null || distance < bestDistance ) {
+
 					best = planet;
 					bestDistance = distance;
 				}
@@ -130,6 +178,11 @@ namespace SpaceCraft {
 						if( !String.IsNullOrWhiteSpace(cmd.Argument(2)) ) {
 							string[] colors = cmd.Argument(2).Split(',');
 							faction.Color = new SerializableVector3(float.Parse(colors[0]),float.Parse(colors[1]),float.Parse(colors[2]));
+							if( faction.MyFaction != null)
+								MyAPIGateway.Players.RequestPlayerColorChanged(faction.MyFaction.FounderId,0,(Vector3)faction.Color);
+
+								//RequestNewPlayer (int serialNumber, string playerName, string characterModel)
+								//LoadIdentities (List< MyObjectBuilder_Identity > list)
 						}
 						faction.Groups.Add( group );
 						faction.SpawnPrefab = first;
@@ -138,15 +191,30 @@ namespace SpaceCraft {
 
       }
 
+			List<IMyIdentity> identities = new List<IMyIdentity>();
+			MyAPIGateway.Players.GetAllIdentites(identities);
+			foreach( IMyIdentity identity in identities) {
+				//MyAPIGateway.Utilities.ShowMessage( "identity", identity.DisplayName + " " + identity.ColorMask.ToString() );
+				foreach( Faction faction in Factions ) {
+					if( faction.MyFaction == null ) continue;
+					if( faction.MyFaction.IsFounder(identity.IdentityId) ) {
+						faction.Founder = identity;
+						//faction.Founder.SetColorMask((Vector3)faction.Color);
+						//identity.ColorMask = faction.Color;
+						break;
+					}
+				}
+			}
+
 			Loaded = true;
 
     }
 
 		public Faction GetFaction( string tag, string name ) {
 			// MyAPIGateway.Session.Factions.TryGetFactionByTag(
-			if( !MyAPIGateway.Session.Factions.FactionTagExists(tag) ) {
-				MyAPIGateway.Session.Factions.CreateFaction(0,tag,name,"Description","Private Info");
-			}
+			// if( !MyAPIGateway.Session.Factions.FactionTagExists(tag) ) {
+			// 	MyAPIGateway.Session.Factions.CreateFaction(0,tag,name,"Description","Private Info");
+			// }
 			foreach( Faction f in Factions) {
 				if( f.Name == tag ) {
 					return f;
@@ -154,10 +222,15 @@ namespace SpaceCraft {
 			}
 
 
+			MyAPIGateway.Session.Factions.CreateFaction(0,tag,name,"Description","Private Info");
+
 			Faction faction = new Faction{
 				Name = tag,
 				MyFaction = MyAPIGateway.Session.Factions.TryGetFactionByTag(tag)
 			};
+
+			if( faction.MyFaction == null )
+				MyAPIGateway.Utilities.ShowMessage( "TryGetFactionByTag", "Failed for " + tag );
 
 			Factions.Add(faction);
 			//faction.Init(Session);

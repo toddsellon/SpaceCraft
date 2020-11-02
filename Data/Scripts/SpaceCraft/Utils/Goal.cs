@@ -9,13 +9,14 @@ namespace SpaceCraft.Utils {
     Stabilize,
     Construct,
     Attack,
-    Defend
+    Defend,
+    Colonize
   };
 
   public enum Steps : ushort {
     Pending,
     Started,
-    //Commencing,
+    Commencing,
     Completed
   };
 

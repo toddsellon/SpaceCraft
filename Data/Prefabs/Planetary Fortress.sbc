@@ -5,6 +5,7 @@
       <Id Type="MyObjectBuilder_PrefabDefinition" Subtype="Planetary Fortress" />
       <CubeGrids>
         <CubeGrid>
+          <IsStatic>true</IsStatic>
           <SubtypeName />
           <EntityId>138944136855199971</EntityId>
           <PersistentFlags>CastShadows InScene</PersistentFlags>

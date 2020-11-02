@@ -2,6 +2,8 @@ using System;
 using VRageMath;
 using VRage;
 using VRage.Game.Entity;
+using VRage.Game.ObjectBuilders.Definitions;
+using Sandbox.Definitions;
 using SpaceCraft.Utils;
 
 namespace SpaceCraft.Utils {
@@ -13,6 +15,11 @@ namespace SpaceCraft.Utils {
     public static MyObjectBuilderType Component;
     public static MyObjectBuilderType Ingot;
     public static MyObjectBuilderType Ore;
+    public static MyDefinitionId Hydrogen;
+    public static MyBlueprintDefinitionBase StoneBP;
+    // public static MyObjectBuilder_GasProperties Hydrogen = new MyObjectBuilder_GasProperties(){
+    //   SubtypeName = "Hydrogen"
+    // };
 
     private static bool Initialized = false;
     public static void Init() {
@@ -22,6 +29,8 @@ namespace SpaceCraft.Utils {
       Component = MyObjectBuilderType.Parse("MyObjectBuilder_Component");
       Ingot = MyObjectBuilderType.Parse("MyObjectBuilder_Ingot");
       Ore = MyObjectBuilderType.Parse("MyObjectBuilder_Ore");
+      Hydrogen = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Hydrogen");
+      StoneBP =	MyDefinitionManager.Static.GetBlueprintDefinition( MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/StoneOreToIngot") );
     }
   }
 

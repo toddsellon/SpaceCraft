@@ -8,8 +8,6 @@ using VRage;
 using VRageMath;
 using VRage.Game.Entity;
 using VRage.Game.ModAPI.Interfaces;
-//using IMyControllableEntity = Sandbox.Game.Entities.IMyControllableEntity;
-using IMyControllableEntity = VRage.Game.ModAPI.Interfaces.IMyControllableEntity;
 
 namespace SpaceCraft.Utils {
 
@@ -30,8 +28,8 @@ namespace SpaceCraft.Utils {
     public bool Cargo = false;
     public bool Destroyed = false;
     public bool Fighter = false;
-    public bool IsFactory = false;
-    public bool IsRefinery = false;
+    public uint FactoryTier = 0;
+    public uint RefineryTier = 0;
     public Faction Owner;
 
 
@@ -149,6 +147,14 @@ namespace SpaceCraft.Utils {
         return 45;
       }
 
+      if( block is IMyMotorSuspension ) {
+        return 30;
+      }
+
+      if( block is IMyWheel ) {
+        return 25;
+      }
+
       return 1;
 		}
 
@@ -197,21 +203,12 @@ namespace SpaceCraft.Utils {
     }
 
     public virtual bool Move() {
-      if( CurrentOrder.Target == null && CurrentOrder.Destination == null ) {
-        CurrentOrder = null;
-        return false;
-      }
-
-      //Vector3D destination = CurrentOrder.Target == null ? CurrentOrder.Destination : CurrentOrder.Target.WorldMatrix.GetDirectionVector(Base6Directions.Direction.Forward);
-      // Vector3D destination = MyAPIGateway.Session.Player.GetPosition();
-      // (Entity as Sandbox.Game.Entities.IMyControllableEntity).MoveAndRotate( Vector3.Normalize(destination), Vector2.Zero, 0.0f );
-      // Entity.MoveAndRotate( Vector3.Normalize(destination), Vector2.Zero, 0.0f );
       return false;
 		}
 
-    public virtual void BeginShoot( MyShootActionEnum action ) {
-      ((Sandbox.Game.Entities.IMyControllableEntity)Entity).BeginShoot(action);
-    }
+    // public virtual void BeginShoot( MyShootActionEnum action ) {
+    //   ((Sandbox.Game.Entities.IMyControllableEntity)Entity).BeginShoot(action);
+    // }
 
     public Order Next() {
       CurrentOrder = null;
@@ -227,6 +224,23 @@ namespace SpaceCraft.Utils {
         Execute( o );
 
       return o;
+
+    }
+
+    public void Scout() {
+      if( CurrentOrder == null ) return;
+
+      if( !Move() ) {
+        MyAPIGateway.Utilities.ShowMessage( "Scout", "Arrived on location" );
+        Vector3D position = Entity.WorldMatrix.Translation;
+        BoundingBoxD boundingBox = new BoundingBoxD(position-500,position+500);
+        List<IMyEntity> entities = MyAPIGateway.Entities.GetEntitiesInAABB(ref boundingBox);
+        foreach(IMyEntity detected in entities ) {
+          if( detected is MyPlanet ) continue;
+          Owner.Detected( detected.GetTopMostParent() );
+        }
+        CurrentOrder.Complete();
+      }
 
     }
 
@@ -291,7 +305,7 @@ namespace SpaceCraft.Utils {
     public void Deposit() {
 			if( CurrentOrder.Target == null ) {
         if( CurrentOrder.Entity == null )
-          CurrentOrder.Entity = Owner.GetClosestGrid(this);
+          CurrentOrder.Entity = Owner.GetBestRefinery(this);
         if( CurrentOrder.Entity == null ) {
           CurrentOrder.Complete();
           return;
@@ -303,6 +317,9 @@ namespace SpaceCraft.Utils {
 			if( CurrentOrder.Step == Steps.Pending ) {
 
 				if( !Move() ) {
+          if( this is CubeGrid && CurrentOrder.Entity is CubeGrid ) {
+            (CurrentOrder.Entity as CubeGrid).ToggleDocked(this as CubeGrid);
+          }
 					CurrentOrder.Progress();
 				}
 			} else {
@@ -317,6 +334,14 @@ namespace SpaceCraft.Utils {
         if( CurrentOrder.Entity == null ) {
           MyAPIGateway.Utilities.ShowMessage( "Deposit", "Entity was null, giving up " + ToString() );
           CurrentOrder = null;
+          return;
+        }
+
+        if( this is CubeGrid ) {
+          if( PercentFull < .1f ) {
+            (CurrentOrder.Entity as CubeGrid).ToggleDocked(this as CubeGrid);
+            CurrentOrder.Complete();
+          }
           return;
         }
 

@@ -13,8 +13,8 @@ namespace SpaceCraft.Utils {
     public Dictionary<string,int> Components = new Dictionary<string,int>();
     public Dictionary<string,int> Cost = new Dictionary<string,int>(); // Ingot cost
     public bool IsStatic = false;
-    public bool IsFactory = false;
-    public bool IsRefinery = false;
+    public int FactoryTier = 0;
+    public int RefineryTier = 0;
     public bool IsCargo = false;
     public bool IsRespawn = false;
     public bool Wheels = false;
@@ -52,12 +52,16 @@ namespace SpaceCraft.Utils {
           MyCubeBlockDefinition def = MyDefinitionManager.Static.GetCubeBlockDefinition(block);
 
           if( block is MyObjectBuilder_CargoContainer ) IsCargo = true;
-          if( block is MyObjectBuilder_MedicalRoom || block is MyObjectBuilder_SurvivalKit ) IsRespawn = true;
-          if( block is MyObjectBuilder_Assembler ) IsFactory = true;
+          if( block is MyObjectBuilder_MedicalRoom || block is MyObjectBuilder_SurvivalKit ) {
+            FactoryTier = Math.Max(FactoryTier,1);
+            RefineryTier = Math.Max(RefineryTier,1);
+            IsRespawn = true;
+          }
+          if( block is MyObjectBuilder_Assembler ) {
+            FactoryTier = block.SubtypeName == "LargeAssembler" ? 3 : Math.Max(FactoryTier,2);
+          }
           if( block is MyObjectBuilder_Refinery ) {
-            if( block.SubtypeName == "LargeRefinery" )
-              Tech = Tech.Established;
-            IsRefinery = true;
+            RefineryTier = block.SubtypeName == "LargeRefinery" ? 3 : Math.Max(RefineryTier,2);
           }
           if( block is MyObjectBuilder_MotorSuspension ) Wheels = true;
           if( block is MyObjectBuilder_Drill ) Worker = true;

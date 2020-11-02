@@ -22,8 +22,6 @@ using Sandbox.Common.ObjectBuilders;
 using Sandbox.Common.ObjectBuilders.Definitions;
 using SpaceCraft;
 using SpaceCraft.Utils;
-//using IMyControllableEntity = Sandbox.Game.Entities.IMyControllableEntity;
-using IMyControllableEntity = VRage.Game.ModAPI.Interfaces.IMyControllableEntity;
 
 namespace SpaceCraft.Utils {
 
@@ -38,11 +36,11 @@ namespace SpaceCraft.Utils {
 	//[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
 	public class Engineer : Controllable {
 
-		public Vector3 Color;
 		protected MyCharacterJetpackComponent Jetpack = null;
 		protected MyCharacterRagdollComponent Ragdoll = null;
 		protected MyAnimationControllerComponent Animation = null;
 
+		public IMyIdentity Identity;
     public IMyCharacter Character;
 		//public MyGhostCharacter Ghost = null;
 
@@ -69,7 +67,7 @@ namespace SpaceCraft.Utils {
 			if( (Character == null || Character.Integrity == 0) ) {
 				CurrentOrder = null;
 				MatrixD matrix = Character.WorldMatrix;
-				Character = Spawn(Owner.GetSpawnLocation(), Owner );
+				Character = Spawn(Owner.GetSpawnLocation());
 				Initialize();
 			}
 
@@ -94,6 +92,9 @@ namespace SpaceCraft.Utils {
 				case Orders.Withdraw:
 					Withdraw();
 					break;
+				case Orders.Scout:
+					Scout();
+					break;
 			}
 			Tick++;
 			if( Tick == 99 ) {
@@ -102,8 +103,32 @@ namespace SpaceCraft.Utils {
 
 		}
 
-		public override bool Execute( Order order, bool force = false ) {
+		public Engineer( Faction owner ) {
+			Owner = owner;
 
+			// Identity = MyAPIGateway.Players.CreateNewIdentity( new MyObjectBuilder_Identity{
+			// 	ColorMask = Owner.Color,
+			// 	DisplayName = Owner.Name + " Engineer"
+			// });
+				//character = Spawn(Owner.GetSpawnLocation());
+			Character = Spawn(Owner.GetSpawnLocation());
+			Entity = Character;
+			Flying = true;
+	    Spacecraft = true;
+	    Drills = true;
+	    Welders = true;
+	    Griders = true;
+			Cargo = true;
+			//MyAPIGateway.Session.RegisterComponent(this, MyUpdateOrder.BeforeSimulation, 0);
+			/*if( data == string.Empty ) return;
+			try {
+				var npcData = MyAPIGateway.Utilities.SerializeFromBinary<Engineer>(Convert.FromBase64String(data));
+			}*/
+			Initialize();
+		}
+
+		public override bool Execute( Order order, bool force = false ) {
+			//MyAPIGateway.Utilities.ShowMessage( Owner.Name, order.ToString() );
 			if( base.Execute( order, force ) ) {
 				switch( CurrentOrder.Type ) {
 					case Orders.Drill:
@@ -129,14 +154,20 @@ namespace SpaceCraft.Utils {
 				CurrentOrder.Complete();
 				return false;
 			}
+
 			Vector2 rotation = Vector2.Zero;
 			// Vector3 destination = Vector3.Normalize(MyAPIGateway.Session.Player.GetPosition() - Character.WorldMatrix.Translation);
 			// double distance = Vector3D.Distance(MyAPIGateway.Session.Player.GetPosition(),Character.WorldMatrix.Translation);
 			//Vector3 destination = Vector3.Normalize(CurrentOrder.Destination - Character.WorldMatrix.Translation);
 
 			Vector3 destination = (CurrentOrder.Target == null ? CurrentOrder.Destination : CurrentOrder.Target.WorldMatrix.Translation);
+			if( CurrentOrder.Planet == null ) {
+				CurrentOrder.Planet = SpaceCraftSession.GetClosestPlanet(destination);
+			}
 			//Vector3 destination = (CurrentOrder.Destination == Vector3D.Zero ? CurrentOrder.Target.WorldMatrix.Translation : CurrentOrder.Destination);
 			double distance = Vector3D.Distance(destination,Character.WorldMatrix.Translation);
+			Vector3D closestPoint = CurrentOrder.Planet.GetClosestSurfacePointGlobal(destination);
+			double altitude = Vector3D.Distance(destination,closestPoint);
 
 			if( distance < CurrentOrder.Range ) {
 				destination = Vector3.Zero;
@@ -146,12 +177,25 @@ namespace SpaceCraft.Utils {
 				if( !Character.EnabledThrusts ) {
 					Character.SwitchThrusts();
 				}
-				destination.Normalize();
-				Jetpack.MoveAndRotate( ref destination, ref rotation, 0.0f, false );
+				if( altitude < 10f ) {
+					Vector3D up = closestPoint - CurrentOrder.Planet.WorldMatrix.Translation;
+					up.Normalize();
+					destination = destination + (up*10f);
+				}
+				//destination.Normalize();
+				Vector3 targetDelta = Vector3.Normalize(destination - Character.WorldMatrix.Translation);
+				Jetpack.MoveAndRotate( ref targetDelta, ref rotation, 0.0f, false );
 			}
 
 			return true;
 		}
+
+		// internal double EstimateDistanceToGround(Vector3D worldPoint)
+    // {
+    //     Vector3D localPoint;
+    //     MyVoxelCoordSystems.WorldPositionToLocalPosition(Planet.PositionLeftBottomCorner, ref worldPoint, out localPoint);
+    //     return Math.Max(0.0f, Planet.Storage.DataProvider.GetDistanceToPoint(ref localPoint));
+    // }
 
 		public void Attack() {
 			if( CurrentOrder.Target == null || CurrentOrder.Target.MarkedForClose || CurrentOrder.Target.Closed ) {
@@ -161,7 +205,7 @@ namespace SpaceCraft.Utils {
 
 			//Sandbox.Game.Entities.IMyControllableEntity e = Character as Sandbox.Game.Entities.IMyControllableEntity;
 			if( CurrentOrder.Step == Steps.Pending ) {
-				BeginShoot( MyShootActionEnum.PrimaryAction );
+				//BeginShoot( MyShootActionEnum.PrimaryAction );
 				CurrentOrder.Progress();
 			}
 		}
@@ -207,7 +251,8 @@ namespace SpaceCraft.Utils {
 					//MyAPIGateway.Utilities.ShowMessage( "Drill", "Inventory Full: " + ToString() );
 					Execute( new Order{
 						Type = Orders.Deposit,
-						Range = 50f
+						Range = 50f,
+						Entity = Owner.GetBestRefinery(this)
 					}, true );
 					return;
 				} else {
@@ -222,25 +267,6 @@ namespace SpaceCraft.Utils {
 				}
 
 			}
-		}
-
-
-
-		public Engineer( IMyCharacter character ) {
-			Character = character;
-			Entity = Character;
-			Flying = true;
-	    Spacecraft = true;
-	    Drills = true;
-	    Welders = true;
-	    Griders = true;
-			Cargo = true;
-			//MyAPIGateway.Session.RegisterComponent(this, MyUpdateOrder.BeforeSimulation, 0);
-			/*if( data == string.Empty ) return;
-			try {
-				var npcData = MyAPIGateway.Utilities.SerializeFromBinary<Engineer>(Convert.FromBase64String(data));
-			}*/
-			Initialize();
 		}
 
 
@@ -264,7 +290,6 @@ namespace SpaceCraft.Utils {
 			Jetpack = Character.Components.Get<MyCharacterJetpackComponent>();
 			Ragdoll = Character.Components.Get<MyCharacterRagdollComponent>();
 			Animation = Character.Components.Get<MyAnimationControllerComponent>();
-
 			//MyAPIGateway.Players.SetControlledEntity(MyAPIGateway.Session.Player.SteamUserId, Character as IMyEntity);
 
 			Character.DoDamage(0.0f, MyStringHash.Get(string.Empty), true); // Hack to property init Physics
@@ -325,15 +350,11 @@ namespace SpaceCraft.Utils {
 
 
 
-		public static IMyCharacter Spawn( MatrixD matrix, Faction owner ) {
+		public IMyCharacter Spawn( MatrixD matrix ) {
 			if( matrix == null ) return null;
 			MyEntity ent = null;
 
-			// if( Ghost == null ) {
-			// 	MyObjectBuilder_GhostCharacter ob = new MyObjectBuilder_GhostCharacter();
-			// 	Ghost = (MyEntity)MyAPIGateway.Entities.CreateFromObjectBuilder(ob);
-			// 	MyAPIGateway.Entities.AddEntity(Ghost);
-			// }
+
 
 			MyObjectBuilder_Character character = new MyObjectBuilder_Character(){
         CharacterModel = "Astronaut",
@@ -341,9 +362,11 @@ namespace SpaceCraft.Utils {
         //BotDefId = SerializableDefinitionId(MyObjectBuilderType.Parse("MyObjectBuilder_Character"), "MyObjectBuilder_BarbarianBot"),
         JetpackEnabled = true,
         PersistentFlags = MyPersistentEntityFlags2.InScene,
-        Name = owner.Name,
-        DisplayName = owner.Name,
-				ColorMaskHSV = owner.Color,
+        Name = Owner.Founder == null ? Owner.Name : Owner.Founder.DisplayName,
+        DisplayName = Owner.Founder == null ? Owner.Name : Owner.Founder.DisplayName,
+				ColorMaskHSV = Color.Gold.ToVector3(),
+				PlayerSteamId = (ulong)(Owner.MyFaction == null ? 0 : Owner.MyFaction.FounderId),
+				PlayerSerialId = (int)(Owner.MyFaction == null ? 0 : Owner.MyFaction.FounderId),
         Inventory = new MyObjectBuilder_Inventory(){
 					Items = new List<MyObjectBuilder_InventoryItem>(){
 						new MyObjectBuilder_InventoryItem() {
@@ -374,6 +397,7 @@ namespace SpaceCraft.Utils {
       };
 
       ent = (MyEntity)MyAPIGateway.Entities.CreateFromObjectBuilder(character);
+			MyAPIGateway.Players.SetControlledEntity((ulong)Owner.MyFaction.FounderId, ent);
 
 			if( ent != null ) {
         ent.Flags &= ~EntityFlags.Save;
@@ -381,8 +405,12 @@ namespace SpaceCraft.Utils {
         ent.Render.Visible = true;
         ent.NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
         MyAPIGateway.Entities.AddEntity(ent);
+				IMyCharacter c = ent as IMyCharacter;
+				// IMyPlayer player = MyAPIGateway.Players.GetPlayerControllingEntity(ent);
+				// if( player != null && owner.MyFaction != null )
+				// 	MyAPIGateway.Session.Factions.AddPlayerToFaction(player.PlayerID, owner.MyFaction.FactionId);
 
-        return ent as IMyCharacter;
+        return c;
 
       }
 
