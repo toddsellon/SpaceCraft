@@ -324,17 +324,21 @@ namespace SpaceCraft.Utils {
 				}
 			} else {
         // Simple timeout after X attempts
-        CurrentOrder.Tick++;
-        if( CurrentOrder.Tick == 5000 ) {
-          MyAPIGateway.Utilities.ShowMessage( "Deposit", "Gave up after 5000 ticks " + ToString() );
-          CurrentOrder = null;
-          return;
-        }
+        // CurrentOrder.Tick++;
+        // if( CurrentOrder.Tick == 5000 ) {
+        //   MyAPIGateway.Utilities.ShowMessage( "Deposit", "Gave up after 5000 ticks " + ToString() );
+        //   Drop( OBTypes.Ore );
+        //   CurrentOrder = null;
+        //   return;
+        // }
 
         if( CurrentOrder.Entity == null ) {
           MyAPIGateway.Utilities.ShowMessage( "Deposit", "Entity was null, giving up " + ToString() );
-          CurrentOrder = null;
-          return;
+          CurrentOrder.Entity = Owner.GetBestRefinery();
+          if( CurrentOrder.Entity == null ) {
+            CurrentOrder = null;
+            return;
+          }
         }
 
         if( this is CubeGrid ) {

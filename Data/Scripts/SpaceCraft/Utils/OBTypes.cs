@@ -15,8 +15,12 @@ namespace SpaceCraft.Utils {
     public static MyObjectBuilderType Component;
     public static MyObjectBuilderType Ingot;
     public static MyObjectBuilderType Ore;
+    public static MyObjectBuilderType Turret;
     public static MyDefinitionId Hydrogen;
+
     public static MyBlueprintDefinitionBase StoneBP;
+    public static MyBlueprintDefinitionBase Magazine;
+
     // public static MyObjectBuilder_GasProperties Hydrogen = new MyObjectBuilder_GasProperties(){
     //   SubtypeName = "Hydrogen"
     // };
@@ -29,8 +33,11 @@ namespace SpaceCraft.Utils {
       Component = MyObjectBuilderType.Parse("MyObjectBuilder_Component");
       Ingot = MyObjectBuilderType.Parse("MyObjectBuilder_Ingot");
       Ore = MyObjectBuilderType.Parse("MyObjectBuilder_Ore");
+      Turret = MyObjectBuilderType.Parse("MyObjectBuilder_LargeGatlingTurret");
       Hydrogen = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Hydrogen");
+
       StoneBP =	MyDefinitionManager.Static.GetBlueprintDefinition( MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/StoneOreToIngot") );
+      Magazine =	MyDefinitionManager.Static.GetBlueprintDefinition( MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/NATO_25x184mmMagazine") );
     }
   }
 

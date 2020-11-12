@@ -54,22 +54,53 @@ namespace SpaceCraft.Utils {
 		protected static int NumGrids = 0;
 		public int Tick = 0;
 		public IMyRemoteControl Remote;
+		public Dictionary<string,int> Balance = null;
 
 		public CubeGrid DockedTo;
     public List<CubeGrid> Docked = new List<CubeGrid>();
 
     public void ToggleDocked( CubeGrid grid ) {
-
+			List<IMySlimBlock> mine = GetBlocks<IMyFunctionalBlock>(null,true);
+			List<IMySlimBlock> theirs = grid.GetBlocks<IMyFunctionalBlock>(null,true);
+			bool disconnect = true;
       if( grid.DockedTo == null ) {
 				Docked.Add( grid );
 				grid.DockedTo = this;
 				//grid.ConstructionSite = null;
+				disconnect = false;
 			} else {
 				Docked.Remove( grid );
 				grid.DockedTo = null;
 				//grid.FindConstructionSite();
 			}
+			foreach( IMySlimBlock i in mine ) {
+				foreach( IMySlimBlock j in theirs ) {
+					ConnectBlocks(i.FatBlock as IMyFunctionalBlock, j.FatBlock as IMyFunctionalBlock, disconnect);
+				}
+			}
+
     }
+
+		public void ConnectBlocks( IMyFunctionalBlock connector, IMyFunctionalBlock connectee, bool disconnect = false ) {
+			MyResourceDistributorComponent a = connector.Components.Get<MyResourceDistributorComponent>();
+			MyResourceDistributorComponent b = connectee.Components.Get<MyResourceDistributorComponent>();
+			if( a == null || b == null ) return;
+			if( disconnect ) {
+				a.RemoveSink(connectee.Components.Get<MyResourceSinkComponent>());
+				b.RemoveSink(connector.Components.Get<MyResourceSinkComponent>());
+				a.RemoveSource(connectee.Components.Get<MyResourceSourceComponent>());
+				b.RemoveSource(connector.Components.Get<MyResourceSourceComponent>());
+			} else {
+				a.AddSink(connectee.Components.Get<MyResourceSinkComponent>());
+				b.AddSink(connector.Components.Get<MyResourceSinkComponent>());
+				a.AddSource(connectee.Components.Get<MyResourceSourceComponent>());
+				b.AddSource(connector.Components.Get<MyResourceSourceComponent>());
+			}
+			// MyResourceSourceComponent source = connector.Components.Get<MyResourceSourceComponent>();
+			// MyResourceSourceComponent sink = connectee.Components.Get<MyResourceSourceComponent>();
+			// source.TemporaryConnectedEntity = connectee as MyEntity;
+			// sink.TemporaryConnectedEntity = connector as MyEntity;
+		}
 
 		public MatrixD WorldMatrix
 		{
@@ -90,11 +121,22 @@ namespace SpaceCraft.Utils {
 			}
 		}
 
+
+		public CubeGrid( IMyCubeGrid grid ) {
+			Grid = grid;
+
+			Entity = Grid;
+			if( grid != null )
+				CheckFlags();
+		}
+
 		// Main loop
 		public override void UpdateBeforeSimulation() {
+			if( Grid == null ) return;
+
 			Tick++;
 			CheckOrder();
-			if( DockedTo != null ) {
+			if( DockedTo != null && ConstructionSite != null ) {
 				Grid.Physics.ClearSpeed();
 			}
 
@@ -177,12 +219,7 @@ namespace SpaceCraft.Utils {
 			// }
 		}
 
-		public CubeGrid( IMyCubeGrid grid ) {
-			Grid = grid;
-			Entity = Grid;
-			if( grid != null )
-				CheckFlags();
-		}
+
 
 		public void Drill() {
 			if( PercentFull > .9) {
@@ -323,9 +360,13 @@ namespace SpaceCraft.Utils {
 		}
 
 		public void AssessInventory( List<IMyInventory> inventories = null ) {
-			if( inventories == null ) inventories = new List<IMyInventory>();
+			inventories = inventories ?? new List<IMyInventory>();
+			if( ConstructionSite != null && ConstructionSite.FatBlock != null && (ConstructionSite.FatBlock.MarkedForClose || ConstructionSite.FatBlock.Closed) ) {
+				FindConstructionSite();
+			}
 			//if( ConstructionSite == null || ConstructionSite.FatBlock == null ) return;
-
+			// TODO: New inventory needs system
+			//Dictionary<IMyInventory,MyDefinitionId> needs = new Dictionary<IMyInventory,MyDefinitionId>();
 			float old = ConstructionSite == null ? 1.0f : ConstructionSite.BuildIntegrity;
 			List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
 			List<IMyAssembler> factories = new List<IMyAssembler>();
@@ -344,12 +385,35 @@ namespace SpaceCraft.Utils {
 				if( block.FatBlock is IMyGasTank )
 					tanks.Add( block.FatBlock as IMyGasTank );
 
-				for( int i = 0; i < 2; i++ ) {
-					IMyInventory inv = block.FatBlock.GetInventory(i);
-					if( inv != null ) {
+				if( Balance == null || Balance.Count == 0 ) {
+					for( int i = 0; i < 2; i++ ) {
+						IMyInventory inv = block.FatBlock.GetInventory(i);
+						if( inv == null ) continue;
 						inventories.Add( inv );
 						if( ConstructionSite != null )
 							ConstructionSite.MoveItemsToConstructionStockpile( inv );
+					}
+				} else {
+					for( int i = 0; i < 2; i++ ) {
+						IMyInventory inv = block.FatBlock.GetInventory(i);
+						if( inv == null ) continue;
+						List<IMyInventoryItem> items = inv.GetItems();
+						foreach( IMyInventoryItem item in items ) {
+							string subtypeName = item.Content.SubtypeName;
+
+							if( Balance.ContainsKey(subtypeName) ) {
+								VRage.MyFixedPoint diff = (VRage.MyFixedPoint)Math.Max(item.Amount.ToIntSafe()-Balance[subtypeName],0);
+
+								Balance[subtypeName] = (int)Math.Max(Balance[subtypeName]-item.Amount.ToIntSafe(),0);
+								if( Balance[subtypeName] <= 0 ) {
+									Balance.Remove(subtypeName);
+									// if( Balance.Count == 0 )
+									// 	Balance = null;
+								}
+								inv.RemoveItemsOfType(diff, new SerializableDefinitionId(item.Content.TypeId, subtypeName) );
+								break;
+							}
+						}
 					}
 				}
 
@@ -386,6 +450,10 @@ namespace SpaceCraft.Utils {
 
 				//IMyInventory inventory = refinery is IMyAssembler ? refinery.GetInventory(1) : refinery.GetInventory(0);
 				IMyInventory inventory = refinery.GetInventory(0);
+
+				// Shuffle ores (didn't work)
+				// if( inventory.IsItemAt(0) )
+				// 	inventory.TransferItemTo(inventory,0,null,true, null, false);
 
 				foreach( IMyInventory inv in inventories ) {
 					bool found = false;
@@ -504,13 +572,6 @@ namespace SpaceCraft.Utils {
 			}
 		}
 
-		public void ConnectBlocks( IMyFunctionalBlock connector, IMyFunctionalBlock connectee ) {
-			MyResourceSourceComponent source = connector.Components.Get<MyResourceSourceComponent>();
-			MyResourceSourceComponent sink = connectee.Components.Get<MyResourceSourceComponent>();
-			source.TemporaryConnectedEntity = connectee as MyEntity;
-			sink.TemporaryConnectedEntity = connector as MyEntity;
-		}
-
 		public void FindConstructionSite( List<IMySlimBlock> exclude = null ) {
 			if( exclude == null ) exclude = new List<IMySlimBlock>();
 			ConstructionSite = null;
@@ -569,8 +630,13 @@ namespace SpaceCraft.Utils {
 			return AddQueueItems( def, clear, ass );
 		}
 
+		public bool AddQueueItems( MyObjectBuilder_CubeBlock block, bool clear = false, IMyAssembler ass = null ) {
+			return AddQueueItems( MyDefinitionManager.Static.GetCubeBlockDefinition(block), clear, ass);
+		}
+
 		public bool AddQueueItems( MyCubeBlockDefinition def, bool clear = false, IMyAssembler ass = null ) {
 			if( def == null ) return false;
+			if( ass == null ) ass = GetAssembler();
 			//VRage.Game.MyObjectBuilder_CubeBlockDefinition.Component.CubeBlockComponent
 
 			foreach( var component in def.Components ){
@@ -586,6 +652,10 @@ namespace SpaceCraft.Utils {
 				MyBlueprintDefinitionBase blueprint = null;
 				MyDefinitionManager.Static.TryGetComponentBlueprintDefinition(component.Definition.Id, out blueprint);
 				ass.AddQueueItem( blueprint, component.Count );
+			}
+
+			if( def.Id.TypeId == OBTypes.Turret ) {
+				ass.AddQueueItem( OBTypes.Magazine, (VRage.MyFixedPoint)3 );
 			}
 
 			//MyAPIGateway.Utilities.ShowMessage( "AddQueueItems", def.ToString() + " components queued with " + ass.ToString()  );
@@ -800,8 +870,9 @@ namespace SpaceCraft.Utils {
 
       IMyCubeGrid g = null;
 			List<IMyCubeGrid> subgrids = new List<IMyCubeGrid>();
-
+			MatrixD original = matrix;
       foreach( MyObjectBuilder_CubeGrid grid in prefab.CubeGrids ) {
+				MyPositionAndOrientation po = grid.PositionAndOrientation ?? new MyPositionAndOrientation(ref matrix);
 				// if( prefab.SubtypeId ) {
 				// 	grid.Name = owner.Name + " Grid" + NumGrids.ToString();
 				// 	grid.DisplayName = owner.Name + " Grid" + NumGrids.ToString();
@@ -811,8 +882,21 @@ namespace SpaceCraft.Utils {
 					grid.DisplayName = owner.Name + " " + prefab.Id.SubtypeName;
 				//}
 				grid.EntityId = (long)0;
-				//if( g == null )
+
+				if( g == null ) {
+					original = po.GetMatrix();
 					grid.PositionAndOrientation = new MyPositionAndOrientation(ref matrix);
+				} else {
+					MatrixD offset = matrix + (po.GetMatrix() - original);
+					//Quaternion rotation = Quaternion.CreateFromRotationMatrix(original);
+					//Quaternion placement = Quaternion.CreateFromRotationMatrix(matrix);
+					// original.Translation = matrix.Translation;
+					// MatrixD diff = original - matrix;
+					// original = matrix + diff;
+					//original = matrix + MatrixD.CreateFromQuaternion(rotation-placement);
+
+					grid.PositionAndOrientation = new MyPositionAndOrientation(ref offset);
+				}
 
 
 				foreach( MyObjectBuilder_CubeBlock block in grid.CubeBlocks ) {
@@ -831,6 +915,7 @@ namespace SpaceCraft.Utils {
           return null;
         }
 
+				entity.RemoveFromGamePruningStructure();
         entity.Flags &= ~EntityFlags.Save;
         //ent.Flags &= ~EntityFlags.NeedsUpdate;
 
@@ -871,7 +956,7 @@ namespace SpaceCraft.Utils {
 
 			if( entity != null ) {
 				entity.Flags &= ~EntityFlags.Save;
-
+				entity.RemoveFromGamePruningStructure();
         entity.Render.Visible = true;
         //entity.WorldMatrix = matrix;
         MyAPIGateway.Entities.AddEntity(entity);
@@ -979,31 +1064,46 @@ namespace SpaceCraft.Utils {
 			AddQueueItems( block.FatBlock, true );
 		}
 
-		public void SetToConstructionSite() {
-			List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
+		public void SetToConstructionSite( List<IMySlimBlock> blocks = null ) {
+			if( blocks == null ) blocks = GetBlocks<IMySlimBlock>();
+
+			List<IMySlimBlock> subblocks = new List<IMySlimBlock>();
+
+			IMyBatteryBlock battery = null;
 
 			foreach( IMySlimBlock block in blocks ) {
+				// Balance paid for this battery
+				if( battery == null && block.FatBlock is IMyBatteryBlock ) {
+					battery = block.FatBlock as IMyBatteryBlock;
+					continue;
+				}
 				block.SetToConstructionSite();
 				block.IncreaseMountLevel( 0f, (long)0 );
 				if( block.FatBlock is IMyMotorSuspension ) {
 					IMyMotorSuspension suspension = block.FatBlock as IMyMotorSuspension;
 					Block.DoAction(block.FatBlock as IMyTerminalBlock, "Add Wheel");
 
-					if( suspension.RotorGrid != null )
+					if( suspension.RotorGrid != null ) {
 						Subgrids.Add(suspension.RotorGrid);
-					else
-						MyAPIGateway.Utilities.ShowMessage( "SetToConstructionSite", "Failed to add wheel" );
+					}
+				}
 
-					// List<ITerminalAction> actions = new List<ITerminalAction>();
-					// suspension.GetActions(actions);
-					// foreach( ITerminalAction action in actions ) {
-					// 	MyAPIGateway.Utilities.ShowMessage( action.ToString(), action.Name.ToString() );
-					// }
-					// suspension.Attach();
+
+
+				if( block.FatBlock is IMyMotorStator ) {
+					IMyMotorStator stator = block.FatBlock as IMyMotorStator;
+					stator.Attach();
+					if( stator.RotorGrid != null ) {
+						Subgrids.Add(stator.RotorGrid);
+						stator.RotorGrid.GetBlocks(subblocks);
+					}
 				}
 			}
 
-			FindConstructionSite();
+			if( subblocks.Count > 0 )
+				SetToConstructionSite(subblocks);
+			else
+				FindConstructionSite();
 		}
 
 		protected void StopProduction() {

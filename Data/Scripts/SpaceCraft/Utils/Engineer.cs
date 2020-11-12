@@ -103,7 +103,7 @@ namespace SpaceCraft.Utils {
 
 		}
 
-		public Engineer( Faction owner ) {
+		public Engineer( Faction owner, IMyCharacter character = null ) {
 			Owner = owner;
 
 			// Identity = MyAPIGateway.Players.CreateNewIdentity( new MyObjectBuilder_Identity{
@@ -111,7 +111,7 @@ namespace SpaceCraft.Utils {
 			// 	DisplayName = Owner.Name + " Engineer"
 			// });
 				//character = Spawn(Owner.GetSpawnLocation());
-			Character = Spawn(Owner.GetSpawnLocation());
+			Character = character ?? Spawn(Owner.GetSpawnLocation());
 			Entity = Character;
 			Flying = true;
 	    Spacecraft = true;
@@ -119,6 +119,7 @@ namespace SpaceCraft.Utils {
 	    Welders = true;
 	    Griders = true;
 			Cargo = true;
+			Fighter = true;
 			//MyAPIGateway.Session.RegisterComponent(this, MyUpdateOrder.BeforeSimulation, 0);
 			/*if( data == string.Empty ) return;
 			try {
@@ -352,7 +353,6 @@ namespace SpaceCraft.Utils {
 
 		public IMyCharacter Spawn( MatrixD matrix ) {
 			if( matrix == null ) return null;
-			MyEntity ent = null;
 
 
 
@@ -362,11 +362,13 @@ namespace SpaceCraft.Utils {
         //BotDefId = SerializableDefinitionId(MyObjectBuilderType.Parse("MyObjectBuilder_Character"), "MyObjectBuilder_BarbarianBot"),
         JetpackEnabled = true,
         PersistentFlags = MyPersistentEntityFlags2.InScene,
-        Name = Owner.Founder == null ? Owner.Name : Owner.Founder.DisplayName,
-        DisplayName = Owner.Founder == null ? Owner.Name : Owner.Founder.DisplayName,
+				Name = Owner.Name,
+				DisplayName = Owner.Name,
+        //Name = Owner.Founder == null ? Owner.Name : Owner.Founder.DisplayName,
+        //DisplayName = Owner.Founder == null ? Owner.Name : Owner.Founder.DisplayName,
 				ColorMaskHSV = Color.Gold.ToVector3(),
-				PlayerSteamId = (ulong)(Owner.MyFaction == null ? 0 : Owner.MyFaction.FounderId),
-				PlayerSerialId = (int)(Owner.MyFaction == null ? 0 : Owner.MyFaction.FounderId),
+				PlayerSteamId = (ulong)(Owner == null || Owner.MyFaction == null ? 0 : Owner.MyFaction.FounderId),
+				PlayerSerialId = (int)(Owner == null || Owner.MyFaction == null ? 0 : Owner.MyFaction.FounderId),
         Inventory = new MyObjectBuilder_Inventory(){
 					Items = new List<MyObjectBuilder_InventoryItem>(){
 						new MyObjectBuilder_InventoryItem() {
@@ -396,12 +398,14 @@ namespace SpaceCraft.Utils {
         SubtypeName = "Default_Astronaut"
       };
 
-      ent = (MyEntity)MyAPIGateway.Entities.CreateFromObjectBuilder(character);
-			MyAPIGateway.Players.SetControlledEntity((ulong)Owner.MyFaction.FounderId, ent);
+      MyEntity ent = (MyEntity)MyAPIGateway.Entities.CreateFromObjectBuilder(character);
+			if( Owner != null && Owner.MyFaction != null )
+				MyAPIGateway.Players.SetControlledEntity((ulong)Owner.MyFaction.FounderId, ent);
 
 			if( ent != null ) {
         ent.Flags &= ~EntityFlags.Save;
         //ent.Flags &= ~EntityFlags.NeedsUpdate;
+				ent.RemoveFromGamePruningStructure();
         ent.Render.Visible = true;
         ent.NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
         MyAPIGateway.Entities.AddEntity(ent);

@@ -43,58 +43,42 @@ namespace SpaceCraft {
 		public bool Loaded = false;
 		public bool Spawned = false;
 		public bool Server = false;
-    public List<Faction> Factions = new List<Faction>();
+    public static List<Faction> Factions = new List<Faction>();
 		public static List<MyPlanet> Planets = new List<MyPlanet>();
 		public static MyPlanet ClosestPlanet { get; protected set; }
 		protected MyObjectBuilder_SessionComponent Session;
+		public static CLI MyCLI;
     public override void Init(MyObjectBuilder_SessionComponent session) {
       base.Init(session);
 			Session = session;
 			Limits.Speed = MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed;
-      SaveName = MyAPIGateway.Session.Name;
+
+			MyCLI = new CLI();
 
 
-			MyAPIGateway.Utilities.GetVariable<bool>("SC-Spawned", out Spawned);
 			Server = MyAPIGateway.Multiplayer.IsServer;
 			Loaded = !Server;
 			//MyAPIGateway.Utilities.IsDedicated;
 
 			if( Server ) {
+				MyAPIGateway.Utilities.GetVariable<bool>("SC-Spawned", out Spawned);
+				SaveName = MyAPIGateway.Session.Name;
+				MyAPIGateway.Session.SessionSettings.EnableRemoteBlockRemoval = false;
 				//IMyDamageSystem
 				//MyAPIGateway.Session.DamageSystem.RegisterAfterDamageHandler (int priority, Action< object, MyDamageInformation > handler);
-				// MyAPIGateway.Multiplayer.RegisterMessageHandler(8877, ChatCommand.MessageHandler);
-				MyAPIGateway.Utilities.MessageEntered += MessageEntered;
+				if( !Spawned ) {
+					SetDefaultValues();
+				}
+
+
 			}
     }
 
-		public static void MessageEntered(string message, ref bool broadcast){
-			if(!message.StartsWith("/sc")) return;
-			IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
-			if( player.PromoteLevel != MyPromoteLevel.Admin && player.PromoteLevel != MyPromoteLevel.Owner ) return;
-
-			MyCommandLine cmd = new MyCommandLine();
-			if( !cmd.TryParse(message.Substring(3)) ) return;
-			broadcast = false;
-
-			switch( cmd.Argument(0) ) {
-				case "set":
-					break;
-			}
-
+		public SetDefaultValues() {
+			MyAPIGateway.Utilities.SetVariable<int>("SC-Grids", 20);
+			MyAPIGateway.Utilities.SetVariable<int>("SC-Difficulty", 1);
+			MyAPIGateway.Utilities.SetVariable<int>("SC-Engineers", 1);
 		}
-
-		// public static void MessageHandler(byte[] data){
-		//
-		// 	var receivedData = MyAPIGateway.Utilities.SerializeFromBinary<SyncData>(data);
-		//
-		// 	if(receivedData.Instruction.StartsWith("MESChatMsg") == true){
-		//
-		// 		ServerChatProcessing(receivedData);
-		//
-		// 	}
-		//
-		//
-		// }
 
 		public static MyPlanet GetClosestPlanet( Vector3D position, List<MyPlanet> exclude = null, string containing = "" ) {
 			if( exclude == null ) exclude = new List<MyPlanet>();
@@ -131,11 +115,44 @@ namespace SpaceCraft {
 			foreach( IMyEntity entity in entities ) {
 				if( entity is MyPlanet ) {
 					Planets.Add( entity as MyPlanet );
+					continue;
 				}
 
-				// Remove Pirates
-				if( entity is IMyCubeGrid && entity.DisplayName.Substring(0,6) == "Pirate" ) {
-					MyAPIGateway.Entities.RemoveEntity(entity);
+
+				if( entity is IMyCubeGrid ) {
+					// Remove Pirates
+					if( entity.DisplayName.Substring(0,6) == "Pirate" ) {
+						MyAPIGateway.Entities.RemoveEntity(entity);
+						continue;
+					}
+
+
+					IMyCubeGrid grid = entity as IMyCubeGrid;
+					List<long> owners = grid.GridSizeEnum == MyCubeSize.Large ? grid.BigOwners : grid.SmallOwners;
+					foreach(long owner in owners) {
+						Faction faction = GetFaction(owner);
+						if( faction != null ) {
+							CubeGrid g = faction.TakeControl( new CubeGrid(grid) ) as CubeGrid;
+							faction.MainBase = g;
+							g.CheckFlags();
+							g.FindConstructionSite();
+							if( g.IsStatic )
+								faction.Colonize( GetClosestPlanet(g.Entity.WorldMatrix.Translation) );
+							break;
+						}
+					}
+
+				}
+
+				if( entity is IMyCharacter ) {
+					IMyCharacter character = entity as IMyCharacter;
+					//Faction faction = GetFactionByFounder(entity.DisplayName);
+					if( character.IsBot ) {
+						Faction faction = GetFaction(entity.DisplayName);
+						if( faction != null ) {
+							faction.TakeControl( new Engineer(faction, entity as IMyCharacter) );
+						}
+					}
 				}
 			}
 		}
@@ -148,7 +165,6 @@ namespace SpaceCraft {
     public void Preload() {
 
 			OBTypes.Init();
-			ScanEntities();
 
       ListReader<MySpawnGroupDefinition> groups = MyDefinitionManager.Static.GetSpawnGroupDefinitions();
 
@@ -178,14 +194,13 @@ namespace SpaceCraft {
 						if( !String.IsNullOrWhiteSpace(cmd.Argument(2)) ) {
 							string[] colors = cmd.Argument(2).Split(',');
 							faction.Color = new SerializableVector3(float.Parse(colors[0]),float.Parse(colors[1]),float.Parse(colors[2]));
-							if( faction.MyFaction != null)
-								MyAPIGateway.Players.RequestPlayerColorChanged(faction.MyFaction.FounderId,0,(Vector3)faction.Color);
-
 								//RequestNewPlayer (int serialNumber, string playerName, string characterModel)
 								//LoadIdentities (List< MyObjectBuilder_Identity > list)
 						}
 						faction.Groups.Add( group );
 						faction.SpawnPrefab = first;
+						if( Spawned )
+							faction.DetermineNextGoal();
           }
         }
 
@@ -206,11 +221,43 @@ namespace SpaceCraft {
 				}
 			}
 
+			ScanEntities();
+
 			Loaded = true;
 
     }
 
-		public Faction GetFaction( string tag, string name ) {
+		public static Faction GetFactionByFounder( string founder ) {
+			foreach( Faction f in Factions) {
+				if( f.Founder == null ) continue;
+				if( f.Founder.DisplayName == founder )
+					return f;
+			}
+
+			return null;
+		}
+
+		public static Faction GetFaction( long owner ) {
+			foreach( Faction f in Factions) {
+				if( f.MyFaction == null ) continue;
+				if( f.MyFaction.FounderId == owner )
+					return f;
+			}
+
+			return null;
+		}
+
+		public static Faction GetFactionContaining( long member ) {
+			foreach( Faction f in Factions) {
+				if( f.MyFaction == null ) continue;
+				if( f.MyFaction.IsMember(member) )
+					return f;
+			}
+
+			return null;
+		}
+
+		public static Faction GetFaction( string tag, string name = "" ) {
 			// MyAPIGateway.Session.Factions.TryGetFactionByTag(
 			// if( !MyAPIGateway.Session.Factions.FactionTagExists(tag) ) {
 			// 	MyAPIGateway.Session.Factions.CreateFaction(0,tag,name,"Description","Private Info");
@@ -229,8 +276,9 @@ namespace SpaceCraft {
 				MyFaction = MyAPIGateway.Session.Factions.TryGetFactionByTag(tag)
 			};
 
-			if( faction.MyFaction == null )
+			if( faction.MyFaction == null ) {
 				MyAPIGateway.Utilities.ShowMessage( "TryGetFactionByTag", "Failed for " + tag );
+			}
 
 			Factions.Add(faction);
 			//faction.Init(Session);

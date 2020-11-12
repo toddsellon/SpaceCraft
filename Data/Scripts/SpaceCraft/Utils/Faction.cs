@@ -73,14 +73,15 @@ namespace SpaceCraft.Utils {
     private IMyCubeBlock RespawnPoint;
     private Progression Progress = Progression.None;
     private string Roadblock = string.Empty;
-    private List<Controllable> Controlled = new List<Controllable>();
+    public List<Controllable> Controlled = new List<Controllable>();
     private List<IMyEntity> Enemies = new List<IMyEntity>();
-    private CubeGrid MainBase;
+    public CubeGrid MainBase;
     //private List<string> Resources = new List<string>(){"Stone","Iron","Silicon","Nickel","Cobalt"};
     private List<string> Resources = new List<string>(){"Stone","Iron","Silicon","Nickel"};
     protected static Random Randy = new Random();
     protected int Tick = 0;
     public MyPlanet Homeworld;
+    public List<MyPlanet> Colonized = new List<MyPlanet>();
     private static bool First = true;
     public Tech Tier = Tech.Primitive;
     public IMyFaction MyFaction;
@@ -102,11 +103,20 @@ namespace SpaceCraft.Utils {
     public void UpdateBeforeSimulation() {
       Tick++;
 
+      if( Enemies.Count > 0 && (Enemies[0] == null || Enemies[0].MarkedForClose) ) {
+        Enemies.RemoveAt(0);
+      }
       AssessGoal();
 
+      Controllable remove = null;
       foreach( Controllable c in Controlled ) {
-        c.UpdateBeforeSimulation();
+        if( c is CubeGrid && c.Entity == null )
+          remove = c;
+        else
+          c.UpdateBeforeSimulation();
       }
+
+      if( remove != null ) Controlled.Remove( remove );
 
       if( Tick == 99 ) Tick = 0;
     }
@@ -140,16 +150,23 @@ namespace SpaceCraft.Utils {
 
     }
 
+    public void Colonize(MyPlanet planet) {
+      if( planet == null || Colonized.Contains(planet)) return;
+      Colonized.Add(planet);
+    }
+
     public void Colonize() {
       if( CurrentGoal == null ) return;
       if( CurrentGoal.Entity == null ) CurrentGoal.Entity = GetSpacecraft();
       if( CurrentGoal.Entity == null ) return;
 
       if( CurrentGoal.Step == Steps.Pending ) {
+        MyAPIGateway.Utilities.ShowMessage( "Colonize", "Started Colonization" );
         (CurrentGoal.Entity as CubeGrid).AddQueueItems( CurrentGoal.Prefab );
         CurrentGoal.Progress();
       } else if( CurrentGoal.Step == Steps.Started ) {
         if( !(CurrentGoal.Entity as CubeGrid).IsProducing ) {
+          MyAPIGateway.Utilities.ShowMessage( "Colonize", "Production finished" );
           CurrentGoal.Entity.Execute( new Order {
             Type = Orders.Move,
             Target = CurrentGoal.Target,
@@ -159,7 +176,7 @@ namespace SpaceCraft.Utils {
         CurrentGoal.Progress();
       } else {
         if( CurrentGoal.Entity.CurrentOrder == null || CurrentGoal.Entity.CurrentOrder.Step == Steps.Completed || CurrentGoal.Entity.CurrentOrder.Type != Orders.Move ) {
-
+          MyAPIGateway.Utilities.ShowMessage( "Colonize", "Goal reached" );
           MainBase = CurrentGoal.Entity as CubeGrid;
           MatrixD location = GetPlacementLocation( CurrentGoal.Prefab, MainBase );
           CubeGrid grid = new CubeGrid( CubeGrid.Spawn( CurrentGoal.Prefab, location, this) );
@@ -230,12 +247,18 @@ namespace SpaceCraft.Utils {
     public void Construct() {
       if( CurrentGoal == null ) return;
 
-      if( CurrentGoal.Prefab == null )
+      if( CurrentGoal.Prefab == null && CurrentGoal.Entity == null ) {
         CurrentGoal.Prefab = GetConstructionProject();
+        CurrentGoal.Balance = CurrentGoal.Prefab == null ? null : CurrentGoal.Prefab.GetBalance();
+        MainBase = GetBestRefinery();
+        MainBase.Balance = CurrentGoal.Balance;
+        MainBase.AddQueueItems(CurrentGoal.Prefab.GetBattery(),true);
+      }
 
       if( CurrentGoal.Step == Steps.Pending && CurrentGoal.Prefab != null ) {
 
-        MainBase = GetBestRefinery();
+        // Wait for balance to be paid
+        if( CurrentGoal.Balance != null && CurrentGoal.Balance.Count > 0 ) return;
 
         MatrixD location = GetPlacementLocation( CurrentGoal.Prefab );
         CubeGrid grid = new CubeGrid( CubeGrid.Spawn( CurrentGoal.Prefab, location, this) );
@@ -258,7 +281,7 @@ namespace SpaceCraft.Utils {
         // Facilitate Production
         CubeGrid grid = CurrentGoal.Entity as CubeGrid;
         if( grid == null || grid.ConstructionSite == null ) {
-          //MyAPIGateway.Utilities.ShowMessage( Name, "Completed construction" );
+          MyAPIGateway.Utilities.ShowMessage( Name, "Completed construction" );
           if( grid.DockedTo != null && !grid.Drills )
             grid.DockedTo.ToggleDocked( grid );
           CurrentGoal.Complete();
@@ -292,14 +315,22 @@ namespace SpaceCraft.Utils {
 
 
 
-      //if( prefab.IsStatic ) {
-        // Place further away
 
-        //int rand = Randy.Next(MAX);
-        //Vector3 p = new Vector3(MAX,rand,rand) + Vector3.Normalize(MainBase.Grid.WorldMatrix.Translation);
         MatrixD m = last.Grid.WorldMatrix;
         Vector3D p = m.Translation;
-        MyPlanet planet = SpaceCraftSession.GetClosestPlanet(p);
+        MyPlanet planet;
+
+        if( prefab.IsStatic && Tier >= Tech.Space ) {
+          // TODO: Determine resource wanted
+          string resource = "Uranium";
+          if( Resources.Contains("Uranium") && !Resources.Contains("Platinum") ) {
+            resource = "Platinum";
+          }
+          planet = SpaceCraftSession.GetClosestPlanet(p, Colonized, resource);
+          Colonized.Add( planet );
+        } else {
+          planet = SpaceCraftSession.GetClosestPlanet(p);
+        }
         //Quaternion q = Quaternion.CreateFromRotationMatrix(m);
         //q.W += Controlled.Count;
 
@@ -370,13 +401,12 @@ namespace SpaceCraft.Utils {
 
       if( CurrentGoal.Step == Steps.Pending && CurrentGoal.Target != null ) {
         // This crashes the game for some reason
-        // Order order66 = new Order(){
-        //   Type = Orders.Attack,
-        //   Target = CurrentGoal.Target
-        // };
-        // foreach( Controllable c in Controlled ) {
-        //   c.Execute( order66, true );
-        // }
+        foreach( Controllable c in Controlled ) {
+          c.Execute( new Order{
+            Type = Orders.Attack,
+            Target = CurrentGoal.Target
+          }, true );
+        }
         CurrentGoal.Progress();
       } else if( CurrentGoal.Step == Steps.Started ) {
 
@@ -400,11 +430,9 @@ namespace SpaceCraft.Utils {
     }
 
     public Order NeedsOrder( Controllable c ) {
-      if( c == null ) {
-        MyAPIGateway.Utilities.ShowMessage( "NeedsOrder", "Controllable is null" );
-        return null;
-      }
-      if( CurrentGoal != null ) switch( CurrentGoal.Type ) {
+      if( c == null || CurrentGoal == null ) return null;
+
+      switch( CurrentGoal.Type ) {
 
         case Goals.Stabilize:
         case Goals.Construct:
@@ -425,19 +453,28 @@ namespace SpaceCraft.Utils {
           goto case Goals.Attack;
 
         case Goals.Attack:
-          if( !CommandLine.Switch("defensive") ) {
-            if( Enemies.Count == 0 ) {
-              c.OrderQueue = GetScoutOrders();
-              if( c.OrderQueue.Count > 0 ) {
-                Order o = c.OrderQueue[0];
-                c.OrderQueue.RemoveAt(0);
-                return o;
-              }
-            } else return new Order {
-              Type = Orders.Attack,
-              Target = Enemies[0]
-            };
+          if( !CommandLine.Switch("defensive") ) break;
+          if( Enemies.Count == 0 ) {
+            IMyEntity enemy = GetClosestEnemy(c.Entity.WorldMatrix.Translation);
+            if( enemy == null) break;
+            Enemies.Add(enemy);
           }
+          return new Order {
+            Type = Orders.Attack,
+            Target = Enemies[0]
+          };
+            // if( Enemies.Count == 0 ) {
+            //   c.OrderQueue = GetScoutOrders();
+            //   if( c.OrderQueue.Count > 0 ) {
+            //     Order o = c.OrderQueue[0];
+            //     c.OrderQueue.RemoveAt(0);
+            //     return o;
+            //   }
+            // } else return new Order {
+            //   Type = Orders.Attack,
+            //   Target = Enemies[0]
+            // };
+
           break;
       }
 
@@ -553,10 +590,11 @@ namespace SpaceCraft.Utils {
           break;
         //case Tech.Established:
         default:
-          resources.Add("Iron",(VRage.MyFixedPoint)0.3);
-          resources.Add("Nickel",(VRage.MyFixedPoint)0.1);
-          resources.Add("Cobalt",(VRage.MyFixedPoint)0.05);
-          resources.Add("Ice",(VRage.MyFixedPoint)0.1);
+          resources.Add("Iron",(VRage.MyFixedPoint)0.1);
+          resources.Add("Nickel",(VRage.MyFixedPoint)0.05);
+          resources.Add("Cobalt",(VRage.MyFixedPoint)0.025);
+          resources.Add("Ice",(VRage.MyFixedPoint)0.01);
+          resources.Add("Magnesium",(VRage.MyFixedPoint)0.01);
           break;
       }
       return resources;
@@ -686,6 +724,10 @@ namespace SpaceCraft.Utils {
         return;
       }
 
+      // if( MyStats.Grids == Limits.Grids ) {
+      //
+      // }
+
       MyStats.Ratio.Add("Workers", MyStats.Workers/MyStats.Grids);
       MyStats.Ratio.Add("Fighters", MyStats.Fighters/MyStats.Grids);
       MyStats.Ratio.Add("Factories", MyStats.Factories/MyStats.Grids);
@@ -746,59 +788,6 @@ namespace SpaceCraft.Utils {
       return null;
     }
 
-    public void AssessProgression() {
-      if( MainBase == null || MainBase.Grid == null ) {
-        MyAPIGateway.Utilities.ShowNotification( MainBase == null ? "AssessProgression() " + Name + " Main base is null" : Name + " Main base has no grid" );
-        return;
-      }
-
-      IMySlimBlock slim;
-      switch( Progress ) {
-        case Progression.None:
-          if( MainBase.Grid.GridSizeEnum == MyCubeSize.Small ) {
-            if( MainBase.Grid.Physics.IsMoving ) return;
-
-            List<IMySlimBlock> batteries = MainBase.GetBlocks<IMyBatteryBlock>();
-
-            if( batteries.Count == 0 || !batteries[0].IsFullIntegrity ) {
-              Mulligan();
-              return;
-            }
-
-            if( MainBase.AddLargeGridConverter() ) {
-              batteries = MainBase.GetBlocks<IMyBatteryBlock>();
-
-             if( MainBase.SuperGrid == null || batteries.Count == 0 || !batteries[0].IsFullIntegrity ) {
-               Mulligan();
-               return;
-              }
-              Progress = Progression.BasicAssembler;
-            } else {
-              Mulligan();
-              return;
-            }
-
-          } else {
-            MainBase.TryPlace(new MyObjectBuilder_Assembler{
-							SubtypeName = "BasicAssembler"
-						});
-
-            MainBase.TryPlace(new MyObjectBuilder_Refinery{
-							SubtypeName = "Blast Furnace"
-						});
-          }
-          break;
-        case Progression.BasicAssembler:
-
-          break;
-        case Progression.BasicRefinery:
-        case Progression.Assembler:
-        case Progression.Refinery:
-        case Progression.Reactor:
-          break;
-      }
-    }
-
     public void Mulligan() {
 
       MyAPIGateway.Utilities.ShowMessage( "Mulligan", Name + " took a mulligan" );
@@ -806,6 +795,8 @@ namespace SpaceCraft.Utils {
         MyAPIGateway.Entities.RemoveEntity( c.Entity );
       }
       Controlled = new List<Controllable>();
+      Colonized = new List<MyPlanet>();
+      Tier = Tech.Primitive;
       CurrentGoal = new Goal{
         Type = Goals.Stabilize
       };
@@ -853,19 +844,20 @@ namespace SpaceCraft.Utils {
       return MatrixD.Zero;
     }
 
-    public IMyEntity GetClosestEnemy( Controllable to ) {
-      IMyEntity source = to.Entity;
-      if( source == null ) return null;
-
-      Vector3D center = source.WorldMatrix.Translation;
-      BoundingSphereD sphere = new BoundingSphereD( center, (double)5000 );
-      List<IMyEntity> entities = MyAPIGateway.Entities.GetEntitiesInSphere( ref sphere );
+    public IMyEntity GetClosestEnemy( Vector3D point, IMyFaction faction = null ) {
+      //BoundingSphereD sphere = new BoundingSphereD( center, (double)5000 );
+      //List<IMyEntity> entities = MyAPIGateway.Entities.GetEntitiesInSphere( ref sphere );
       IMyEntity best = null;
       double distance = 0.0f;
-      foreach( IMyEntity entity in entities ) {
-        // TODO: Exclude owned grids
-
-        double d = Vector3D.Distance( entity.WorldMatrix.Translation, center );
+      foreach( IMyEntity entity in Enemies ) {
+        if( faction != null ) {
+          if( entity is IMyCubeGrid ) {
+            IMyCubeGrid grid = entity as IMyCubeGrid;
+            IMyFaction owner = MyAPIGateway.Session.Factions.TryGetPlayerFaction(grid.GridSizeEnum == MyCubeSize.Large ? grid.BigOwners[0] : grid.SmallOwners[0]);
+            if( owner != faction ) continue;
+          }
+        }
+        double d = Vector3D.Distance( entity.WorldMatrix.Translation, point );
         if( best == null || d < distance ) {
           best = entity;
           distance = d;
@@ -894,6 +886,7 @@ namespace SpaceCraft.Utils {
         if( Homeworld == null ) {
           Homeworld = SpaceCraftSession.ClosestPlanet;
         }
+        Colonized.Add( Homeworld );
         //int rand = Randy.Next(Homeworld.Size.X);
         Vector3 p = new Vector3(Randy.Next(Homeworld.Size.X),Randy.Next(Homeworld.Size.Y),Randy.Next(Homeworld.Size.Z)) + Vector3.Normalize(Homeworld.PositionLeftBottomCorner);
         //position = planet.GetClosestSurfacePointLocal( ref p );
@@ -932,8 +925,7 @@ namespace SpaceCraft.Utils {
 
     protected float Prioritize( Prefab prefab ) {
       //if( Tier < prefab.Tier ) return 0f;
-      //MyAPIGateway.Utilities.ShowMessage( "Prioritize", prefab.ToString() + " Cost: " + String.Join(",",prefab.Cost.Keys) );
-      //MyAPIGateway.Utilities.ShowMessage( "Prioritize", "Available: " + String.Join(",",Resources) );
+
       foreach( string resource in prefab.Cost.Keys ) {
         // Doesn't have access to resources
         if( !Resources.Contains(resource) ) {
@@ -991,6 +983,9 @@ namespace SpaceCraft.Utils {
           priority *= MyStats.Ratio["Static"] >= MyStats.Desired["Static"] ? .5f : 1f;
 
       }
+
+
+      priority *= prefab.Atmosphere && !prefab.IsStatic && Tier < Tech.Space ? 2 : 1;
 
 
       return priority;

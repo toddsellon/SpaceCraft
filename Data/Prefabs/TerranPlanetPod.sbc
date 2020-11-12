@@ -221,7 +221,7 @@
               <ShowInInventory>true</ShowInInventory>
               <Enabled>true</Enabled>
               <BroadcastRadius>99.9999847</BroadcastRadius>
-              <ShowShipName>false</ShowShipName>
+              <ShowShipName>true</ShowShipName>
               <EnableBroadcasting>true</EnableBroadcasting>
               <AttachedPB>0</AttachedPB>
               <IgnoreAllied>false</IgnoreAllied>

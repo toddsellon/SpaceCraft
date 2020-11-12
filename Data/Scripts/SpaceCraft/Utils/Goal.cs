@@ -2,6 +2,7 @@ using VRageMath;
 using VRage;
 using VRage.Game.Entity;
 using SpaceCraft.Utils;
+using System.Collections.Generic;
 
 namespace SpaceCraft.Utils {
 
@@ -27,6 +28,7 @@ namespace SpaceCraft.Utils {
     public Steps Step = Steps.Pending;
     public Prefab Prefab;
     public Controllable Entity;
+    public Dictionary<string,int> Balance = null;
 
     public void Progress() {
       if( Step < Steps.Completed )

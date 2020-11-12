@@ -78,12 +78,20 @@ namespace SpaceCraft.Utils {
                 case "LargeBlockSmallAtmosphericThrust":
                 case "SmallBlockLargeAtmosphericThrust":
                 case "SmallBlockSmallAtmosphericThrust":
+                case "SmallBlockSmallAtmosphericThrustSciFi":
+                case "SmallBlockLargeAtmosphericThrustSciFi":
+                case "LargeBlockSmallAtmosphericThrustSciFi":
+                case "LargeBlockLargeAtmosphericThrustSciFi":
                   Flying = true;
                   break;
                 case "SmallBlockSmallThrust":
                 case "SmallBlockLargeThrust":
                 case "LargeBlockSmallThrust":
                 case "LargeBlockLargeThrust":
+                case "SmallBlockSmallThrustSciFi":
+                case "SmallBlockLargeThrustSciFi":
+                case "LargeBlockSmallThrustSciFi":
+                case "LargeBlockLargeThrustSciFi":
                   Spacecraft = true;
                   break;
                 default:
@@ -125,6 +133,25 @@ namespace SpaceCraft.Utils {
 
       if( Worker ) Fighter = false;
       if( !IsStatic && Flying && !Spacecraft ) Atmosphere = true;
+    }
+
+    // Returns the cost of the first battery, minumum required to spawn
+    public Dictionary<string,int> GetBalance() {
+      if( Definition == null ) return null;
+      MyObjectBuilder_BatteryBlock battery = GetBattery();
+      if( battery == null ) return null;
+
+      return Block.GetCost(battery);
+    }
+
+    public MyObjectBuilder_BatteryBlock GetBattery() {
+      foreach( MyObjectBuilder_CubeGrid grid in Definition.CubeGrids ) {
+        foreach(MyObjectBuilder_CubeBlock block in grid.CubeBlocks) {
+          if( block is MyObjectBuilder_BatteryBlock )
+            return block as MyObjectBuilder_BatteryBlock;
+        }
+      }
+      return null;
     }
 
     public static Prefab Get( string subtypeId ) {
