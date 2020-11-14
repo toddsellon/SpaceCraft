@@ -9,7 +9,8 @@ namespace SpaceCraft.Utils {
 
   public class Limits {
     public static float Speed = 110f;
-    public static int Grids = 20;
+    //public static int Grids = 20;
+    //public static int Engineers = 1;
   }
 
 }

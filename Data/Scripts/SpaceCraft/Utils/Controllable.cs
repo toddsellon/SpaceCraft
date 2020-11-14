@@ -15,6 +15,7 @@ namespace SpaceCraft.Utils {
   //public class Controllable : MySessionComponentBase, IMyEntityController {
   public class Controllable {
 
+    public Convars Vars;
     public Order CurrentOrder;
     public List<Order> OrderQueue = new List<Order>();
     public IMyEntity Entity;
@@ -126,7 +127,6 @@ namespace SpaceCraft.Utils {
       }
 
       if( block is IMyAssembler ) {
-        //MyAPIGateway.Utilities.ShowMessage( "Prioritize", "slim.BlockDefinition.DisplayNameString" + slim.BlockDefinition.DisplayNameString );
         //switch( slim.BlockDefinition.DisplayNameString ) {
         switch(subtypeName) {
           case "LargeAssembler":
@@ -182,7 +182,7 @@ namespace SpaceCraft.Utils {
 
     public virtual bool Execute( Order order, bool force = false ) {
 
-      //MyAPIGateway.Utilities.ShowMessage( "Execute", ToString() + ": " + order.ToString() );
+      if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "Execute", ToString() + ": " + order.ToString() );
 
       if( force ) Stop();
       if( order == null ) {
@@ -231,7 +231,7 @@ namespace SpaceCraft.Utils {
       if( CurrentOrder == null ) return;
 
       if( !Move() ) {
-        MyAPIGateway.Utilities.ShowMessage( "Scout", "Arrived on location" );
+        if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "Scout", "Arrived on location" );
         Vector3D position = Entity.WorldMatrix.Translation;
         BoundingBoxD boundingBox = new BoundingBoxD(position-500,position+500);
         List<IMyEntity> entities = MyAPIGateway.Entities.GetEntitiesInAABB(ref boundingBox);
@@ -272,7 +272,6 @@ namespace SpaceCraft.Utils {
       if( CurrentOrder == null || CurrentOrder.Entity == null ) return;
       if( Owner.CurrentGoal.Entity == null) {
         CurrentOrder = null;
-        MyAPIGateway.Utilities.ShowMessage( "Withdraw", ToString() + " Owner.CurrentGoal.Entity is null" );
         return;
       }
 
@@ -303,6 +302,7 @@ namespace SpaceCraft.Utils {
     }
 
     public void Deposit() {
+      if( CurrentOrder == null ) return;
 			if( CurrentOrder.Target == null ) {
         if( CurrentOrder.Entity == null )
           CurrentOrder.Entity = Owner.GetBestRefinery(this);
@@ -333,12 +333,13 @@ namespace SpaceCraft.Utils {
         // }
 
         if( CurrentOrder.Entity == null ) {
-          MyAPIGateway.Utilities.ShowMessage( "Deposit", "Entity was null, giving up " + ToString() );
-          CurrentOrder.Entity = Owner.GetBestRefinery();
-          if( CurrentOrder.Entity == null ) {
-            CurrentOrder = null;
-            return;
-          }
+          CurrentOrder = null;
+          return;
+          // CurrentOrder.Entity = Owner.GetBestRefinery();
+          // if( CurrentOrder.Entity == null ) {
+          //   CurrentOrder = null;
+          //   return;
+          // }
         }
 
         if( this is CubeGrid ) {
@@ -352,23 +353,23 @@ namespace SpaceCraft.Utils {
         int remaining = 0;
 				List<IMyInventory> inventories = GetInventory();
 
-        if( CurrentOrder.Entity is CubeGrid ) {
-          CubeGrid grid = CurrentOrder.Entity as CubeGrid;
-
-          // Check for construction
-          if( grid.ConstructionSite != null ) {
-
-            foreach( IMyInventory mine in inventories ) {
-              grid.ConstructionSite.MoveItemsToConstructionStockpile( mine );
-              grid.ConstructionSite.IncreaseMountLevel( 5f, (long)0 );
-            }
-          }
-
-          if( AreEmpty(inventories) ) {
-            CurrentOrder = null;
-            return;
-          }
-        }
+        // if( CurrentOrder.Entity is CubeGrid ) {
+        //   CubeGrid grid = CurrentOrder.Entity as CubeGrid;
+        //
+        //   // Check for construction
+        //   if( grid.ConstructionSite != null ) {
+        //
+        //     foreach( IMyInventory mine in inventories ) {
+        //       grid.ConstructionSite.MoveItemsToConstructionStockpile( mine );
+        //       grid.ConstructionSite.IncreaseMountLevel( 5f, (long)0 );
+        //     }
+        //   }
+        //
+        //   if( AreEmpty(inventories) ) {
+        //     CurrentOrder = null;
+        //     return;
+        //   }
+        // }
 
         remaining = 0;
 
@@ -377,10 +378,12 @@ namespace SpaceCraft.Utils {
 				foreach( IMyInventory inv in target ) {
 
           foreach( IMyInventory mine in inventories ) {
+            if( mine == null ) continue;
   					List<IMyInventoryItem> items = mine.GetItems();
 
   					for( int i = items.Count-1; i >= 0; i-- ) {
               IMyInventoryItem item = items[i];
+              if( item == null ) continue;
               if( item.Content.TypeId == OBTypes.Tool ) continue;
               if( CurrentOrder.Filter != MyObjectBuilderType.Invalid && item.Content.TypeId != CurrentOrder.Filter ) continue;
               mine.TransferItemTo(inv, i, null, true, item.Amount, false );
@@ -389,12 +392,16 @@ namespace SpaceCraft.Utils {
 
 				}
 
-        if( AreEmpty(inventories) ) {
-          CurrentOrder = null;
-          return;
-        } else {
-          // TODO: Tell Grid it needs storage
-        }
+        Drop(OBTypes.Ore);
+        CurrentOrder = null;
+        return;
+
+        // if( AreEmpty(inventories) ) {
+        //   CurrentOrder = null;
+        //   return;
+        // } else {
+        //   // TODO: Tell Grid it needs storage
+        // }
 
 			}
 		}
@@ -425,7 +432,6 @@ namespace SpaceCraft.Utils {
       MyObjectBuilderType tools =	MyObjectBuilderType.Parse("MyObjectBuilder_PhysicalGunObject");
       foreach( IMyInventoryItem item in items ) {
         if( item.Content.TypeId != tools ) {
-          //MyAPIGateway.Utilities.ShowMessage( "IsEmpty", item.Content.TypeId + " != " + tools );
           return false;
         }
       }

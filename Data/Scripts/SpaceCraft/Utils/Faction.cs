@@ -64,6 +64,8 @@ namespace SpaceCraft.Utils {
 
     public static int LIMIT = 20;
 
+    public int Engineers = 0;
+
     public string Name;
     public MyCommandLine CommandLine = new MyCommandLine();
     public List<MySpawnGroupDefinition> Groups = new List<MySpawnGroupDefinition>();
@@ -89,6 +91,7 @@ namespace SpaceCraft.Utils {
     public string SpawnPrefab;
     public Stats MyStats = new Stats();
     public Vector3D Origin = Vector3D.Zero;
+    public IMyPlayer Following;
     // public Vector3I Scouted = Vector3I.Zero;
     //
     // public enum Axes {
@@ -118,12 +121,49 @@ namespace SpaceCraft.Utils {
 
       if( remove != null ) Controlled.Remove( remove );
 
-      if( Tick == 99 ) Tick = 0;
+      if( Tick == 99 ) {
+        Tick = 0;
+
+        if( Engineers < Convars.Static.Engineers ) {
+          TakeControl( new Engineer(this) );
+        } else if( Engineers > Convars.Static.Engineers ) {
+          RemoveEngineer();
+        }
+
+      }
+    }
+
+    public void Follow( IMyPlayer player ) {
+      Following = player;
+      foreach( Controllable c in Controlled ) {
+        if( c is Engineer ) {
+          c.Execute( new Order {
+            Type = Orders.Follow,
+            Player = player,
+            Range = 20f
+          }, true );
+        }
+      }
     }
 
     public void DetectedEnemy( IMyEntity enemy ) {
       if( !Enemies.Contains( enemy ) )
         Enemies.Add( enemy );
+    }
+
+    public void RemoveEngineer() {
+      Engineer remove = null;
+      foreach( Controllable c in Controlled ) {
+        if( c is Engineer ) {
+          remove = c as Engineer;
+          break;
+        }
+      }
+      if( remove != null ) {
+        remove.Character.Kill();
+        Controlled.Remove( remove );
+        Engineers--;
+      }
     }
 
     public void AssessGoal() {
@@ -161,12 +201,12 @@ namespace SpaceCraft.Utils {
       if( CurrentGoal.Entity == null ) return;
 
       if( CurrentGoal.Step == Steps.Pending ) {
-        MyAPIGateway.Utilities.ShowMessage( "Colonize", "Started Colonization" );
+        if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "Colonize", "Started Colonization" );
         (CurrentGoal.Entity as CubeGrid).AddQueueItems( CurrentGoal.Prefab );
         CurrentGoal.Progress();
       } else if( CurrentGoal.Step == Steps.Started ) {
         if( !(CurrentGoal.Entity as CubeGrid).IsProducing ) {
-          MyAPIGateway.Utilities.ShowMessage( "Colonize", "Production finished" );
+          if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "Colonize", "Production finished" );
           CurrentGoal.Entity.Execute( new Order {
             Type = Orders.Move,
             Target = CurrentGoal.Target,
@@ -176,7 +216,7 @@ namespace SpaceCraft.Utils {
         CurrentGoal.Progress();
       } else {
         if( CurrentGoal.Entity.CurrentOrder == null || CurrentGoal.Entity.CurrentOrder.Step == Steps.Completed || CurrentGoal.Entity.CurrentOrder.Type != Orders.Move ) {
-          MyAPIGateway.Utilities.ShowMessage( "Colonize", "Goal reached" );
+          if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "Colonize", "Goal reached" );
           MainBase = CurrentGoal.Entity as CubeGrid;
           MatrixD location = GetPlacementLocation( CurrentGoal.Prefab, MainBase );
           CubeGrid grid = new CubeGrid( CubeGrid.Spawn( CurrentGoal.Prefab, location, this) );
@@ -248,7 +288,9 @@ namespace SpaceCraft.Utils {
       if( CurrentGoal == null ) return;
 
       if( CurrentGoal.Prefab == null && CurrentGoal.Entity == null ) {
-        CurrentGoal.Prefab = GetConstructionProject();
+
+        CurrentGoal.Prefab = CurrentGoal.Prefab ?? GetConstructionProject();
+
         CurrentGoal.Balance = CurrentGoal.Prefab == null ? null : CurrentGoal.Prefab.GetBalance();
         MainBase = GetBestRefinery();
         MainBase.Balance = CurrentGoal.Balance;
@@ -281,7 +323,7 @@ namespace SpaceCraft.Utils {
         // Facilitate Production
         CubeGrid grid = CurrentGoal.Entity as CubeGrid;
         if( grid == null || grid.ConstructionSite == null ) {
-          MyAPIGateway.Utilities.ShowMessage( Name, "Completed construction" );
+          if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( Name, "Completed construction" );
           if( grid.DockedTo != null && !grid.Drills )
             grid.DockedTo.ToggleDocked( grid );
           CurrentGoal.Complete();
@@ -306,7 +348,7 @@ namespace SpaceCraft.Utils {
 
 
     // https://github.com/KeenSoftwareHouse/SpaceEngineers/blob/a109106fc0ded66bdd5da70e099646203c56550f/Sources/Sandbox.Game/Game/Entities/Blocks/MyOreDetectorComponent.cs
-    protected MatrixD GetPlacementLocation( Prefab prefab, CubeGrid last = null ) {
+    public MatrixD GetPlacementLocation( Prefab prefab, CubeGrid last = null ) {
       if( last == null ) last = GetLastCreated();
       //Dictionary<string, byte[]> maps = MyAPIGateway.Session.GetVoxelMapsArray();
 
@@ -385,8 +427,8 @@ namespace SpaceCraft.Utils {
         // Place close to base
       //}
 
-
-      MyAPIGateway.Utilities.ShowMessage( Name, "Building " + prefab.ToString() + " at " + position.ToString() );
+      if( Convars.Static.Debug )
+        MyAPIGateway.Utilities.ShowMessage( Name, "Building " + prefab.ToString() + " at " + position.ToString() );
 
       return matrix;
     }
@@ -581,20 +623,20 @@ namespace SpaceCraft.Utils {
       Dictionary<string,VRage.MyFixedPoint> resources = new Dictionary<string,VRage.MyFixedPoint>();
       CubeGrid grid = c as CubeGrid;
       if( grid != null && grid.DockedTo != null && grid.DockedTo.RefineryTier == 1 ) {
-        resources.Add("Stone",(VRage.MyFixedPoint)1);
+        resources.Add("Stone",(VRage.MyFixedPoint)1*Convars.Static.Difficulty);
         return resources;
       }
       switch( Tier ) {
         case Tech.Primitive:
-          resources.Add("Stone",(VRage.MyFixedPoint)1);
+          resources.Add("Stone",(VRage.MyFixedPoint)1*Convars.Static.Difficulty);
           break;
         //case Tech.Established:
         default:
-          resources.Add("Iron",(VRage.MyFixedPoint)0.1);
-          resources.Add("Nickel",(VRage.MyFixedPoint)0.05);
-          resources.Add("Cobalt",(VRage.MyFixedPoint)0.025);
-          resources.Add("Ice",(VRage.MyFixedPoint)0.01);
-          resources.Add("Magnesium",(VRage.MyFixedPoint)0.01);
+          resources.Add("Iron",(VRage.MyFixedPoint)0.1*Convars.Static.Difficulty);
+          resources.Add("Nickel",(VRage.MyFixedPoint)0.05*Convars.Static.Difficulty);
+          resources.Add("Cobalt",(VRage.MyFixedPoint)0.025*Convars.Static.Difficulty);
+          resources.Add("Ice",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
+          resources.Add("Magnesium",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
           break;
       }
       return resources;
@@ -611,14 +653,14 @@ namespace SpaceCraft.Utils {
       target.GetMissingComponents(total);
 
       Dictionary<string,int> missing = new Dictionary<string,int>(total);
-      MyAPIGateway.Utilities.ShowMessage( "Missing", string.Join(",", missing.Keys ) );
+      if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "Missing", string.Join(",", missing.Keys ) );
 
       foreach(Controllable c in Controlled ) {
         if( !(c is CubeGrid) ) continue;
         CubeGrid grid = c as CubeGrid;
         if( CurrentGoal.Type == Goals.Construct && grid == CurrentGoal.Entity ) continue;
         Dictionary<string,int> surplus = c.GetSurplus();
-        MyAPIGateway.Utilities.ShowMessage( "Surplus", string.Join(",", surplus.Keys ) );
+        if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "Surplus", string.Join(",", surplus.Keys ) );
         foreach( string st in total.Keys ) {
           if( surplus.ContainsKey( st ) ) {
             MyPhysicalItemDefinition def = MyDefinitionManager.Static.GetPhysicalItemDefinition( MyDefinitionId.Parse("MyObjectBuilder_Component/" + st) );
@@ -724,7 +766,7 @@ namespace SpaceCraft.Utils {
         return;
       }
 
-      // if( MyStats.Grids == Limits.Grids ) {
+      // if( MyStats.Grids == Convars.Static.Grids ) {
       //
       // }
 
@@ -751,7 +793,17 @@ namespace SpaceCraft.Utils {
         return;
       }
 
-
+      if( MyStats.Grids >= Convars.Static.Grids ) { // Limit reached
+        CurrentGoal = new Goal{
+          Type = CommandLine.Switch("defensive") ? Goals.Defend : Goals.Attack
+        };
+        // if( CurrentGoal.Type == Goals.Attack && Enemies.Count == 0 ) {
+        //   IMyEntity enemy = GetClosestEnemy(MainBase.Entity.WorldMatrix.Translation);
+        //   if( enemy == null) break;
+        //   Enemies.Add(enemy);
+        // }
+        return;
+      }
 
       if( Tier == Tech.Advanced ) {
         // Get to space
@@ -789,13 +841,13 @@ namespace SpaceCraft.Utils {
     }
 
     public void Mulligan() {
-
-      MyAPIGateway.Utilities.ShowMessage( "Mulligan", Name + " took a mulligan" );
+      if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "Mulligan", Name + " took a mulligan" );
       foreach( Controllable c in Controlled ) {
         MyAPIGateway.Entities.RemoveEntity( c.Entity );
       }
       Controlled = new List<Controllable>();
       Colonized = new List<MyPlanet>();
+      Engineers = 0;
       Tier = Tech.Primitive;
       CurrentGoal = new Goal{
         Type = Goals.Stabilize
@@ -808,8 +860,12 @@ namespace SpaceCraft.Utils {
 
     public Controllable TakeControl( Controllable c ) {
       c.Owner = this;
+
       //c.Init( Session );
       Controlled.Add( c );
+
+      if( c is Engineer )
+        Engineers++;
 
       return c;
     }
@@ -850,12 +906,16 @@ namespace SpaceCraft.Utils {
       IMyEntity best = null;
       double distance = 0.0f;
       foreach( IMyEntity entity in Enemies ) {
+        IMyFaction owner = null;
         if( faction != null ) {
           if( entity is IMyCubeGrid ) {
             IMyCubeGrid grid = entity as IMyCubeGrid;
-            IMyFaction owner = MyAPIGateway.Session.Factions.TryGetPlayerFaction(grid.GridSizeEnum == MyCubeSize.Large ? grid.BigOwners[0] : grid.SmallOwners[0]);
+            owner = MyAPIGateway.Session.Factions.TryGetPlayerFaction(grid.GridSizeEnum == MyCubeSize.Large ? grid.BigOwners[0] : grid.SmallOwners[0]);
             if( owner != faction ) continue;
-          }
+          }/* else if( entity is IMyCharacter ) {
+            owner = MyAPIGateway.Session.Factions.TryGetPlayerFaction();
+            if( owner != faction ) continue;
+          }*/
         }
         double d = Vector3D.Distance( entity.WorldMatrix.Translation, point );
         if( best == null || d < distance ) {
@@ -911,9 +971,6 @@ namespace SpaceCraft.Utils {
 
       position.X += 5;
 
-      // Engineer engineer = new Engineer( Engineer.Spawn(MatrixD.CreateWorld(position),this ) );
-      // if( engineer == null ) return false;
-      // TakeControl( engineer );
       TakeControl( new Engineer(this) );
 
       return true;

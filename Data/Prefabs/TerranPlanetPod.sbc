@@ -47,6 +47,7 @@
               <GearPivotPosition xsi:nil="true" />
               <OtherPivot xsi:nil="true" />
               <LockMode>Unlocked</LockMode>
+              <ShareMode>Faction</ShareMode>
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_CubeBlock">
               <SubtypeName>SmallBlockArmorSlope2Tip</SubtypeName>
@@ -141,6 +142,7 @@
               <CurrentTime>0</CurrentTime>
               <IsCountingDown>false</IsCountingDown>
               <Silent>false</Silent>
+              <ShareMode>Faction</ShareMode>
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_CubeBlock">
               <SubtypeName>SmallBlockArmorRoundSlope</SubtypeName>
@@ -171,6 +173,7 @@
               <Enabled>false</Enabled>
               <BroadcastRadius>1499.99963</BroadcastRadius>
               <HudText />
+              <ShareMode>Faction</ShareMode>
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_CubeBlock">
               <SubtypeName>SmallBlockArmorInvCorner2Base</SubtypeName>
@@ -227,6 +230,7 @@
               <IgnoreAllied>false</IgnoreAllied>
               <IgnoreOther>true</IgnoreOther>
               <HudText />
+              <ShareMode>Faction</ShareMode>
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_CubeBlock">
               <SubtypeName>SmallBlockArmorBlock</SubtypeName>
@@ -253,9 +257,10 @@
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
               <ShowInInventory>true</ShowInInventory>
-              <Enabled>true</Enabled>
+              <Enabled>false</Enabled>
               <DetectionRadius>50</DetectionRadius>
               <BroadcastUsingAntennas>true</BroadcastUsingAntennas>
+              <ShareMode>Faction</ShareMode>
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_CubeBlock">
               <SubtypeName>SmallBlockArmorBlock</SubtypeName>
@@ -575,6 +580,7 @@
               <BlockOrientation Forward="Left" Up="Up" />
               <Owner>144115188075855897</Owner>
               <BuiltBy>144115188075855897</BuiltBy>
+              <ShareMode>Faction</ShareMode>
               <ComponentContainer>
                 <Components>
                   <ComponentData>
@@ -902,6 +908,7 @@
               <BlinkLenght>90</BlinkLenght>
               <BlinkOffset>0</BlinkOffset>
               <Offset>0.5</Offset>
+              <ShareMode>Faction</ShareMode>
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_LandingGear">
               <SubtypeName>SmallBlockLandingGear</SubtypeName>
@@ -928,6 +935,7 @@
               <GearPivotPosition xsi:nil="true" />
               <OtherPivot xsi:nil="true" />
               <LockMode>Unlocked</LockMode>
+              <ShareMode>Faction</ShareMode>
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_CubeBlock">
               <SubtypeName>SmallBlockArmorSlope2Base</SubtypeName>
@@ -1352,6 +1360,7 @@
               <BlockOrientation Forward="Down" Up="Forward" />
               <ColorMaskHSV x="0.575" y="0.150000036" z="0.199999958" />
               <BuiltBy>144115188075855897</BuiltBy>
+              <ShareMode>Faction</ShareMode>
               <ComponentContainer>
                 <Components>
                   <ComponentData>
@@ -1380,6 +1389,7 @@
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallAtmosphericThrust</SubtypeName>
               <EntityId>97439975055619757</EntityId>
+              <ShareMode>Faction</ShareMode>
               <Min x="-3" y="-1" z="6" />
               <BlockOrientation Forward="Down" Up="Forward" />
               <ColorMaskHSV x="0.575" y="0.150000036" z="0.199999958" />
@@ -1412,6 +1422,7 @@
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallAtmosphericThrust</SubtypeName>
               <EntityId>99903880431277850</EntityId>
+              <ShareMode>Faction</ShareMode>
               <Min x="3" y="-1" z="0" />
               <BlockOrientation Forward="Down" Up="Forward" />
               <ColorMaskHSV x="0.575" y="0.150000036" z="0.199999958" />
@@ -1444,6 +1455,7 @@
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallAtmosphericThrust</SubtypeName>
               <EntityId>96564969846623720</EntityId>
+              <ShareMode>Faction</ShareMode>
               <Min x="-3" y="-1" z="0" />
               <BlockOrientation Forward="Down" Up="Forward" />
               <ColorMaskHSV x="0.575" y="0.150000036" z="0.199999958" />
@@ -1520,10 +1532,12 @@
               <SemiautoEnabled>false</SemiautoEnabled>
               <OnlyDischargeEnabled>false</OnlyDischargeEnabled>
               <ChargeMode>0</ChargeMode>
+              <ShareMode>Faction</ShareMode>
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_OxygenGenerator">
               <SubtypeName>OxygenGeneratorSmall</SubtypeName>
               <EntityId>112206005528780439</EntityId>
+              <ShareMode>Faction</ShareMode>
               <Min x="2" y="-1" z="2" />
               <BlockOrientation Forward="Right" Up="Backward" />
               <Owner>144115188075855897</Owner>
@@ -1619,6 +1633,7 @@
               <BlockOrientation Forward="Left" Up="Up" />
               <Owner>144115188075855897</Owner>
               <BuiltBy>144115188075855897</BuiltBy>
+              <ShareMode>Faction</ShareMode>
               <ComponentContainer>
                 <Components>
                   <ComponentData>
@@ -1668,6 +1683,7 @@
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallHydrogenThrust</SubtypeName>
               <EntityId>137303742924784910</EntityId>
+              <ShareMode>Faction</ShareMode>
               <Min x="0" y="-2" z="3" />
               <BlockOrientation Forward="Down" Up="Forward" />
               <ColorMaskHSV x="0" y="-0.8" z="-0.306840628" />
@@ -1699,6 +1715,7 @@
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Cockpit">
               <SubtypeName>PassengerSeatSmall</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>128081215442819476</EntityId>
               <Min x="-1" y="-1" z="4" />
               <BlockOrientation Forward="Backward" Up="Up" />
@@ -1761,6 +1778,7 @@
               <SubtypeName>SmallBlockLight_1corner</SubtypeName>
               <EntityId>130574711393288604</EntityId>
               <Min x="2" y="0" z="5" />
+              <ShareMode>Faction</ShareMode>
               <BlockOrientation Forward="Forward" Up="Left" />
               <BuiltBy>144115188075855897</BuiltBy>
               <CustomName>Corner Light</CustomName>
@@ -1781,6 +1799,7 @@
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_InteriorLight">
               <SubtypeName>SmallBlockLight_1corner</SubtypeName>
               <EntityId>97312764001451616</EntityId>
+              <ShareMode>Faction</ShareMode>
               <Min x="-2" y="0" z="5" />
               <BlockOrientation Forward="Right" Up="Forward" />
               <BuiltBy>144115188075855897</BuiltBy>
@@ -1803,6 +1822,7 @@
               <SubtypeName>SmallBlockLandingGear</SubtypeName>
               <EntityId>78342428793852787</EntityId>
               <Min x="0" y="-3" z="0" />
+              <ShareMode>Faction</ShareMode>
               <ColorMaskHSV x="0" y="-0.8" z="7.450581E-09" />
               <BuiltBy>144115188075855897</BuiltBy>
               <CustomName>Landing Gear</CustomName>
@@ -1828,10 +1848,12 @@
               <SubtypeName>SmallBlockLandingGear</SubtypeName>
               <EntityId>104884305040569926</EntityId>
               <Min x="1" y="-3" z="3" />
+              <ShareMode>Faction</ShareMode>
               <BlockOrientation Forward="Right" Up="Up" />
               <ColorMaskHSV x="0" y="-0.8" z="7.450581E-09" />
               <BuiltBy>144115188075855897</BuiltBy>
               <CustomName>Landing Gear 4</CustomName>
+              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
@@ -1853,6 +1875,7 @@
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_SurvivalKit">
               <SubtypeName>SurvivalKit</SubtypeName>
               <EntityId>102295684362190389</EntityId>
+              <ShareMode>Faction</ShareMode>
               <Min x="-1" y="-1" z="-1" />
               <BlockOrientation Forward="Right" Up="Up" />
               <Owner>144115188075855897</Owner>

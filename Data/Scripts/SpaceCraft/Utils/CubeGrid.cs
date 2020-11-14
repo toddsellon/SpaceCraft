@@ -43,6 +43,25 @@ namespace SpaceCraft.Utils {
 	//[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
 	public class CubeGrid : Controllable {
 
+		internal class Item {
+			public MyDefinitionId Id;
+			public VRage.MyFixedPoint Amount;
+
+			public Item() {
+
+			}
+
+			public Item( MyBlueprintDefinitionBase.Item item ) {
+				Id = item.Id;
+				Amount = item.Amount;
+			}
+
+			public override string ToString()
+      {
+          return string.Format("{0}x {1}", Amount, Id);
+      }
+		}
+
 		private static SerializableVector3 DefaultColor = new SerializableVector3(0.575f,0.150000036f,0.199999958f);
 
 		public IMySlimBlock ConstructionSite;
@@ -143,7 +162,8 @@ namespace SpaceCraft.Utils {
 			if( Tick == 99 ) {
 
 
-				AssessInventory();
+				//AssessInventory();
+				UpdateInventory();
 				// if( Grid.IsStatic )
 				// 	Drill();
 				Tick = 0;
@@ -222,15 +242,16 @@ namespace SpaceCraft.Utils {
 
 
 		public void Drill() {
-			if( PercentFull > .9) {
-				if( !IsStatic )
-					Execute( new Order{
-						Type = Orders.Deposit,
-						Range = 50f,
-						Entity = Owner.GetBestRefinery(this)
-					}, true );
-				return;
-			}
+			// This is not working ATM
+			// if( PercentFull > .9) {
+			// 	if( !IsStatic )
+			// 		Execute( new Order{
+			// 			Type = Orders.Deposit,
+			// 			Range = 50f,
+			// 			Entity = Owner.GetBestRefinery(this)
+			// 		}, true );
+			// 	return;
+			// }
 			List<IMySlimBlock> drills = GetBlocks<IMyShipDrill>();
 			foreach( IMySlimBlock slim in drills ) {
 				if( !slim.FatBlock.IsFunctional ) continue;
@@ -314,8 +335,6 @@ namespace SpaceCraft.Utils {
 						break;
 				}
 			}
-
-			//MyAPIGateway.Utilities.ShowMessage( "RefineryTier", RefineryTier.ToString() );
 		}
 
 		public List<IMySlimBlock> GetBlocks<t>( List<IMySlimBlock> blocks = null, bool excludeDocked = false ) {
@@ -357,6 +376,159 @@ namespace SpaceCraft.Utils {
 				list.AddRange( blocks );
 
 			return list;
+		}
+
+		public void UpdateInventory() {
+			// if( ConstructionSite != null && ConstructionSite.FatBlock != null && (ConstructionSite.FatBlock.MarkedForClose || ConstructionSite.FatBlock.Closed) ) {
+			// 	FindConstructionSite();
+			// }
+
+			float old = ConstructionSite == null ? 1.0f : ConstructionSite.BuildIntegrity;
+			List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
+			Dictionary<IMyCubeBlock,CubeGrid.Item> needs = new Dictionary<IMyCubeBlock,CubeGrid.Item>();
+			// Assess needs
+			foreach( IMySlimBlock slim in blocks ) {
+				IMyCubeBlock block = slim.FatBlock;
+				if( block == null || !block.IsFunctional ) continue;
+				CubeGrid.Item need = AssessNeed(block);
+				if( need != null )
+					needs.Add(block,need);
+				else if( block is IMyAssembler ) {
+					// TODO: Cooperative mode
+				}
+
+				AllocateResources(block);
+			}
+
+			// Fulfill needs
+			foreach( IMySlimBlock slim in blocks ) {
+				IMyCubeBlock block = slim.FatBlock;
+				if( block == null || !block.IsFunctional ) continue;
+
+				List<IMyCubeBlock> fulfilled = new List<IMyCubeBlock>();
+				foreach( IMyCubeBlock b in needs.Keys ) {
+					if( block == b ) continue;
+					CubeGrid.Item need = needs[b];
+					for( int i = 0; i < 2; i++ ) {
+						IMyInventory inv = block.GetInventory(i);
+						if( inv == null ) continue;
+						List<IMyInventoryItem> items = inv.GetItems();
+						int j = 0;
+						foreach( IMyInventoryItem item in items ) {
+							if( item.Content.TypeId == need.Id.TypeId && (need.Id.SubtypeName == String.Empty || need.Id.SubtypeName == item.Content.SubtypeName ) ) {
+								inv.TransferItemTo(b.GetInventory(), j, null, true, need.Amount, false);
+								fulfilled.Add(b);
+								break;
+							}
+							j++;
+						}
+					}
+				}
+
+				foreach( IMyCubeBlock f in fulfilled ) needs.Remove(f);
+			}
+
+			if( ConstructionSite == null ) return;
+			ConstructionSite.IncreaseMountLevel(5.0f,Owner.MyFaction.FounderId);
+
+			if( ConstructionSite.IsFullIntegrity ) {
+				ConstructionSite.PlayConstructionSound(MyIntegrityChangeEnum.ConstructionEnd);
+				StopProduction();
+				CheckFlags();
+				Owner.BlockCompleted(ConstructionSite);
+				if( CurrentOrder != null )
+	        CurrentOrder.Complete();
+				FindConstructionSite();
+				foreach( CubeGrid grid in Docked ) {
+					grid.ConstructionSite = ConstructionSite;
+					if( grid.CurrentOrder != null )
+		        grid.CurrentOrder.Complete();
+				}
+			} else if( old < ConstructionSite.BuildIntegrity ) {
+				ConstructionSite.PlayConstructionSound(MyIntegrityChangeEnum.ConstructionProcess);
+			}
+
+		}
+
+		internal CubeGrid.Item AssessNeed(IMyCubeBlock block) {
+			if( block is IMyAssembler ) {
+				if( block.BlockDefinition.TypeIdString == "MyObjectBuilder_SurvivalKit" )
+					return new CubeGrid.Item {
+						Id = OBTypes.Stone,
+						Amount = (VRage.MyFixedPoint)1000
+					};
+
+				IMyAssembler ass = block as IMyAssembler;
+				if( ass.IsQueueEmpty ) return null;
+				List<MyProductionQueueItem> queue = ass.GetQueue();
+				if( queue.Count == 0 ) return null;
+				// item.Blueprint.Id.SubtypeName;
+				MyBlueprintDefinitionBase bp =	MyDefinitionManager.Static.GetBlueprintDefinition(queue[0].Blueprint.Id);
+				IMyInventory inventory = ass.GetInventory(0);
+				List<IMyInventoryItem> items = inventory.GetItems();
+				items.AddRange(ass.GetInventory(1).GetItems());
+
+				// Not pulling all
+				foreach( MyBlueprintDefinitionBase.Item prereq in bp.Prerequisites ) {
+					bool fnd = false;
+					foreach( IMyInventoryItem item in items ) {
+
+						if( item.Amount >= prereq.Amount && prereq.Id.TypeId == item.Content.TypeId && prereq.Id.SubtypeName == item.Content.SubtypeName ) {
+							fnd = true;
+							break;
+						}
+					}
+					if( !fnd )
+						return new CubeGrid.Item(prereq);
+				}
+			}
+
+			if( block is IMyRefinery ) {
+				return new CubeGrid.Item {
+					Id = OBTypes.AnyOre,
+					Amount = (MyFixedPoint)100
+				};
+			}
+
+			return null;
+		}
+
+		public void AllocateResources(IMyCubeBlock block) {
+			if( Balance == null || Balance.Count == 0 ) {
+				//MyAPIGateway.Utilities.ShowNotification( "Trying to allocate resources" );
+				for( int i = 0; i < 2; i++ ) {
+					IMyInventory inv = block.GetInventory(i);
+					if( inv == null ) continue;
+					//inventories.Add( inv );
+					if( ConstructionSite != null ) {
+						//MyAPIGateway.Utilities.ShowNotification( "Trying to move to stockpile" );
+						ConstructionSite.MoveItemsToConstructionStockpile( inv );
+					}
+				}
+			} else {
+				//MyAPIGateway.Utilities.ShowNotification( "Trying to pay balance" );
+				for( int i = 0; i < 2; i++ ) {
+					IMyInventory inv = block.GetInventory(i);
+					if( inv == null ) continue;
+					List<IMyInventoryItem> items = inv.GetItems();
+					foreach( IMyInventoryItem item in items ) {
+						string subtypeName = item.Content.SubtypeName;
+
+						if( Balance.ContainsKey(subtypeName) ) {
+							VRage.MyFixedPoint diff = (VRage.MyFixedPoint)Math.Max(item.Amount.ToIntSafe()-Balance[subtypeName],0);
+
+							Balance[subtypeName] = (int)Math.Max(Balance[subtypeName]-item.Amount.ToIntSafe(),0);
+							if( Balance[subtypeName] <= 0 ) {
+								Balance.Remove(subtypeName);
+								// if( Balance.Count == 0 )
+								// 	Balance = null;
+							}
+							inv.RemoveItemsOfType(diff, new SerializableDefinitionId(item.Content.TypeId, subtypeName) );
+							break;
+						}
+					}
+				}
+			}
 		}
 
 		public void AssessInventory( List<IMyInventory> inventories = null ) {
@@ -520,8 +692,6 @@ namespace SpaceCraft.Utils {
 
 				if( needs.Count == 0 ) continue;
 
-				//MyAPIGateway.Utilities.ShowMessage( "AssessInventory", String.Join( ", ", needs ) );
-
 				foreach( MyBlueprintDefinitionBase.Item need in needs ) {
 					bool found = false;
 
@@ -534,11 +704,8 @@ namespace SpaceCraft.Utils {
 							if( need.Id.TypeId == itm.Content.TypeId && need.Id.SubtypeName == itm.Content.SubtypeName ) {
 								// Transfer
 								found = true;
-								//MyAPIGateway.Utilities.ShowMessage( "AssessInventory","Trying to pull items" );
 								inv.TransferItemTo(inventory, i, null, true, need.Amount, false);
 								break;
-							} else if( need.Id.TypeId == itm.Content.TypeId ) {
-								//MyAPIGateway.Utilities.ShowMessage( "AssessInventory", "itm.Amount:" + itm.Amount.ToString() + " != need.Amount:" + need.Amount.ToString() );
 							}
 						}
 
@@ -583,7 +750,6 @@ namespace SpaceCraft.Utils {
 				if( block.IsFullIntegrity || exclude.Contains(block) ) continue;
 
 				int p = Prioritize(block);
-				//MyAPIGateway.Utilities.ShowMessage( "Priority", block.ToString() + " " + p.ToString() );
 				if( best == null || p > priority ) {
 					best = block;
 					priority = p;
@@ -657,8 +823,6 @@ namespace SpaceCraft.Utils {
 			if( def.Id.TypeId == OBTypes.Turret ) {
 				ass.AddQueueItem( OBTypes.Magazine, (VRage.MyFixedPoint)3 );
 			}
-
-			//MyAPIGateway.Utilities.ShowMessage( "AddQueueItems", def.ToString() + " components queued with " + ass.ToString()  );
 
 			return true;
 		}
@@ -806,7 +970,6 @@ namespace SpaceCraft.Utils {
 						//IMySlimBlock hit = Grid.GetCubeBlock( point.Normal + block.Position );
 						IMySlimBlock hit = Grid.GetCubeBlock( (point.Normal*size) + block.Position );
 
-						//MyAPIGateway.Utilities.ShowMessage( "point.Normal", point.Normal.ToString() );
 						if( hit == null ) {
 							//slot = point.Normal + block.Position;
 							slot = (point.Normal*size) + block.Position;
@@ -846,7 +1009,6 @@ namespace SpaceCraft.Utils {
 				if( !block.FatBlock.IsFunctional ) continue;
 
 				int p = Prioritize( block );
-				//MyAPIGateway.Utilities.ShowMessage( "GetAssembler", block.ToString() + " Priority: " + p.ToString() );
 				if( best == null || p > priority ) {
 					best = block.FatBlock as IMyAssembler;
 					priority = p;
@@ -901,10 +1063,10 @@ namespace SpaceCraft.Utils {
 
 				foreach( MyObjectBuilder_CubeBlock block in grid.CubeBlocks ) {
 					block.EntityId = (long)0;
-					// if( owner.MyFaction != null ) {
-					// 	block.Owner = owner.MyFaction.FounderId;
-					// 	block.BuiltBy = owner.MyFaction.FounderId;
-					// }
+					if( owner.MyFaction != null ) {
+						block.Owner = owner.MyFaction.FounderId;
+						block.BuiltBy = owner.MyFaction.FounderId;
+					}
 					if( block.ColorMaskHSV == DefaultColor )
 						block.ColorMaskHSV = owner.Color;
 					//block.Min = new Vector3I(Vector3D.Transform(new Vector3D(block.Min), matrix))	;
@@ -915,7 +1077,6 @@ namespace SpaceCraft.Utils {
           return null;
         }
 
-				entity.RemoveFromGamePruningStructure();
         entity.Flags &= ~EntityFlags.Save;
         //ent.Flags &= ~EntityFlags.NeedsUpdate;
 
@@ -946,17 +1107,16 @@ namespace SpaceCraft.Utils {
 			grid.PositionAndOrientation = new MyPositionAndOrientation(ref matrix);
 
 			foreach( MyObjectBuilder_CubeBlock block in grid.CubeBlocks ) {
-				// if( owner.MyFaction != null ) {
-				// 	block.Owner = owner.MyFaction.FounderId;
-				// 	block.BuiltBy = owner.MyFaction.FounderId;
-				// }
+				if( owner.MyFaction != null ) {
+					block.Owner = owner.MyFaction.FounderId;
+					block.BuiltBy = owner.MyFaction.FounderId;
+				}
 			}
 			MyEntity entity = (MyEntity)MyAPIGateway.Entities.CreateFromObjectBuilder(grid);
 			IMyCubeGrid g = null;
 
 			if( entity != null ) {
 				entity.Flags &= ~EntityFlags.Save;
-				entity.RemoveFromGamePruningStructure();
         entity.Render.Visible = true;
         //entity.WorldMatrix = matrix;
         MyAPIGateway.Entities.AddEntity(entity);
@@ -974,7 +1134,10 @@ namespace SpaceCraft.Utils {
 				Orientation =  Quaternion.CreateFromForwardUp(Vector3.Left, Vector3.Backward),
 				Min = new Vector3I(-1,-1,-3),
 				BuildPercent = 0.0f,
-				ConstructionInventory = new MyObjectBuilder_Inventory()
+				ConstructionInventory = new MyObjectBuilder_Inventory(),
+				Owner = Owner.MyFaction.FounderId,
+				BuiltBy = Owner.MyFaction.FounderId,
+				ShareMode = MyOwnershipShareModeEnum.Faction
 			} );
 
 			if( slim == null ) {
@@ -990,7 +1153,10 @@ namespace SpaceCraft.Utils {
 							SubtypeName = "LargeAdvancedStator",
 							Orientation =  Quaternion.CreateFromForwardUp(Vector3.Left, Vector3.Backward),
 							BuildPercent = 0.0f,
-							ConstructionInventory = new MyObjectBuilder_Inventory()
+							ConstructionInventory = new MyObjectBuilder_Inventory(),
+							Owner = Owner.MyFaction.FounderId,
+							BuiltBy = Owner.MyFaction.FounderId,
+							ShareMode = MyOwnershipShareModeEnum.Faction
 						}
 					}
 				}, slim.FatBlock.WorldMatrix, Owner );
@@ -1020,7 +1186,10 @@ namespace SpaceCraft.Utils {
 								Min = new Vector3I(0,-1,-1),
 								Orientation =  Quaternion.CreateFromForwardUp(Vector3.Forward, Vector3.Down),
 								BuildPercent = 0.0f,
-								ConstructionInventory = new MyObjectBuilder_Inventory()
+								ConstructionInventory = new MyObjectBuilder_Inventory(),
+								Owner = Owner.MyFaction.FounderId,
+								BuiltBy = Owner.MyFaction.FounderId,
+								ShareMode = MyOwnershipShareModeEnum.Faction
 							}, false );
 
 							if( slim == null ) {
@@ -1035,7 +1204,10 @@ namespace SpaceCraft.Utils {
 							Min = new Vector3I(0,0,skipRefinery ? -1 : -2),
 							Orientation =  Quaternion.CreateFromForwardUp(Vector3.Backward, Vector3.Right),
 							BuildPercent = 0.0f,
-							ConstructionInventory = new MyObjectBuilder_Inventory()
+							ConstructionInventory = new MyObjectBuilder_Inventory(),
+							Owner = Owner.MyFaction.FounderId,
+							BuiltBy = Owner.MyFaction.FounderId,
+							ShareMode = MyOwnershipShareModeEnum.Faction
 						}, false );
 
 						if( slim == null ) {

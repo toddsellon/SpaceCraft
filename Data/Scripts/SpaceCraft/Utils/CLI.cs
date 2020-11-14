@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using VRageMath;
 using VRage;
@@ -13,55 +14,140 @@ namespace SpaceCraft.Utils {
 
   public class CLI {
 
-    protected Dictionary<string,Action<MyCommandLine>> Actions = new Dictionary<string,Action<MyCommandLine>>();
-    protected Dictionary<string,string> Convars = new Dictionary<string,string>();
-
-    public CLI() {
-      // MyAPIGateway.Multiplayer.RegisterMessageHandler(8877, ChatCommand.MessageHandler);
-      Actions.Add("set",Set);
-      Actions.Add("get",Get);
-      Actions.Add("attack",Attack);
-
-      Convars.Add("grids",grids);
-      Convars.Add("difficulty",difficulty);
-      Convars.Add("engineers",engineers);
-
-      MyAPIGateway.Utilities.MessageEntered += MessageEntered;
+    public class QueuedAction {
+      public Action<MyCommandLine,Message> action;
+      public MyCommandLine cmd;
+      public Message message;
     }
 
-    public void MessageEntered(string message, ref bool broadcast){
-			if(!message.StartsWith("/sc")) return;
+    protected QueuedAction Queued;
+    protected static ushort Id = 8008;
+    protected bool Server;
+    //public static readonly Convars Settings = new Convars();
+    protected Dictionary<string,Action<MyCommandLine,Message>> Actions = new Dictionary<string,Action<MyCommandLine,Message>>(StringComparer.OrdinalIgnoreCase);
+
+    public CLI(bool server) {
+      Server = server;
+
+      Actions.Add("get",Get);
+      Actions.Add("attack",Attack);
+      Actions.Add("build",Build);
+      Actions.Add("set",Set);
+      Actions.Add("spawn",Spawn);
+      Actions.Add("follow",Follow);
+      Actions.Add("war",War);
+      Actions.Add("peace",Peace);
+      Actions.Add("debug",Debug);
+
+      MyAPIGateway.Utilities.MessageEntered += MessageEntered;
+      MyAPIGateway.Multiplayer.RegisterMessageHandler(Id, MessageHandler);
+    }
+
+    public void Destroy() {
+      MyAPIGateway.Utilities.MessageEntered -= MessageEntered;
+      MyAPIGateway.Multiplayer.UnregisterMessageHandler(Id, MessageHandler);
+    }
+
+    public void MessageEntered(string text, ref bool broadcast){
+			if(!text.StartsWith("/sc ",StringComparison.OrdinalIgnoreCase)) return;
+
+      broadcast = false;
 
 
-			MyCommandLine cmd = new MyCommandLine();
-			if( !cmd.TryParse(message) ) return;
-			broadcast = false;
-      string action = cmd.Argument(1);
+      if( !Server ) {
+        SendMessageToServer( new Message {
+          Text = text
+        });
+        return;
+      }
 
-      if( Actions.ContainsKey(action) )
-        Actions[action](cmd);
+			ParseMessage(text);
 
 		}
 
-    public void Set( MyCommandLine cmd ) {
+    public void MessageHandler(byte[] data){
+
+      Message message = MyAPIGateway.Utilities.SerializeFromBinary<Message>(data);
+
+      if( Server ) {
+        ParseMessage(message.Text,message);
+      } else {
+        MyAPIGateway.Utilities.ShowMessage( message.Sender, message.Text );
+      }
+
+		}
+
+    public bool ParseMessage(string text, Message message = null) {
+      MyCommandLine cmd = new MyCommandLine();
+			if( !cmd.TryParse(text) ) return false;
+
+      string action = cmd.Argument(1);
+
+      if( Actions.ContainsKey(action) ) {
+        Queued = new QueuedAction{
+          action = Actions[action],
+          cmd = cmd,
+          message = message
+        };
+        //MyAPIGateway.Utilities.InvokeOnGameThread(RunAction);
+        //Actions[action](cmd, message);
+        return true;
+      }
+      return false;
+    }
+
+    public void RunAction() {
+      if( Queued != null )
+        Queued.action(Queued.cmd, Queued.message);
+      Queued = null;
+    }
+
+    public bool SendMessageToServer(Message message) {
+      if( message == null ) return false;
       IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
-			if( player.PromoteLevel != MyPromoteLevel.Admin && player.PromoteLevel != MyPromoteLevel.Owner ) return;
-      string convar = cmd.Argument(2);
-      if( Convars.ContainsKey(convar) ) {
-        Convars[convar] = cmd.Argument(3);
-        MyAPIGateway.Utilities.ShowMessage( convar, Convars[convar] );
+      message.SteamUserId = player.SteamUserId;
+      message.PlayerID = player.IdentityId;
+      byte[] data = MyAPIGateway.Utilities.SerializeToBinary<Message>(message);
+      return MyAPIGateway.Multiplayer.SendMessageToServer(Id, data);
+    }
+
+    public bool SendMessageToClient(Message message) {
+      if( message == null || message.SteamUserId == 0 ) return false;
+      byte[] data = MyAPIGateway.Utilities.SerializeToBinary<Message>(message);
+      return MyAPIGateway.Multiplayer.SendMessageTo(Id, data, message.SteamUserId);
+    }
+
+    public void Respond( string sender, string text, Message message = null ) {
+      if( message == null )
+        MyAPIGateway.Utilities.ShowMessage( sender, text );
+      else {
+        message.Sender = sender;
+        message.Text = text;
+        SendMessageToClient(message);
       }
     }
 
-    public void Get( MyCommandLine cmd ) {
-      string convar = cmd.Argument(2);
-      if( Convars.ContainsKey(convar) ) {
-        MyAPIGateway.Utilities.ShowMessage( convar, Convars[convar] );
-      }
-
+    public void Debug( MyCommandLine cmd, Message message ) {
+      Convars.Static.Debug = !Convars.Static.Debug;
     }
 
-    public void Attack( MyCommandLine cmd ) {
+    public void Set( MyCommandLine cmd, Message message ) {
+      if( message != null ) {
+        Respond("Error","You don't have permission", message);
+        return;
+      }
+      //IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
+			//if( player.PromoteLevel != MyPromoteLevel.Admin && player.PromoteLevel != MyPromoteLevel.Owner ) return;
+      string convar = cmd.Argument(2);
+      Respond(convar, Convars.Static.Set(convar,cmd.Argument(3)), message);
+    }
+
+    public void Get( MyCommandLine cmd, Message message ) {
+      string convar = cmd.Argument(2);
+      Respond(convar, Convars.Static.Get(convar), message);
+    }
+
+    public void Attack( MyCommandLine cmd, Message message ) {
       IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
       Faction faction = SpaceCraftSession.GetFactionContaining(player.PlayerID);
       if( faction == null ) return;
@@ -86,20 +172,129 @@ namespace SpaceCraft.Utils {
 
     }
 
+    public void Build( MyCommandLine cmd, Message message ) {
+      IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
+      Faction faction = SpaceCraftSession.GetFactionContaining(message == null ? player.PlayerID : message.PlayerID);
+      if( faction == null ) {
+        Respond("Error", "You do not belong to a SpaceCraft faction", message);
+        return;
+      }
+
+      Prefab prefab = Prefab.Get(cmd.Argument(2));
+      if( prefab == null ) {
+        Respond("Error", "Prefab not found " + cmd.Argument(2), message);
+        return;
+      }
+
+      faction.CurrentGoal = new Goal {
+        Type = Goals.Construct,
+        Prefab = prefab
+      };
+
+      Respond("Building", cmd.Argument(2), message);
+    }
+
+    public void Spawn( MyCommandLine cmd, Message message ) {
+      if( message != null ) {
+        Respond("Error","You don't have permission", message);
+        return;
+      }
+      IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
+      Faction faction = SpaceCraftSession.GetFactionContaining(player.PlayerID);
+      if( faction == null ) {
+        Respond("Error", "You do not belong to a SpaceCraft faction", message);
+        return;
+      }
+      Prefab prefab = Prefab.Get(cmd.Argument(2));
+      if( prefab == null ) {
+        Respond("Error", "Prefab not found " + cmd.Argument(2), message);
+        return;
+      }
+      CubeGrid grid = new CubeGrid( CubeGrid.Spawn(prefab, faction.GetPlacementLocation(prefab), faction) );
+      if( grid != null && grid.Grid != null )
+        faction.TakeControl( grid );
+
+      Respond("Spawning", cmd.Argument(2), message);
+    }
+
+    public void Follow( MyCommandLine cmd, Message message ) {
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+      if( player == null ) {
+        Respond("Error", "Player not found", message);
+        return;
+      }
+      Faction faction = SpaceCraftSession.GetFactionContaining(player.PlayerID);
+      if( faction == null ) {
+        Respond("Error", "You do not belong to a SpaceCraft faction", message);
+        return;
+      }
+
+      faction.Follow(player);
+      Respond("Following", player.DisplayName, message);
+    }
+
+    public void War( MyCommandLine cmd, Message message ) {
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+      if( player == null ) {
+        Respond("Error", "Player not found", message);
+        return;
+      }
+      Faction faction = SpaceCraftSession.GetFactionContaining(player.PlayerID);
+      if( faction == null ) {
+        Respond("Error", "You do not belong to a SpaceCraft faction", message);
+        return;
+      }
+
+      Faction target = SpaceCraftSession.GetFaction(cmd.Argument(2).ToUpper());
+      if( target == null ) {
+        Respond("Error", "Could not find faction to declare war", message);
+        return;
+      }
+
+      MyAPIGateway.Session.Factions.DeclareWar(faction.MyFaction.FactionId, target.MyFaction.FactionId);
+      Respond("War", "were declared on " + target.Name, message);
+    }
+
+    public void Peace( MyCommandLine cmd, Message message ) {
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+      if( player == null ) {
+        Respond("Error", "Player not found", message);
+        return;
+      }
+      Faction faction = SpaceCraftSession.GetFactionContaining(player.PlayerID);
+      if( faction == null ) {
+        Respond("Error", "You do not belong to a SpaceCraft faction", message);
+        return;
+      }
+      Faction target = SpaceCraftSession.GetFaction(cmd.Argument(2).ToUpper());
+      if( target == null ) {
+        Respond("Error", "Could not find faction to declare war", message);
+        return;
+      }
+
+      // if( MyAPIGateway.Session.Factions.IsPeaceRequestStateSent (long myFactionId, long foreignFactionId) ) {
+      //   MyAPIGateway.Session.Factions.AcceptPeace (long fromFactionId, long toFactionId);
+      //   Respond("Peace", "was made with " + target.Name, message);
+      // } else{
+      //   MyAPIGateway.Session.Factions.SendPeaceRequest (long fromFactionId, long toFactionId);
+      //   Respond("Peace", "was requested with " + target.Name, message);
+      // }
+      Respond("Peace", "Not Implemented yet", message);
+    }
+
     public string grids
 		{
 			get
 			{
-        int val;
-        MyAPIGateway.Utilities.GetVariable<int>("SC-Grids", out val);
-				return val.ToString();
+				return Convars.Static.Grids.ToString();
 			}
 
       set
       {
         int v;
         if( Int32.TryParse(value, out v) ) {
-          MyAPIGateway.Utilities.SetVariable<int>("SC-Grids", v);
+          Convars.Static.Grids = v;
+          //MyAPIGateway.Utilities.SetVariable<int>("SC-Grids", v);
         }
       }
 		}
@@ -108,16 +303,15 @@ namespace SpaceCraft.Utils {
 		{
 			get
 			{
-        int val;
-        MyAPIGateway.Utilities.GetVariable<int>("SC-Difficulty", out val);
-				return val.ToString();
+        return Convars.Static.Difficulty.ToString();
 			}
 
       set
       {
-        int v;
-        if( Int32.TryParse(value, out v) ) {
-          MyAPIGateway.Utilities.SetVariable<int>("SC-Difficulty", v);
+        float v;
+        if( float.TryParse(value, out v) ) {
+          //MyAPIGateway.Utilities.SetVariable<float>("SC-Difficulty", v);
+          Convars.Static.Difficulty = v;
         }
       }
 		}
@@ -126,32 +320,36 @@ namespace SpaceCraft.Utils {
 		{
 			get
 			{
-        int val;
-        MyAPIGateway.Utilities.GetVariable<int>("SC-Engineers", out val);
-				return val.ToString();
+				return Convars.Static.Engineers.ToString();
 			}
 
       set
       {
         int v;
         if( Int32.TryParse(value, out v) ) {
-          MyAPIGateway.Utilities.SetVariable<int>("SC-Engineers", v);
+          Convars.Static.Engineers = v;
+          //MyAPIGateway.Utilities.SetVariable<int>("SC-Engineers", v);
         }
       }
 		}
 
-		// public static void MessageHandler(byte[] data){
-		//
-		// 	var receivedData = MyAPIGateway.Utilities.SerializeFromBinary<SyncData>(data);
-		//
-		// 	if(receivedData.Instruction.StartsWith("MESChatMsg") == true){
-		//
-		// 		ServerChatProcessing(receivedData);
-		//
-		// 	}
-		//
-		//
-		// }
+    public string debug
+		{
+			get
+			{
+				return Convars.Static.Debug.ToString();
+			}
+
+      set
+      {
+        bool v = Boolean.Parse(value);
+        Convars.Static.Debug = v;
+        //MyAPIGateway.Utilities.SetVariable<bool>("SC-Debug", v);
+      }
+		}
+
+
+
   }
 
 }

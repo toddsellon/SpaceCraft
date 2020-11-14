@@ -42,7 +42,7 @@ namespace SpaceCraft.Utils {
 
 		public IMyIdentity Identity;
     public IMyCharacter Character;
-		//public MyGhostCharacter Ghost = null;
+		//public MyGhostCharacter Ghost = new MyGhostCharacter();
 
 		public MatrixD WorldMatrix {
 			get {
@@ -67,7 +67,7 @@ namespace SpaceCraft.Utils {
 			if( (Character == null || Character.Integrity == 0) ) {
 				CurrentOrder = null;
 				MatrixD matrix = Character.WorldMatrix;
-				Character = Spawn(Owner.GetSpawnLocation());
+				Character = Spawn();
 				Initialize();
 			}
 
@@ -95,24 +95,23 @@ namespace SpaceCraft.Utils {
 				case Orders.Scout:
 					Scout();
 					break;
+				case Orders.Follow:
+					Follow();
+					break;
 			}
-			Tick++;
-			if( Tick == 99 ) {
-				Tick = 0;
-			}
+			// Tick++;
+			// if( Tick == 99 ) {
+			// 	Tick = 0;
+			// }
 
 		}
 
 		public Engineer( Faction owner, IMyCharacter character = null ) {
 			Owner = owner;
 
-			// Identity = MyAPIGateway.Players.CreateNewIdentity( new MyObjectBuilder_Identity{
-			// 	ColorMask = Owner.Color,
-			// 	DisplayName = Owner.Name + " Engineer"
-			// });
-				//character = Spawn(Owner.GetSpawnLocation());
-			Character = character ?? Spawn(Owner.GetSpawnLocation());
+			Character = character ?? Spawn();
 			Entity = Character;
+
 			Flying = true;
 	    Spacecraft = true;
 	    Drills = true;
@@ -126,6 +125,28 @@ namespace SpaceCraft.Utils {
 				var npcData = MyAPIGateway.Utilities.SerializeFromBinary<Engineer>(Convert.FromBase64String(data));
 			}*/
 			Initialize();
+		}
+
+		public void Initialize() {
+			if( Character == null ) return;
+
+			Jetpack = Character.Components.Get<MyCharacterJetpackComponent>();
+			Ragdoll = Character.Components.Get<MyCharacterRagdollComponent>();
+			Animation = Character.Components.Get<MyAnimationControllerComponent>();
+			//MyAPIGateway.Players.SetControlledEntity(MyAPIGateway.Session.Player.SteamUserId, Character as IMyEntity);
+
+			Character.DoDamage(0.0f, MyStringHash.Get(string.Empty), true); // Hack to property init Physics
+
+			if( !Character.EnabledDamping ) {
+				Character.SwitchDamping();
+			}
+			if( !Character.EnabledThrusts ) {
+				Character.SwitchThrusts();
+			}
+
+			Character.Physics.Activate();
+
+
 		}
 
 		public override bool Execute( Order order, bool force = false ) {
@@ -147,6 +168,12 @@ namespace SpaceCraft.Utils {
 			}
 
 			return false;
+		}
+
+		public void Follow() {
+			if( CurrentOrder == null || CurrentOrder.Player == null ) return;
+			CurrentOrder.Destination = CurrentOrder.Player.GetPosition();
+			Move();
 		}
 
 		public override bool Move() {
@@ -178,14 +205,15 @@ namespace SpaceCraft.Utils {
 				if( !Character.EnabledThrusts ) {
 					Character.SwitchThrusts();
 				}
-				if( altitude < 10f ) {
+				if( altitude < 2f ) {
 					Vector3D up = closestPoint - CurrentOrder.Planet.WorldMatrix.Translation;
 					up.Normalize();
-					destination = destination + (up*10f);
+					destination = destination + (up*2f);
 				}
 				//destination.Normalize();
 				Vector3 targetDelta = Vector3.Normalize(destination - Character.WorldMatrix.Translation);
 				Jetpack.MoveAndRotate( ref targetDelta, ref rotation, 0.0f, false );
+				//Jetpack.MoveAndRotate( ref destination, ref rotation, 0.0f, false );
 			}
 
 			return true;
@@ -285,28 +313,6 @@ namespace SpaceCraft.Utils {
 			};
     }
 
-		public void Initialize() {
-			if( Character == null ) return;
-
-			Jetpack = Character.Components.Get<MyCharacterJetpackComponent>();
-			Ragdoll = Character.Components.Get<MyCharacterRagdollComponent>();
-			Animation = Character.Components.Get<MyAnimationControllerComponent>();
-			//MyAPIGateway.Players.SetControlledEntity(MyAPIGateway.Session.Player.SteamUserId, Character as IMyEntity);
-
-			Character.DoDamage(0.0f, MyStringHash.Get(string.Empty), true); // Hack to property init Physics
-
-			if( !Character.EnabledDamping ) {
-				Character.SwitchDamping();
-			}
-			if( !Character.EnabledThrusts ) {
-				Character.SwitchThrusts();
-			}
-
-			Character.Physics.Activate();
-
-
-		}
-
 		public void SwitchToWeapon( Weapons weapon = Weapons.None ) {
 			if( Character != null ) {
 				Sandbox.Game.Entities.IMyControllableEntity e = Character as Sandbox.Game.Entities.IMyControllableEntity;
@@ -350,11 +356,12 @@ namespace SpaceCraft.Utils {
 		}
 
 
+		public IMyCharacter Spawn() {
+			return Spawn(Owner.GetSpawnLocation());
+		}
 
 		public IMyCharacter Spawn( MatrixD matrix ) {
 			if( matrix == null ) return null;
-
-
 
 			MyObjectBuilder_Character character = new MyObjectBuilder_Character(){
         CharacterModel = "Astronaut",
@@ -362,12 +369,13 @@ namespace SpaceCraft.Utils {
         //BotDefId = SerializableDefinitionId(MyObjectBuilderType.Parse("MyObjectBuilder_Character"), "MyObjectBuilder_BarbarianBot"),
         JetpackEnabled = true,
         PersistentFlags = MyPersistentEntityFlags2.InScene,
-				Name = Owner.Name,
-				DisplayName = Owner.Name,
-        //Name = Owner.Founder == null ? Owner.Name : Owner.Founder.DisplayName,
-        //DisplayName = Owner.Founder == null ? Owner.Name : Owner.Founder.DisplayName,
+				// Name = Owner.Name,
+				// DisplayName = Owner.Name,
+        Name = Owner.Founder == null ? Owner.Name : Owner.Founder.DisplayName,
+        DisplayName = Owner.Founder == null ? Owner.Name : Owner.Founder.DisplayName,
 				ColorMaskHSV = Color.Gold.ToVector3(),
-				PlayerSteamId = (ulong)(Owner == null || Owner.MyFaction == null ? 0 : Owner.MyFaction.FounderId),
+				//PlayerSteamId = (ulong)(Owner == null || Owner.MyFaction == null ? 0 : Owner.MyFaction.FounderId),
+				PlayerSteamId = Owner.MyFaction == null ? 0 : MyAPIGateway.Players.TryGetSteamId(Owner.MyFaction.FounderId),
 				PlayerSerialId = (int)(Owner == null || Owner.MyFaction == null ? 0 : Owner.MyFaction.FounderId),
         Inventory = new MyObjectBuilder_Inventory(){
 					Items = new List<MyObjectBuilder_InventoryItem>(){
@@ -399,20 +407,31 @@ namespace SpaceCraft.Utils {
       };
 
       MyEntity ent = (MyEntity)MyAPIGateway.Entities.CreateFromObjectBuilder(character);
-			if( Owner != null && Owner.MyFaction != null )
-				MyAPIGateway.Players.SetControlledEntity((ulong)Owner.MyFaction.FounderId, ent);
+			if( Owner != null && Owner.Founder != null ) {
+				//MyAPIGateway.Players.SetControlledEntity((ulong)Owner.MyFaction.FounderId, ent);
+				//MyAPIGateway.Players.SetControlledEntity(MyAPIGateway.Players.TryGetSteamId(Owner.MyFaction.FounderId), ent);
+				//																																											PlayerId
+				MyAPIGateway.Players.SetControlledEntity((ulong)Owner.Founder.PlayerId, ent);
+				//MyAPIGateway.Players.ExtendControl(Ghost, ent);
+				//AddPlayerToFaction (long playerId, long factionId)
+
+			}
+
+
+			//MyAPIGateway.Session.Factions.AddPlayerToFaction (long playerId, long factionId)
+			//MyAPIGateway.Players.TryExtendControl (IMyControllableEntity entityWithControl, IMyEntity entityGettingControl)
 
 			if( ent != null ) {
         ent.Flags &= ~EntityFlags.Save;
         //ent.Flags &= ~EntityFlags.NeedsUpdate;
-				ent.RemoveFromGamePruningStructure();
         ent.Render.Visible = true;
         ent.NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
         MyAPIGateway.Entities.AddEntity(ent);
 				IMyCharacter c = ent as IMyCharacter;
 				// IMyPlayer player = MyAPIGateway.Players.GetPlayerControllingEntity(ent);
-				// if( player != null && owner.MyFaction != null )
-				// 	MyAPIGateway.Session.Factions.AddPlayerToFaction(player.PlayerID, owner.MyFaction.FactionId);
+				// if( player != null && Owner.MyFaction != null )
+				// 	MyAPIGateway.Session.Factions.AddPlayerToFaction(player.PlayerID, Owner.MyFaction.FactionId);
+
 
         return c;
 

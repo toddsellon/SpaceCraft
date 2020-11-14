@@ -36,7 +36,7 @@
               <Enabled>true</Enabled>
               <IsLocked>false</IsLocked>
               <BrakeForce>-INF</BrakeForce>
-              <AutoLock>true</AutoLock>
+              <AutoLock>false</AutoLock>
               <FirstLockAttempt>false</FirstLockAttempt>
               <LockSound>ArcShipLandGearOn</LockSound>
               <UnlockSound>ArcShipLandGearOff</UnlockSound>

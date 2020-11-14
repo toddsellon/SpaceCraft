@@ -19,7 +19,8 @@ namespace SpaceCraft.Utils {
     Scout,
     Attack,
     Deposit,
-    Withdraw
+    Withdraw,
+    Follow
   };
 
   public class Order {
@@ -33,6 +34,7 @@ namespace SpaceCraft.Utils {
     public int Tick = 0;
     public MyObjectBuilderType Filter = MyObjectBuilderType.Invalid;
     public MyPlanet Planet;
+    public IMyPlayer Player;
 
     public void Progress() {
       if( Step < Steps.Completed )
