@@ -11,7 +11,7 @@ SpaceCraft is still a work in progress, so please expect issues/bugs/other frust
 Factions are defined inside XML formated .sbc files *outside the SpaceCraft base mod*. Custom prefabs can also be added via XML.
 
 # Example
-The &lt;SpawnGroup&gt; *&lt;Description&gt;* is parsed using a Command Line syntax (separated by spaces). The first argument of "SpaceCraft" defines a new Faction. The Faction tag is the second argument. Optionally, an HSV color may be specified as the first argument. Also, any faction-specific parameters can optionally be defined with flags (i.e. -aggressive).
+The &lt;SpawnGroup&gt; **&lt;Description&gt;** is parsed using a Command Line syntax (separated by spaces). The first argument of "SpaceCraft" defines a new Faction. The Faction tag is the second argument. Optionally, an HSV color may be specified as the first argument. Also, any faction-specific parameters can optionally be defined with flags (i.e. -aggressive).
 
 ```xml
 <?xml version="1.0"?>
@@ -66,26 +66,26 @@ More to come!
 # Command Line Interface
 SpaceCraft has a chat-based command interface that allows you to control SpaceCraft factions or change session settings. To use the CLI, simply type "/sc" into the chat, followed by your command. The following are the available commands (square brackets indicates optional arguments):
 
-- get 
+- **get **
 Returns the value of a setting. All possible settings listed below.
 	- /sc get difficulty
-- set
-Changes a configuration setting
+- **set**
+	- Changes a configuration setting
 	- /sc set engineers 2
--attack [faction]
-Orders your faction to attack the specified faction or the nearest enemy if a Faction is not specified (buggy)
+-**attack** [faction]
+	- Orders your faction to attack the specified faction or the nearest enemy if a Faction is not specified (buggy)
 	-/sc attack "HVS"
--build "Prefab Name" [faction]
-Orders the specified faction to begin construction of a specific prefab or orders your current faction if one is not specified.
+-**build** "Prefab Name" [faction]
+	- Orders the specified faction to begin construction of a specific prefab or orders your current faction if one is not specified.
 	-/sc build "Terran SCV"
--spawn "Prefab Name" [faction]
-Spawns a completed prefab for specified faction or your faction if one is not specified.
+-**spawn** "Prefab Name" [faction]
+	- Spawns a completed prefab for specified faction or your faction if one is not specified.
 	-/sc spawn "Terran Battlecruiser" ARC
--follow
-Orders your faction to follow your Player Character (buggy)
+-**follow**
+	- Orders your faction to follow your Player Character (buggy)
 	-/sc follow
--debug
-Toggles debug mode on/off
+-**debug**
+	- Toggles debug mode on/off
 	-/sc debug
 
 
