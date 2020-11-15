@@ -79,8 +79,14 @@ namespace SpaceCraft.Utils {
     public List<CubeGrid> Docked = new List<CubeGrid>();
 
     public void ToggleDocked( CubeGrid grid ) {
-			List<IMySlimBlock> mine = GetBlocks<IMyFunctionalBlock>(null,true);
-			List<IMySlimBlock> theirs = grid.GetBlocks<IMyFunctionalBlock>(null,true);
+
+			if( DockedTo != null ) {
+				DockedTo.ToggleDocked(grid);
+				return;
+			}
+
+			// List<IMySlimBlock> mine = GetBlocks<IMyFunctionalBlock>(null,true);
+			// List<IMySlimBlock> theirs = grid.GetBlocks<IMyFunctionalBlock>(null,true);
 			bool disconnect = true;
       if( grid.DockedTo == null ) {
 				Docked.Add( grid );
@@ -92,11 +98,11 @@ namespace SpaceCraft.Utils {
 				grid.DockedTo = null;
 				//grid.FindConstructionSite();
 			}
-			foreach( IMySlimBlock i in mine ) {
-				foreach( IMySlimBlock j in theirs ) {
-					ConnectBlocks(i.FatBlock as IMyFunctionalBlock, j.FatBlock as IMyFunctionalBlock, disconnect);
-				}
-			}
+			// foreach( IMySlimBlock i in mine ) {
+			// 	foreach( IMySlimBlock j in theirs ) {
+			// 		ConnectBlocks(i.FatBlock as IMyFunctionalBlock, j.FatBlock as IMyFunctionalBlock, disconnect);
+			// 	}
+			// }
 
     }
 
@@ -163,7 +169,8 @@ namespace SpaceCraft.Utils {
 
 
 				//AssessInventory();
-				UpdateInventory();
+				if( DockedTo == null )
+					UpdateInventory();
 				// if( Grid.IsStatic )
 				// 	Drill();
 				Tick = 0;
@@ -385,19 +392,49 @@ namespace SpaceCraft.Utils {
 
 			float old = ConstructionSite == null ? 1.0f : ConstructionSite.BuildIntegrity;
 			List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
+			IMyAssembler main = GetAssembler();
 			Dictionary<IMyCubeBlock,CubeGrid.Item> needs = new Dictionary<IMyCubeBlock,CubeGrid.Item>();
+			CubeGrid.Item bp = null;
 			// Assess needs
 			foreach( IMySlimBlock slim in blocks ) {
 				IMyCubeBlock block = slim.FatBlock;
 				if( block == null || !block.IsFunctional ) continue;
 				CubeGrid.Item need = AssessNeed(block);
-				if( need != null )
+				if( need != null ) {
+					if( need.Id.TypeId == OBTypes.Magazine )
+						bp = need;
+
 					needs.Add(block,need);
-				else if( block is IMyAssembler ) {
-					// TODO: Cooperative mode
+				}
+				else if( block is IMyAssembler && block != main ) {
+					IMyAssembler factory = block as IMyAssembler;
+					//string SubtypeName = factory.SlimBlock.BlockDefinition.Id.SubtypeName;
+					// List<MyProductionQueueItem> queue;
+					List<MyProductionQueueItem> queue = main.GetQueue();
+
+					if( factory.IsQueueEmpty && queue.Count > 0 ) {
+						// Cooperative Mode
+						if( factory.CanUseBlueprint(queue[0].Blueprint) ) {
+							main.RemoveQueueItem(0, (VRage.MyFixedPoint)1);
+							factory.AddQueueItem(queue[0].Blueprint, (VRage.MyFixedPoint)1);
+						}
+					}
 				}
 
 				AllocateResources(block);
+			}
+
+			// See if ammo needs queue
+			if( bp != null ) {
+
+				MyBlueprintDefinitionBase bpd =	MyDefinitionManager.Static.TryGetBlueprintDefinitionByResultId(bp.Id);
+				if( bpd != null ) {
+
+					List<MyProductionQueueItem> queue = main.GetQueue();
+					if( queue.Count == 0 || queue[0].Blueprint != bpd )
+						main.InsertQueueItem(0,bpd, bp.Amount);
+						//main.AddQueueItem(bpd, bp.Amount);
+				}
 			}
 
 			// Fulfill needs
@@ -408,17 +445,29 @@ namespace SpaceCraft.Utils {
 				List<IMyCubeBlock> fulfilled = new List<IMyCubeBlock>();
 				foreach( IMyCubeBlock b in needs.Keys ) {
 					if( block == b ) continue;
+					IMyInventory inventory = b.GetInventory();
 					CubeGrid.Item need = needs[b];
+					//bool fnd = false;
 					for( int i = 0; i < 2; i++ ) {
 						IMyInventory inv = block.GetInventory(i);
 						if( inv == null ) continue;
 						List<IMyInventoryItem> items = inv.GetItems();
 						int j = 0;
+
 						foreach( IMyInventoryItem item in items ) {
-							if( item.Content.TypeId == need.Id.TypeId && (need.Id.SubtypeName == String.Empty || need.Id.SubtypeName == item.Content.SubtypeName ) ) {
-								inv.TransferItemTo(b.GetInventory(), j, null, true, need.Amount, false);
-								fulfilled.Add(b);
-								break;
+							if( item.Content.TypeId == need.Id.TypeId
+									&& (need.Id.SubtypeName == String.Empty || need.Id.SubtypeName == item.Content.SubtypeName )
+									&& (!needs.ContainsKey(block) || needs[block] != need ) // Need same thing
+									&& (need.Id != OBTypes.AnyOre || (need.Id == OBTypes.AnyOre && (item.Content.SubtypeName != "Ice" && item.Content.SubtypeName != "Stone" ) ) ) ) {
+
+								inv.TransferItemTo(inventory, j, null, true, need.Amount, false);
+								//if( !fnd )
+								if( need.Id != OBTypes.AnyOre ) {
+									fulfilled.Add(b);
+
+									//fnd = true;
+									break;
+								}
 							}
 							j++;
 						}
@@ -451,11 +500,12 @@ namespace SpaceCraft.Utils {
 		}
 
 		internal CubeGrid.Item AssessNeed(IMyCubeBlock block) {
+			IMyInventory inventory = null;
 			if( block is IMyAssembler ) {
 				if( block.BlockDefinition.TypeIdString == "MyObjectBuilder_SurvivalKit" )
 					return new CubeGrid.Item {
 						Id = OBTypes.Stone,
-						Amount = (VRage.MyFixedPoint)1000
+						Amount = (VRage.MyFixedPoint)500
 					};
 
 				IMyAssembler ass = block as IMyAssembler;
@@ -464,7 +514,7 @@ namespace SpaceCraft.Utils {
 				if( queue.Count == 0 ) return null;
 				// item.Blueprint.Id.SubtypeName;
 				MyBlueprintDefinitionBase bp =	MyDefinitionManager.Static.GetBlueprintDefinition(queue[0].Blueprint.Id);
-				IMyInventory inventory = ass.GetInventory(0);
+				inventory = ass.GetInventory(0);
 				List<IMyInventoryItem> items = inventory.GetItems();
 				items.AddRange(ass.GetInventory(1).GetItems());
 
@@ -483,11 +533,42 @@ namespace SpaceCraft.Utils {
 				}
 			}
 
-			if( block is IMyRefinery ) {
+			if( block is IMyOxygenGenerator )
 				return new CubeGrid.Item {
-					Id = OBTypes.AnyOre,
+					Id = OBTypes.Ice,
 					Amount = (MyFixedPoint)100
 				};
+
+			// if( block is IMyGasTank )
+			// 	return new CubeGrid.Item {
+			// 		Id = OBTypes.Hydrogen,
+			// 		Amount = (MyFixedPoint)100
+			// 	};
+
+			inventory = block.GetInventory();
+
+			if( block is IMyRefinery ) {
+				// Shuffle ores
+				if( inventory.GetItems().Count > 1 )
+					inventory.TransferItemTo(inventory, 0, inventory.GetItems().Count, true, inventory.GetItems()[0].Amount, false);
+				return new CubeGrid.Item {
+					Id = OBTypes.AnyOre,
+					Amount = (MyFixedPoint)500
+				};
+			}
+
+			if( block is IMyUserControllableGun ) {
+
+				MyWeaponBlockDefinition def = MyDefinitionManager.Static.GetCubeBlockDefinition(block.BlockDefinition) as MyWeaponBlockDefinition;
+				MyWeaponDefinition weapon =	MyDefinitionManager.Static.GetWeaponDefinition(def.WeaponDefinitionId);
+				//IMyUserControllableGun gun = block as IMyUserControllableGun;
+				if( inventory.GetItems().Count == 0 ) {
+					return new CubeGrid.Item {
+						Id = weapon.AmmoMagazinesId[0],
+						Amount = (MyFixedPoint)1
+					};
+				}
+				return null;
 			}
 
 			return null;
@@ -531,215 +612,11 @@ namespace SpaceCraft.Utils {
 			}
 		}
 
-		public void AssessInventory( List<IMyInventory> inventories = null ) {
-			inventories = inventories ?? new List<IMyInventory>();
-			if( ConstructionSite != null && ConstructionSite.FatBlock != null && (ConstructionSite.FatBlock.MarkedForClose || ConstructionSite.FatBlock.Closed) ) {
-				FindConstructionSite();
-			}
-			//if( ConstructionSite == null || ConstructionSite.FatBlock == null ) return;
-			// TODO: New inventory needs system
-			//Dictionary<IMyInventory,MyDefinitionId> needs = new Dictionary<IMyInventory,MyDefinitionId>();
-			float old = ConstructionSite == null ? 1.0f : ConstructionSite.BuildIntegrity;
-			List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
-			List<IMyAssembler> factories = new List<IMyAssembler>();
-			List<IMyProductionBlock> refineries = new List<IMyProductionBlock>();
-			// List<IMyOxygenTank> tanks = new List<IMyOxygenTank>();
-			List<IMyGasTank> tanks = new List<IMyGasTank>();
-
-			// Update Construction Site
-			foreach( IMySlimBlock block in blocks ) {
-				if( block.FatBlock == null ) continue;
-				if( block.FatBlock is IMyAssembler ) {
-					factories.Add( block.FatBlock as IMyAssembler );
-				}
-				if( block.FatBlock is IMyRefinery )
-					refineries.Add( block.FatBlock as IMyProductionBlock );
-				if( block.FatBlock is IMyGasTank )
-					tanks.Add( block.FatBlock as IMyGasTank );
-
-				if( Balance == null || Balance.Count == 0 ) {
-					for( int i = 0; i < 2; i++ ) {
-						IMyInventory inv = block.FatBlock.GetInventory(i);
-						if( inv == null ) continue;
-						inventories.Add( inv );
-						if( ConstructionSite != null )
-							ConstructionSite.MoveItemsToConstructionStockpile( inv );
-					}
-				} else {
-					for( int i = 0; i < 2; i++ ) {
-						IMyInventory inv = block.FatBlock.GetInventory(i);
-						if( inv == null ) continue;
-						List<IMyInventoryItem> items = inv.GetItems();
-						foreach( IMyInventoryItem item in items ) {
-							string subtypeName = item.Content.SubtypeName;
-
-							if( Balance.ContainsKey(subtypeName) ) {
-								VRage.MyFixedPoint diff = (VRage.MyFixedPoint)Math.Max(item.Amount.ToIntSafe()-Balance[subtypeName],0);
-
-								Balance[subtypeName] = (int)Math.Max(Balance[subtypeName]-item.Amount.ToIntSafe(),0);
-								if( Balance[subtypeName] <= 0 ) {
-									Balance.Remove(subtypeName);
-									// if( Balance.Count == 0 )
-									// 	Balance = null;
-								}
-								inv.RemoveItemsOfType(diff, new SerializableDefinitionId(item.Content.TypeId, subtypeName) );
-								break;
-							}
-						}
-					}
-				}
-
-			}
-
-			// Balance tanks
-			foreach( IMyGasTank filling in tanks ) {
-				if( filling.FilledRatio == 1f ) continue;
-
-
-				// if( source.RemainingCapacity == 0f ) continue;
-
-				MyResourceSinkComponent sink = filling.Components.Get<MyResourceSinkComponent>();
-
-				foreach( IMyGasTank tank in tanks ) {
-					if( tank == filling || tank.FilledRatio == 0f ) continue;
-					MyResourceSourceComponent source = tank.Components.Get<MyResourceSourceComponent>();
-					//ConnectBlocks(filling, tank);
-					//if( tank.FilledRatio > filling.FilledRatio && source.ProductionEnabledByType(OBTypes.Hydrogen) ) {
-					if( tank.FilledRatio > filling.FilledRatio ) {
-						float output = source.MaxOutputByType(OBTypes.Hydrogen);
-						sink.SetInputFromDistributor(OBTypes.Hydrogen,output,true,true);
-						//source.SetRemainingCapacityByType(OBTypes.Hydrogen, (float)((tank.FilledRatio*tank.Capacity)-output));
-						sink.Update();
-					}
-
-				}
-
-			}
-
-			// Pull Ore
-			foreach( IMyProductionBlock refinery in refineries ) {
-				//if( refinery.IsProducing ) continue;
-
-				//IMyInventory inventory = refinery is IMyAssembler ? refinery.GetInventory(1) : refinery.GetInventory(0);
-				IMyInventory inventory = refinery.GetInventory(0);
-
-				// Shuffle ores (didn't work)
-				// if( inventory.IsItemAt(0) )
-				// 	inventory.TransferItemTo(inventory,0,null,true, null, false);
-
-				foreach( IMyInventory inv in inventories ) {
-					bool found = false;
-					if( inv == inventory || inv == null ) continue;
-
-					List<IMyInventoryItem> itms = inv.GetItems();
-					for( int i = 0; i < itms.Count; i++ ) {
-						IMyInventoryItem itm = itms[i];
-						if( itm.Content.TypeId == OBTypes.Ore ) {
-							if( inv.TransferItemTo(inventory, i, null, true, (VRage.MyFixedPoint)100, false) ) {
-								found = true;
-								break;
-							}
-						}
-					}
-					if( found ) break;
-				}
-			}
-
-			IMyAssembler main = GetAssembler();
-			if( main == null ) return;
-
-			// Pull Components
-			foreach( IMyAssembler factory in factories ) {
-				if( factory == null || !factory.IsFunctional ) continue;
-				//string SubtypeName = factory.SlimBlock.BlockDefinition.Id.SubtypeName;
-				// List<MyProductionQueueItem> queue;
-				List<MyProductionQueueItem> queue = main.GetQueue();
-
-				if( factory != main && factory.IsQueueEmpty && queue.Count > 0 ) {
-					// Cooperative Mode
-					if( factory.CanUseBlueprint(queue[0].Blueprint) ) {
-						main.RemoveQueueItem(0, (VRage.MyFixedPoint)1);
-						factory.AddQueueItem(queue[0].Blueprint, (VRage.MyFixedPoint)1);
-					}
-				}
-
-				queue = factory.GetQueue();
-				if( queue.Count == 0 ) continue;
-				MyProductionQueueItem item = queue[0];
-				// item.Blueprint.Id.SubtypeName;
-				MyBlueprintDefinitionBase bp =	MyDefinitionManager.Static.GetBlueprintDefinition(item.Blueprint.Id);
-				IMyInventory inventory = factory.GetInventory(0);
-
-				List<MyBlueprintDefinitionBase.Item> needs = new List<MyBlueprintDefinitionBase.Item>();
-				List<IMyInventoryItem> items = inventory.GetItems();
-
-
-				foreach( MyBlueprintDefinitionBase.Item prereq in bp.Prerequisites ) {
-					bool fnd = false;
-					foreach( IMyInventoryItem i in items ) {
-
-						if( i.Amount >= prereq.Amount && prereq.Id.TypeId == i.Content.TypeId && prereq.Id.SubtypeName == i.Content.SubtypeName ) {
-							fnd = true;
-						}
-					}
-					if( !fnd )
-						needs.Add(prereq);
-				}
-
-				if( factory.BlockDefinition.TypeIdString == "MyObjectBuilder_SurvivalKit" ) {
-					needs.Add( OBTypes.StoneBP.Prerequisites[0] );
-				}
-
-				if( needs.Count == 0 ) continue;
-
-				foreach( MyBlueprintDefinitionBase.Item need in needs ) {
-					bool found = false;
-
-					foreach( IMyInventory inv in inventories ) {
-						if( inv == inventory ) continue;
-
-						List<IMyInventoryItem> itms = inv.GetItems();
-						for( int i = 0; i < itms.Count; i++ ) {
-							IMyInventoryItem itm = itms[i];
-							if( need.Id.TypeId == itm.Content.TypeId && need.Id.SubtypeName == itm.Content.SubtypeName ) {
-								// Transfer
-								found = true;
-								inv.TransferItemTo(inventory, i, null, true, need.Amount, false);
-								break;
-							}
-						}
-
-						if( found ) break; // Inventories
-					}
-				}
-
-			} // End pull components
-
-
-			if( ConstructionSite != null ) {
-				ConstructionSite.IncreaseMountLevel(5.0f,(long)0);
-
-
-				if( ConstructionSite.IsFullIntegrity ) {
-					ConstructionSite.PlayConstructionSound(MyIntegrityChangeEnum.ConstructionEnd);
-					StopProduction();
-					CheckFlags();
-					Owner.BlockCompleted(ConstructionSite);
-					if( CurrentOrder != null )
-		        CurrentOrder.Complete();
-					FindConstructionSite();
-					foreach( CubeGrid grid in Docked ) {
-						grid.ConstructionSite = ConstructionSite;
-						if( grid.CurrentOrder != null )
-			        grid.CurrentOrder.Complete();
-					}
-				} else if( old < ConstructionSite.BuildIntegrity ) {
-					ConstructionSite.PlayConstructionSound(MyIntegrityChangeEnum.ConstructionProcess);
-				}
-			}
-		}
-
 		public void FindConstructionSite( List<IMySlimBlock> exclude = null ) {
+			if( DockedTo != null ) {
+				DockedTo.FindConstructionSite( exclude );
+				return;
+			}
 			if( exclude == null ) exclude = new List<IMySlimBlock>();
 			ConstructionSite = null;
 			List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
@@ -818,10 +695,6 @@ namespace SpaceCraft.Utils {
 				MyBlueprintDefinitionBase blueprint = null;
 				MyDefinitionManager.Static.TryGetComponentBlueprintDefinition(component.Definition.Id, out blueprint);
 				ass.AddQueueItem( blueprint, component.Count );
-			}
-
-			if( def.Id.TypeId == OBTypes.Turret ) {
-				ass.AddQueueItem( OBTypes.Magazine, (VRage.MyFixedPoint)3 );
 			}
 
 			return true;
@@ -1060,13 +933,11 @@ namespace SpaceCraft.Utils {
 					grid.PositionAndOrientation = new MyPositionAndOrientation(ref offset);
 				}
 
-
+				long ownerId = owner != null && owner.MyFaction != null ? owner.MyFaction.FounderId : 0;
 				foreach( MyObjectBuilder_CubeBlock block in grid.CubeBlocks ) {
 					block.EntityId = (long)0;
-					if( owner.MyFaction != null ) {
-						block.Owner = owner.MyFaction.FounderId;
-						block.BuiltBy = owner.MyFaction.FounderId;
-					}
+					block.Owner = ownerId;
+					block.BuiltBy = ownerId;
 					if( block.ColorMaskHSV == DefaultColor )
 						block.ColorMaskHSV = owner.Color;
 					//block.Min = new Vector3I(Vector3D.Transform(new Vector3D(block.Min), matrix))	;
@@ -1078,6 +949,7 @@ namespace SpaceCraft.Utils {
         }
 
         entity.Flags &= ~EntityFlags.Save;
+				entity.Save = true;
         //ent.Flags &= ~EntityFlags.NeedsUpdate;
 
         entity.Render.Visible = true;
@@ -1104,13 +976,12 @@ namespace SpaceCraft.Utils {
 			//grid.Name = "StarCraft Grid" + NumGrids.ToString();
 			//grid.DisplayName = "StarCraft Grid" + NumGrids.ToString();
 			//NumGrids++;
+			long ownerId = owner != null && owner.MyFaction != null ? owner.MyFaction.FounderId : 0;
 			grid.PositionAndOrientation = new MyPositionAndOrientation(ref matrix);
 
 			foreach( MyObjectBuilder_CubeBlock block in grid.CubeBlocks ) {
-				if( owner.MyFaction != null ) {
-					block.Owner = owner.MyFaction.FounderId;
-					block.BuiltBy = owner.MyFaction.FounderId;
-				}
+				block.Owner = ownerId;
+				block.BuiltBy = ownerId;
 			}
 			MyEntity entity = (MyEntity)MyAPIGateway.Entities.CreateFromObjectBuilder(grid);
 			IMyCubeGrid g = null;
@@ -1118,6 +989,7 @@ namespace SpaceCraft.Utils {
 			if( entity != null ) {
 				entity.Flags &= ~EntityFlags.Save;
         entity.Render.Visible = true;
+				entity.Save = true;
         //entity.WorldMatrix = matrix;
         MyAPIGateway.Entities.AddEntity(entity);
 
@@ -1128,6 +1000,7 @@ namespace SpaceCraft.Utils {
 		}
 
 		public bool AddLargeGridConverter( bool skipRefinery = true ) {
+			if( Grid == null || Owner == null ) return false;
 			IMyCubeGrid grid;
 			IMySlimBlock slim = TryPlace( new MyObjectBuilder_MotorAdvancedRotor{
 				SubtypeName = "SmallAdvancedRotor",
@@ -1284,6 +1157,221 @@ namespace SpaceCraft.Utils {
 			foreach( IMySlimBlock factory in factories ) {
 				IMyAssembler ass = factory.FatBlock as IMyAssembler;
 				ass.ClearQueue();
+			}
+		}
+
+		public void FindSubgrids() {
+			List<IMySlimBlock> motors = GetBlocks<IMyMotorStator>();
+			foreach( IMySlimBlock slim in motors ) {
+				IMyMotorStator motor = slim.FatBlock as IMyMotorStator;
+				if( motor.RotorGrid != null )
+					Subgrids.Add(motor.RotorGrid);
+			}
+		}
+
+
+		// Obsolete: This was the original proof of concept
+		public void AssessInventory( List<IMyInventory> inventories = null ) {
+			inventories = inventories ?? new List<IMyInventory>();
+			if( ConstructionSite != null && ConstructionSite.FatBlock != null && (ConstructionSite.FatBlock.MarkedForClose || ConstructionSite.FatBlock.Closed) ) {
+				FindConstructionSite();
+			}
+			//if( ConstructionSite == null || ConstructionSite.FatBlock == null ) return;
+			// TODO: New inventory needs system
+			//Dictionary<IMyInventory,MyDefinitionId> needs = new Dictionary<IMyInventory,MyDefinitionId>();
+			float old = ConstructionSite == null ? 1.0f : ConstructionSite.BuildIntegrity;
+			List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
+			List<IMyAssembler> factories = new List<IMyAssembler>();
+			List<IMyProductionBlock> refineries = new List<IMyProductionBlock>();
+			// List<IMyOxygenTank> tanks = new List<IMyOxygenTank>();
+			List<IMyGasTank> tanks = new List<IMyGasTank>();
+
+			// Update Construction Site
+			foreach( IMySlimBlock block in blocks ) {
+				if( block.FatBlock == null ) continue;
+				if( block.FatBlock is IMyAssembler ) {
+					factories.Add( block.FatBlock as IMyAssembler );
+				}
+				if( block.FatBlock is IMyRefinery )
+					refineries.Add( block.FatBlock as IMyProductionBlock );
+				if( block.FatBlock is IMyGasTank )
+					tanks.Add( block.FatBlock as IMyGasTank );
+
+				if( Balance == null || Balance.Count == 0 ) {
+					for( int i = 0; i < 2; i++ ) {
+						IMyInventory inv = block.FatBlock.GetInventory(i);
+						if( inv == null ) continue;
+						inventories.Add( inv );
+						if( ConstructionSite != null )
+							ConstructionSite.MoveItemsToConstructionStockpile( inv );
+					}
+				} else {
+					for( int i = 0; i < 2; i++ ) {
+						IMyInventory inv = block.FatBlock.GetInventory(i);
+						if( inv == null ) continue;
+						List<IMyInventoryItem> items = inv.GetItems();
+						foreach( IMyInventoryItem item in items ) {
+							string subtypeName = item.Content.SubtypeName;
+
+							if( Balance.ContainsKey(subtypeName) ) {
+								VRage.MyFixedPoint diff = (VRage.MyFixedPoint)Math.Max(item.Amount.ToIntSafe()-Balance[subtypeName],0);
+
+								Balance[subtypeName] = (int)Math.Max(Balance[subtypeName]-item.Amount.ToIntSafe(),0);
+								if( Balance[subtypeName] <= 0 ) {
+									Balance.Remove(subtypeName);
+									// if( Balance.Count == 0 )
+									// 	Balance = null;
+								}
+								inv.RemoveItemsOfType(diff, new SerializableDefinitionId(item.Content.TypeId, subtypeName) );
+								break;
+							}
+						}
+					}
+				}
+
+			}
+
+			// Balance tanks
+			foreach( IMyGasTank filling in tanks ) {
+				if( filling.FilledRatio == 1f ) continue;
+
+
+				// if( source.RemainingCapacity == 0f ) continue;
+
+				MyResourceSinkComponent sink = filling.Components.Get<MyResourceSinkComponent>();
+
+				foreach( IMyGasTank tank in tanks ) {
+					if( tank == filling || tank.FilledRatio == 0f ) continue;
+					MyResourceSourceComponent source = tank.Components.Get<MyResourceSourceComponent>();
+					//ConnectBlocks(filling, tank);
+					//if( tank.FilledRatio > filling.FilledRatio && source.ProductionEnabledByType(OBTypes.Hydrogen) ) {
+					if( tank.FilledRatio > filling.FilledRatio ) {
+						float output = source.MaxOutputByType(OBTypes.Hydrogen);
+						sink.SetInputFromDistributor(OBTypes.Hydrogen,output,true,true);
+						//source.SetRemainingCapacityByType(OBTypes.Hydrogen, (float)((tank.FilledRatio*tank.Capacity)-output));
+						sink.Update();
+					}
+
+				}
+
+			}
+
+			// Pull Ore
+			foreach( IMyProductionBlock refinery in refineries ) {
+				//if( refinery.IsProducing ) continue;
+
+				//IMyInventory inventory = refinery is IMyAssembler ? refinery.GetInventory(1) : refinery.GetInventory(0);
+				IMyInventory inventory = refinery.GetInventory(0);
+
+				foreach( IMyInventory inv in inventories ) {
+					bool found = false;
+					if( inv == inventory || inv == null ) continue;
+
+					List<IMyInventoryItem> itms = inv.GetItems();
+					for( int i = 0; i < itms.Count; i++ ) {
+						IMyInventoryItem itm = itms[i];
+						if( itm.Content.TypeId == OBTypes.Ore ) {
+							if( inv.TransferItemTo(inventory, i, null, true, (VRage.MyFixedPoint)100, false) ) {
+								found = true;
+								break;
+							}
+						}
+					}
+					if( found ) break;
+				}
+			}
+
+			IMyAssembler main = GetAssembler();
+			if( main == null ) return;
+
+			// Pull Components
+			foreach( IMyAssembler factory in factories ) {
+				if( factory == null || !factory.IsFunctional ) continue;
+				//string SubtypeName = factory.SlimBlock.BlockDefinition.Id.SubtypeName;
+				// List<MyProductionQueueItem> queue;
+				List<MyProductionQueueItem> queue = main.GetQueue();
+
+				if( factory != main && factory.IsQueueEmpty && queue.Count > 0 ) {
+					// Cooperative Mode
+					if( factory.CanUseBlueprint(queue[0].Blueprint) ) {
+						main.RemoveQueueItem(0, (VRage.MyFixedPoint)1);
+						factory.AddQueueItem(queue[0].Blueprint, (VRage.MyFixedPoint)1);
+					}
+				}
+
+				queue = factory.GetQueue();
+				if( queue.Count == 0 ) continue;
+				MyProductionQueueItem item = queue[0];
+				// item.Blueprint.Id.SubtypeName;
+				MyBlueprintDefinitionBase bp =	MyDefinitionManager.Static.GetBlueprintDefinition(item.Blueprint.Id);
+				IMyInventory inventory = factory.GetInventory(0);
+
+				List<MyBlueprintDefinitionBase.Item> needs = new List<MyBlueprintDefinitionBase.Item>();
+				List<IMyInventoryItem> items = inventory.GetItems();
+
+
+				foreach( MyBlueprintDefinitionBase.Item prereq in bp.Prerequisites ) {
+					bool fnd = false;
+					foreach( IMyInventoryItem i in items ) {
+
+						if( i.Amount >= prereq.Amount && prereq.Id.TypeId == i.Content.TypeId && prereq.Id.SubtypeName == i.Content.SubtypeName ) {
+							fnd = true;
+						}
+					}
+					if( !fnd )
+						needs.Add(prereq);
+				}
+
+				if( factory.BlockDefinition.TypeIdString == "MyObjectBuilder_SurvivalKit" ) {
+					needs.Add( OBTypes.StoneBP.Prerequisites[0] );
+				}
+
+				if( needs.Count == 0 ) continue;
+
+				foreach( MyBlueprintDefinitionBase.Item need in needs ) {
+					bool found = false;
+
+					foreach( IMyInventory inv in inventories ) {
+						if( inv == inventory ) continue;
+
+						List<IMyInventoryItem> itms = inv.GetItems();
+						for( int i = 0; i < itms.Count; i++ ) {
+							IMyInventoryItem itm = itms[i];
+							if( need.Id.TypeId == itm.Content.TypeId && need.Id.SubtypeName == itm.Content.SubtypeName ) {
+								// Transfer
+								found = true;
+								inv.TransferItemTo(inventory, i, null, true, need.Amount, false);
+								break;
+							}
+						}
+
+						if( found ) break; // Inventories
+					}
+				}
+
+			} // End pull components
+
+
+			if( ConstructionSite != null ) {
+				ConstructionSite.IncreaseMountLevel(5.0f,(long)0);
+
+
+				if( ConstructionSite.IsFullIntegrity ) {
+					ConstructionSite.PlayConstructionSound(MyIntegrityChangeEnum.ConstructionEnd);
+					StopProduction();
+					CheckFlags();
+					Owner.BlockCompleted(ConstructionSite);
+					if( CurrentOrder != null )
+		        CurrentOrder.Complete();
+					FindConstructionSite();
+					foreach( CubeGrid grid in Docked ) {
+						grid.ConstructionSite = ConstructionSite;
+						if( grid.CurrentOrder != null )
+			        grid.CurrentOrder.Complete();
+					}
+				} else if( old < ConstructionSite.BuildIntegrity ) {
+					ConstructionSite.PlayConstructionSound(MyIntegrityChangeEnum.ConstructionProcess);
+				}
 			}
 		}
 

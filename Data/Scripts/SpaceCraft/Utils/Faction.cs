@@ -292,9 +292,17 @@ namespace SpaceCraft.Utils {
         CurrentGoal.Prefab = CurrentGoal.Prefab ?? GetConstructionProject();
 
         CurrentGoal.Balance = CurrentGoal.Prefab == null ? null : CurrentGoal.Prefab.GetBalance();
+
         MainBase = GetBestRefinery();
-        MainBase.Balance = CurrentGoal.Balance;
-        MainBase.AddQueueItems(CurrentGoal.Prefab.GetBattery(),true);
+        if( MainBase.DockedTo == null ) {
+          MainBase.Balance = CurrentGoal.Balance;
+          MainBase.AddQueueItems(CurrentGoal.Prefab.GetBattery(),true);
+        } else {
+          MainBase.DockedTo.Balance = CurrentGoal.Balance;
+          MainBase.DockedTo.AddQueueItems(CurrentGoal.Prefab.GetBattery(),true);
+        }
+
+
       }
 
       if( CurrentGoal.Step == Steps.Pending && CurrentGoal.Prefab != null ) {
@@ -324,8 +332,8 @@ namespace SpaceCraft.Utils {
         CubeGrid grid = CurrentGoal.Entity as CubeGrid;
         if( grid == null || grid.ConstructionSite == null ) {
           if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( Name, "Completed construction" );
-          if( grid.DockedTo != null && !grid.Drills )
-            grid.DockedTo.ToggleDocked( grid );
+          // if( grid.DockedTo != null && !grid.Drills )
+          //   grid.DockedTo.ToggleDocked( grid );
           CurrentGoal.Complete();
           return;
         }
@@ -521,8 +529,9 @@ namespace SpaceCraft.Utils {
       }
 
       if( c.Entity == null ) return null;
-
-      Vector3D position = c.Entity.WorldMatrix.Translation;
+      //Vector3D position = c.Entity.WorldMatrix.Translation;
+      Vector3D position = GetBestRefinery().Entity.WorldMatrix.Translation;
+      //Vector3D position = c.Wheels || c.Atmosphere ? c.Entity.WorldMatrix.Translation : GetBestRefinery().Entity.WorldMatrix.Translation;
       MyPlanet planet = SpaceCraftSession.GetClosestPlanet( position );
       if( planet == null ) return null;
 
@@ -631,12 +640,18 @@ namespace SpaceCraft.Utils {
           resources.Add("Stone",(VRage.MyFixedPoint)1*Convars.Static.Difficulty);
           break;
         //case Tech.Established:
+        case Tech.Advanced:
+          resources.Add("Silver",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
+          resources.Add("Gold",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
+          goto default;
         default:
-          resources.Add("Iron",(VRage.MyFixedPoint)0.1*Convars.Static.Difficulty);
-          resources.Add("Nickel",(VRage.MyFixedPoint)0.05*Convars.Static.Difficulty);
-          resources.Add("Cobalt",(VRage.MyFixedPoint)0.025*Convars.Static.Difficulty);
+          resources.Add("Iron",(VRage.MyFixedPoint)0.2*Convars.Static.Difficulty);
+          resources.Add("Nickel",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
+          resources.Add("Cobalt",(VRage.MyFixedPoint)0.002*Convars.Static.Difficulty);
           resources.Add("Ice",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
           resources.Add("Magnesium",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
+          resources.Add("Silicon",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
+          resources.Add("Stone",(VRage.MyFixedPoint)0.005*Convars.Static.Difficulty);
           break;
       }
       return resources;
@@ -843,6 +858,7 @@ namespace SpaceCraft.Utils {
     public void Mulligan() {
       if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "Mulligan", Name + " took a mulligan" );
       foreach( Controllable c in Controlled ) {
+        if( c.Entity == null ) continue;
         MyAPIGateway.Entities.RemoveEntity( c.Entity );
       }
       Controlled = new List<Controllable>();
@@ -957,7 +973,7 @@ namespace SpaceCraft.Utils {
         position = position + (up * 150);
       }
 
-      MainBase = new CubeGrid(CubeGrid.Spawn("TerranPlanetPod", MatrixD.CreateWorld(position), this));
+      MainBase = new CubeGrid(CubeGrid.Spawn(String.IsNullOrWhiteSpace(SpawnPrefab) ? "Terran Planet Pod" : SpawnPrefab, MatrixD.CreateWorld(position), this));
       //MainBase.Init(Session);
 
       TakeControl( MainBase );
@@ -974,6 +990,16 @@ namespace SpaceCraft.Utils {
       TakeControl( new Engineer(this) );
 
       return true;
+    }
+
+    public bool IsSubgrid( IMyCubeGrid grid ) {
+      foreach( Controllable c in Controlled ) {
+        CubeGrid g = c as CubeGrid;
+        if( g != null && g.Subgrids.Contains(grid) )
+          return true;
+      }
+
+      return false;
     }
 
     // public override void Init(MyObjectBuilder_SessionComponent session) {

@@ -1,48 +1,100 @@
 using System;
+using System.IO;
+using VRage.Game.ModAPI;
 
 namespace SpaceCraft.Utils {
 
   public sealed class Convars {
 
-    private static volatile Convars instance = new Convars();
+    private static Convars instance;
 
     public static Convars Static
     {
-      get { lock(instance){return instance;} }
+      get {
+        if( instance == null ) {
+          instance = new Convars();
+          if( MyAPIGateway.Utilities.FileExistsInWorldStorage(File,typeof(Convars)) ) {
+            //instance.Spawned = true;
+            instance = Open() ?? new Convars();
+            instance.Spawned = true;
+          } else {
+            instance = new Convars();
+          }
+        }
+        return instance;
+      }
     }
 
-    public volatile float Difficulty = 1f;
-    public volatile int Grids = 20;
-    public volatile bool Debug = false;
-    public volatile int Engineers = 1;
+    public float Difficulty = 1f;
+    public int Grids = 20;
+    public bool Debug = false;
+    public int Engineers = 1;
+    public bool Spawned = false;
 
-    private Convars(){
-      bool spawned;
-      MyAPIGateway.Utilities.GetVariable<bool>("SC-Spawned", out spawned);
-      if( spawned ) {
-  			MyAPIGateway.Utilities.GetVariable<int>("SC-Grids", out Grids);
-  			MyAPIGateway.Utilities.GetVariable<float>("SC-Difficulty", out Difficulty);
-  			MyAPIGateway.Utilities.GetVariable<int>("SC-Engineers", out Engineers);
-  			MyAPIGateway.Utilities.GetVariable<bool>("SC-Debug", out Debug);
+    protected static string File = "SCConvars.xml";
+
+    // private Convars(){
+    //   bool spawned;
+    //   if( MyAPIGateway.Utilities.FileExistsInWorldStorage(File,typeof(Convars)) ) {
+    //     instance = Open() ?? new Convars();
+    //   }/* else {
+    //     Save();
+    //   }*/
+    //   // MyAPIGateway.Utilities.GetVariable<bool>("SC-Spawned", out spawned);
+    //   // if( !spawned ) {
+  	// 	// 	MyAPIGateway.Utilities.GetVariable<int>("SC-Grids", out Grids);
+  	// 	// 	MyAPIGateway.Utilities.GetVariable<float>("SC-Difficulty", out Difficulty);
+  	// 	// 	MyAPIGateway.Utilities.GetVariable<int>("SC-Engineers", out Engineers);
+  	// 	// 	MyAPIGateway.Utilities.GetVariable<bool>("SC-Debug", out Debug);
+    //   // }
+    // }
+
+    private static Convars Open() {
+      try {
+        TextReader reader = MyAPIGateway.Utilities.ReadFileInWorldStorage(File, typeof(Convars));
+        return MyAPIGateway.Utilities.SerializeFromXML<Convars>(reader.ReadToEnd());
+      }catch(Exception e){
+        return null;
       }
+      return null;
+    }
+
+    public bool Save() {
+      try{
+        if( MyAPIGateway.Utilities.FileExistsInWorldStorage(File,typeof(Convars)) )
+          MyAPIGateway.Utilities.DeleteFileInWorldStorage(File,typeof(Convars));
+				TextWriter writer = MyAPIGateway.Utilities.WriteFileInWorldStorage(File, typeof(Convars));
+				using (writer){
+
+					writer.Write(MyAPIGateway.Utilities.SerializeToXML<Convars>(this));
+
+				}
+
+			}catch(Exception exc){
+				return false;
+
+			}
+
+      return true;
     }
 
     public string Set( string convar, string value ) {
       switch( convar.ToLower() ) {
         case "engineers":
           Int32.TryParse(value, out Engineers);
-          MyAPIGateway.Utilities.SetVariable<int>("SC-Engineers", Engineers);
+          Save();
           return Engineers.ToString();
         case "grids":
           Int32.TryParse(value, out Grids);
-          MyAPIGateway.Utilities.SetVariable<int>("SC-Grids", Grids);
+          Save();
           return Grids.ToString();
         case "difficulty":
           float.TryParse(value, out Difficulty);
-          MyAPIGateway.Utilities.SetVariable<float>("SC-Difficulty", Difficulty);
+          Save();
           return Difficulty.ToString();
       }
-      return 'null';
+
+      return "null";
     }
 
     public string Get( string convar ) {
@@ -51,7 +103,7 @@ namespace SpaceCraft.Utils {
         case "grids": return Grids.ToString();
         case "difficulty": return Difficulty.ToString();
       }
-      return 'null';
+      return "null";
     }
 
 

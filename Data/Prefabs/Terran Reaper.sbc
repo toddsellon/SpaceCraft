@@ -69,7 +69,9 @@
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallAtmosphericThrust</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>108633241382463034</EntityId>
+              <ShareMode>Faction</ShareMode>
               <Min x="-1" y="2" z="1" />
               <BlockOrientation Forward="Left" Up="Forward" />
               <BuiltBy>144115188075855897</BuiltBy>
@@ -100,6 +102,7 @@
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallAtmosphericThrust</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>139171165297222794</EntityId>
               <Min x="-1" y="3" z="1" />
               <BlockOrientation Forward="Right" Up="Forward" />
@@ -131,6 +134,7 @@
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallAtmosphericThrust</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>93087341107288543</EntityId>
               <Min x="-2" y="2" z="0" />
               <BlockOrientation Forward="Up" Up="Right" />
@@ -162,6 +166,7 @@
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallAtmosphericThrust</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>76574617111746442</EntityId>
               <Min x="2" y="2" z="0" />
               <BlockOrientation Forward="Down" Up="Right" />
@@ -193,6 +198,7 @@
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallAtmosphericThrust</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>112663842736000624</EntityId>
               <Min x="1" y="5" z="-1" />
               <BlockOrientation Forward="Backward" Up="Down" />
@@ -224,6 +230,7 @@
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallAtmosphericThrust</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>123874877420340435</EntityId>
               <Min x="-1" y="5" z="-1" />
               <BlockOrientation Forward="Forward" Up="Down" />
@@ -511,6 +518,7 @@
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallAtmosphericThrust</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>119541564788672158</EntityId>
               <Min x="-2" y="2" z="-1" />
               <BlockOrientation Forward="Down" Up="Left" />
@@ -588,6 +596,7 @@
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallAtmosphericThrust</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>73353432006391395</EntityId>
               <Min x="2" y="2" z="-1" />
               <BlockOrientation Forward="Up" Up="Left" />

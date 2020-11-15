@@ -105,6 +105,7 @@
                 </Components>
               </ComponentContainer>
               <CustomName>Hydrogen Thruster 8</CustomName>
+              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
@@ -334,6 +335,7 @@
                 </Components>
               </ComponentContainer>
               <CustomName>Large Hydrogen Thruster</CustomName>
+              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
@@ -366,6 +368,7 @@
                 </Components>
               </ComponentContainer>
               <CustomName>Large Hydrogen Thruster 2</CustomName>
+              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
@@ -665,6 +668,7 @@
                 </Components>
               </ComponentContainer>
               <CustomName>Hydrogen Thruster 5</CustomName>
+              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
@@ -697,6 +701,7 @@
                 </Components>
               </ComponentContainer>
               <CustomName>Hydrogen Thruster 13</CustomName>
+              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
@@ -729,6 +734,7 @@
                 </Components>
               </ComponentContainer>
               <CustomName>Hydrogen Thruster 7</CustomName>
+              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
@@ -761,6 +767,7 @@
                 </Components>
               </ComponentContainer>
               <CustomName>Hydrogen Thruster 8</CustomName>
+              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
@@ -1061,6 +1068,7 @@
                 </Components>
               </ComponentContainer>
               <CustomName>Hydrogen Thruster 9</CustomName>
+              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
@@ -1093,6 +1101,7 @@
                 </Components>
               </ComponentContainer>
               <CustomName>Hydrogen Thruster 10</CustomName>
+              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
@@ -1125,6 +1134,7 @@
                 </Components>
               </ComponentContainer>
               <CustomName>Hydrogen Thruster 11</CustomName>
+              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
@@ -1178,6 +1188,7 @@
               <ColorMaskHSV x="0" y="-0.8" z="-0.45" />
               <BuiltBy>144115188075855897</BuiltBy>
               <CustomName>Power Efficiency Module</CustomName>
+              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
@@ -1192,6 +1203,7 @@
               <ColorMaskHSV x="0" y="-0.8" z="-0.45" />
               <BuiltBy>144115188075855897</BuiltBy>
               <CustomName>Power Efficiency Module 2</CustomName>
+              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
@@ -1466,6 +1478,7 @@
               <ColorMaskHSV x="0" y="-0.8" z="-0.45" />
               <BuiltBy>144115188075855897</BuiltBy>
               <CustomName>Power Efficiency Module 3</CustomName>
+              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
@@ -1480,6 +1493,7 @@
               <ColorMaskHSV x="0" y="-0.8" z="-0.45" />
               <BuiltBy>144115188075855897</BuiltBy>
               <CustomName>Power Efficiency Module 5</CustomName>
+              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
@@ -2015,7 +2029,7 @@
               <PreviousIdleRotationState>true</PreviousIdleRotationState>
               <TargetCharacters>true</TargetCharacters>
             </MyObjectBuilder_CubeBlock>
-            <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_LargeGatlingTurret">
+            <!-- <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_LargeGatlingTurret">
               <SubtypeName />
               <EntityId>88525625930946116</EntityId>
               <Min x="-1" y="-3" z="3" />
@@ -2081,7 +2095,7 @@
               <EnableIdleRotation>true</EnableIdleRotation>
               <PreviousIdleRotationState>true</PreviousIdleRotationState>
               <TargetCharacters>true</TargetCharacters>
-            </MyObjectBuilder_CubeBlock>
+            </MyObjectBuilder_CubeBlock> -->
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_LargeGatlingTurret">
               <SubtypeName />
               <EntityId>99932321631484390</EntityId>
@@ -2243,6 +2257,7 @@
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>LargeBlockSmallAtmosphericThrustSciFi</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>128694965485129753</EntityId>
               <Min x="-2" y="-6" z="1" />
               <BlockOrientation Forward="Up" Up="Right" />
@@ -2705,6 +2720,7 @@
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>LargeBlockSmallAtmosphericThrustSciFi</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>94174688223059400</EntityId>
               <Min x="2" y="-6" z="1" />
               <BlockOrientation Forward="Up" Up="Left" />

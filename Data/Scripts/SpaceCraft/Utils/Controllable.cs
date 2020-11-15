@@ -137,25 +137,16 @@ namespace SpaceCraft.Utils {
         return 48;
       }
 
+      if( block is IMyMedicalRoom ) return 47;
 
 
-      if( block is IMyProductionBlock ) {
-        return 47;
-      }
+      if( block is IMyProductionBlock ) return 46;
 
-      if( block is IMyShipDrill ) {
-        return 45;
-      }
+      if( block is IMyShipDrill ) return 45;
 
-      if( block is IMyMotorSuspension ) {
-        return 30;
-      }
+      if( block is IMyMotorSuspension || block is IMyWheel ) return 30;
 
-      if( block is IMyWheel ) {
-        return 25;
-      }
-
-      return 1;
+      return block is IMyFunctionalBlock ? 2 : 1;
 		}
 
     public Dictionary<string,int> GetSurplus( Dictionary<string,int> surplus = null) {
@@ -182,7 +173,7 @@ namespace SpaceCraft.Utils {
 
     public virtual bool Execute( Order order, bool force = false ) {
 
-      if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "Execute", ToString() + ": " + order.ToString() );
+      if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( Entity.DisplayName, "Executing " + order.Type.ToString() );
 
       if( force ) Stop();
       if( order == null ) {

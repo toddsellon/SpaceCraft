@@ -548,6 +548,7 @@
               <BlockOrientation Forward="Left" Up="Up" />
               <ColorMaskHSV x="0" y="-0.8" z="-0.45" />
               <BuiltBy>144115188075855897</BuiltBy>
+              <ShareMode>Faction</ShareMode>
               <CustomName>Power Efficiency Module</CustomName>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
@@ -562,6 +563,7 @@
               <BlockOrientation Forward="Right" Up="Up" />
               <ColorMaskHSV x="0" y="-0.8" z="-0.45" />
               <BuiltBy>144115188075855897</BuiltBy>
+              <ShareMode>Faction</ShareMode>
               <CustomName>Power Efficiency Module 2</CustomName>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
@@ -576,6 +578,7 @@
               <BlockOrientation Forward="Left" Up="Down" />
               <ColorMaskHSV x="0" y="-0.8" z="-0.45" />
               <BuiltBy>144115188075855897</BuiltBy>
+              <ShareMode>Faction</ShareMode>
               <CustomName>Power Efficiency Module 3</CustomName>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
@@ -590,6 +593,7 @@
               <BlockOrientation Forward="Left" Up="Up" />
               <ColorMaskHSV x="0" y="-0.8" z="-0.45" />
               <BuiltBy>144115188075855897</BuiltBy>
+              <ShareMode>Faction</ShareMode>
               <CustomName>Power Efficiency Module 4</CustomName>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
@@ -757,6 +761,7 @@
               <Min x="-7" y="-1" z="-3" />
               <ColorMaskHSV x="0" y="-0.8" z="-0.45" />
               <BuiltBy>144115188075855897</BuiltBy>
+              <ShareMode>Faction</ShareMode>
               <CustomName>Yield Module</CustomName>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
@@ -773,6 +778,7 @@
               <BuiltBy>144115188075855897</BuiltBy>
               <CustomName>Power Efficiency Module 5</CustomName>
               <ShowOnHUD>false</ShowOnHUD>
+              <ShareMode>Faction</ShareMode>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
               <ShowInInventory>true</ShowInInventory>
@@ -787,6 +793,7 @@
               <BuiltBy>144115188075855897</BuiltBy>
               <CustomName>Power Efficiency Module 6</CustomName>
               <ShowOnHUD>false</ShowOnHUD>
+              <ShareMode>Faction</ShareMode>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
               <ShowInInventory>true</ShowInInventory>
@@ -801,6 +808,7 @@
               <CustomName>Yield Module 2</CustomName>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
+              <ShareMode>Faction</ShareMode>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
               <ShowInInventory>true</ShowInInventory>
               <Enabled>true</Enabled>

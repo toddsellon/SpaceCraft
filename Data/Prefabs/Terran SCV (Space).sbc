@@ -52,12 +52,14 @@
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
               <ShowInInventory>true</ShowInInventory>
               <Enabled>true</Enabled>
+              <ShareMode>Faction</ShareMode>
               <IsStockpiling>false</IsStockpiling>
               <FilledRatio>0.492087156</FilledRatio>
               <AutoRefill>false</AutoRefill>
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockLargeHydrogenThrust</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>142432415348628965</EntityId>
               <Min x="-1" y="-5" z="-1" />
               <BlockOrientation Forward="Down" Up="Right" />
@@ -144,6 +146,7 @@
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallHydrogenThrust</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>102160414326314742</EntityId>
               <Min x="0" y="8" z="0" />
               <BlockOrientation Forward="Up" Up="Left" />
@@ -264,6 +267,7 @@
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallHydrogenThrust</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>81820650703243419</EntityId>
               <Min x="0" y="-3" z="-2" />
               <ColorMaskHSV x="0" y="-0.8" z="-0.45" />
@@ -295,6 +299,7 @@
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallHydrogenThrust</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>120065771737484281</EntityId>
               <Min x="2" y="-3" z="0" />
               <BlockOrientation Forward="Right" Up="Forward" />
@@ -327,6 +332,7 @@
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallHydrogenThrust</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>97623994178070011</EntityId>
               <Min x="0" y="-3" z="2" />
               <BlockOrientation Forward="Backward" Up="Right" />
@@ -359,6 +365,7 @@
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Thrust">
               <SubtypeName>SmallBlockSmallHydrogenThrust</SubtypeName>
+              <ShareMode>Faction</ShareMode>
               <EntityId>114667107849150727</EntityId>
               <Min x="-2" y="-3" z="0" />
               <BlockOrientation Forward="Left" Up="Backward" />

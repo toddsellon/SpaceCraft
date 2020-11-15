@@ -5,14 +5,23 @@
 <SpawnGroup>
 	<Id>
 		<TypeId>SpawnGroupDefinition</TypeId>
-		<SubtypeId>TerranOutpost</SubtypeId>
+		<SubtypeId>SpaceCraft</SubtypeId>
 	</Id>
 	<Description>SpaceCraft</Description>
 	<Icon>Textures\GUI\Icons\Fake.dds</Icon>
 	<Frequency>1.0</Frequency>
 	<IsPirate>true</IsPirate>
 	<Prefabs>
-		<Prefab SubtypeId="TerranOutpost">
+		<Prefab SubtypeId="Terran Planet Pod">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Terran Planet Pod</BeaconText>
+			<Speed>20.0</Speed>
+		</Prefab>
+		<Prefab SubtypeId="Terran Outpost">
 			<Position>
 				<X>0.0</X>
 				<Y>0.0</Y>

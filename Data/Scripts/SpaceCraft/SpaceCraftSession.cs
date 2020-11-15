@@ -43,30 +43,13 @@ namespace SpaceCraft {
 		public bool Loaded = false;
 		public bool Spawned = false;
 		public bool Server = false;
-		//public static float Difficulty = 1f;
-		//public static bool Debug = false;
     public static List<Faction> Factions = new List<Faction>();
 		public static List<MyPlanet> Planets = new List<MyPlanet>();
 		public static MyPlanet ClosestPlanet { get; protected set; }
-		protected MyObjectBuilder_SessionComponent Session;
 		public static CLI MyCLI;
-
-		//private Convars Vars = new Convars();
-		// private static readonly Lazy<Convars> Singleton = new Lazy<Convars>(() => new Convars());
-		// //public static readonly Convars Vars = new Convars();
-		// public static Convars Vars
-    // {
-    //     get
-    //     {
-    //         return Singleton.Value;
-    //     }
-    // }
 
     public override void Init(MyObjectBuilder_SessionComponent session) {
       base.Init(session);
-			Session = session;
-
-			Limits.Speed = MyDefinitionManager.Static.EnvironmentDefinition.SmallShipMaxSpeed;
 
 			Server = MyAPIGateway.Multiplayer.IsServer;
 			Loaded = !Server;
@@ -79,10 +62,9 @@ namespace SpaceCraft {
 
 			if( Server ) {
 
-				MyAPIGateway.Utilities.GetVariable<bool>("SC-Spawned", out Spawned);
-				// if( !Spawned )
-				// 	Vars.Init();
-				SaveName = MyAPIGateway.Session.Name;
+				//MyAPIGateway.Utilities.GetVariable<bool>("SC-Spawned", out Spawned);
+				Spawned = Convars.Static.Spawned;
+				//SaveName = MyAPIGateway.Session.Name;
 				MyAPIGateway.Session.SessionSettings.EnableRemoteBlockRemoval = false;
 				//IMyDamageSystem
 				//MyAPIGateway.Session.DamageSystem.RegisterAfterDamageHandler (int priority, Action< object, MyDamageInformation > handler);
@@ -95,7 +77,7 @@ namespace SpaceCraft {
 
 		// Main loop
     public override void UpdateBeforeSimulation() {
-			MyCLI.RunAction();
+
 			if( !Server ) return;
 
 			if( !Loaded ) {
@@ -177,19 +159,21 @@ namespace SpaceCraft {
 
 				if( entity is IMyCubeGrid ) {
 					// Remove Pirates
-					if( entity.DisplayName.Substring(0,6) == "Pirate" ) {
-						MyAPIGateway.Entities.RemoveEntity(entity);
-						continue;
-					}
+					// if( entity.DisplayName.Substring(0,6) == "Pirate" ) {
+					// 	MyAPIGateway.Entities.RemoveEntity(entity);
+					// 	continue;
+					// }
 
 
 					IMyCubeGrid grid = entity as IMyCubeGrid;
 					List<long> owners = grid.GridSizeEnum == MyCubeSize.Large ? grid.BigOwners : grid.SmallOwners;
 					foreach(long owner in owners) {
 						Faction faction = GetFaction(owner);
-						if( faction != null ) {
+						if( faction != null && !faction.IsSubgrid(grid) ) {
+							// Determine if subgrid
 							CubeGrid g = faction.TakeControl( new CubeGrid(grid) ) as CubeGrid;
-
+							g.FindSubgrids();
+							//MyAPIGateway.Utilities.ShowMessage( "TakeControl", faction.Name );
 							g.CheckFlags();
 							g.FindConstructionSite();
 							if( g.IsStatic ) {
@@ -241,7 +225,7 @@ namespace SpaceCraft {
 					foreach( 	MySpawnGroupDefinition.SpawnGroupPrefab prefab in group.Prefabs ) {
 						if( first == String.Empty ) first = prefab.SubtypeId;
 
-						if( prefab.SubtypeId != "TerranPlanetPod" )
+						if( prefab.SubtypeId != "Terran Planet Pod" )
 							Prefab.Add(prefab.SubtypeId, Name);
 					}
 
@@ -259,8 +243,7 @@ namespace SpaceCraft {
 						}
 						faction.Groups.Add( group );
 						faction.SpawnPrefab = first;
-						if( Spawned )
-							faction.DetermineNextGoal();
+
           }
         }
 
@@ -288,6 +271,12 @@ namespace SpaceCraft {
 			// }
 
 			ScanEntities();
+
+			if( Spawned ) {
+				if( ClosestPlanet == null ) ClosestPlanet = GetClosestPlanet( MyAPIGateway.Session.Player.GetPosition() );
+				foreach( Faction faction in Factions )
+					faction.DetermineNextGoal();
+			}
 
 			Loaded = true;
 
@@ -333,7 +322,6 @@ namespace SpaceCraft {
 			};
 
 			Factions.Add(faction);
-			//faction.Init(Session);
 			return faction;
 		}
 
@@ -366,8 +354,9 @@ namespace SpaceCraft {
 				//faction.Spawn(Vector3D.Zero);
 			}
 
-			Spawned = true;
-			MyAPIGateway.Utilities.SetVariable<bool>("SC-Spawned", true);
+			Convars.Static.Spawned = Spawned = true;
+			Convars.Static.Save();
+			//MyAPIGateway.Utilities.SetVariable<bool>("SC-Spawned", true);
 		}
 
 

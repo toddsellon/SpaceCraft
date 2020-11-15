@@ -14,13 +14,7 @@ namespace SpaceCraft.Utils {
 
   public class CLI {
 
-    public class QueuedAction {
-      public Action<MyCommandLine,Message> action;
-      public MyCommandLine cmd;
-      public Message message;
-    }
-
-    protected QueuedAction Queued;
+    //protected QueuedAction Queued;
     protected static ushort Id = 8008;
     protected bool Server;
     //public static readonly Convars Settings = new Convars();
@@ -84,22 +78,10 @@ namespace SpaceCraft.Utils {
       string action = cmd.Argument(1);
 
       if( Actions.ContainsKey(action) ) {
-        Queued = new QueuedAction{
-          action = Actions[action],
-          cmd = cmd,
-          message = message
-        };
-        //MyAPIGateway.Utilities.InvokeOnGameThread(RunAction);
-        //Actions[action](cmd, message);
+        Actions[action](cmd, message);
         return true;
       }
       return false;
-    }
-
-    public void RunAction() {
-      if( Queued != null )
-        Queued.action(Queued.cmd, Queued.message);
-      Queued = null;
     }
 
     public bool SendMessageToServer(Message message) {
@@ -129,6 +111,7 @@ namespace SpaceCraft.Utils {
 
     public void Debug( MyCommandLine cmd, Message message ) {
       Convars.Static.Debug = !Convars.Static.Debug;
+      Respond("Debug", Convars.Static.Debug ? "On" : "Off", message);
     }
 
     public void Set( MyCommandLine cmd, Message message ) {
@@ -200,9 +183,9 @@ namespace SpaceCraft.Utils {
         return;
       }
       IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
-      Faction faction = SpaceCraftSession.GetFactionContaining(player.PlayerID);
+      Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(3)) ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(3).ToUpper());
       if( faction == null ) {
-        Respond("Error", "You do not belong to a SpaceCraft faction", message);
+        Respond("Error", "SpaceCraft faction not found " + cmd.Argument(3), message);
         return;
       }
       Prefab prefab = Prefab.Get(cmd.Argument(2));
@@ -281,72 +264,6 @@ namespace SpaceCraft.Utils {
       // }
       Respond("Peace", "Not Implemented yet", message);
     }
-
-    public string grids
-		{
-			get
-			{
-				return Convars.Static.Grids.ToString();
-			}
-
-      set
-      {
-        int v;
-        if( Int32.TryParse(value, out v) ) {
-          Convars.Static.Grids = v;
-          //MyAPIGateway.Utilities.SetVariable<int>("SC-Grids", v);
-        }
-      }
-		}
-
-    public string difficulty
-		{
-			get
-			{
-        return Convars.Static.Difficulty.ToString();
-			}
-
-      set
-      {
-        float v;
-        if( float.TryParse(value, out v) ) {
-          //MyAPIGateway.Utilities.SetVariable<float>("SC-Difficulty", v);
-          Convars.Static.Difficulty = v;
-        }
-      }
-		}
-
-    public string engineers
-		{
-			get
-			{
-				return Convars.Static.Engineers.ToString();
-			}
-
-      set
-      {
-        int v;
-        if( Int32.TryParse(value, out v) ) {
-          Convars.Static.Engineers = v;
-          //MyAPIGateway.Utilities.SetVariable<int>("SC-Engineers", v);
-        }
-      }
-		}
-
-    public string debug
-		{
-			get
-			{
-				return Convars.Static.Debug.ToString();
-			}
-
-      set
-      {
-        bool v = Boolean.Parse(value);
-        Convars.Static.Debug = v;
-        //MyAPIGateway.Utilities.SetVariable<bool>("SC-Debug", v);
-      }
-		}
 
 
 
