@@ -68,25 +68,25 @@ SpaceCraft has a chat-based command interface that allows you to control SpaceCr
 
 - get 
 Returns the value of a setting. All possible settings listed below.
--- /sc get difficulty
+	- /sc get difficulty
 - set
 Changes a configuration setting
--- /sc set engineers 2
+	- /sc set engineers 2
 -attack [faction]
 Orders your faction to attack the specified faction or the nearest enemy if a Faction is not specified (buggy)
---/sc attack "HVS"
+	-/sc attack "HVS"
 -build "Prefab Name" [faction]
 Orders the specified faction to begin construction of a specific prefab or orders your current faction if one is not specified.
---/sc build "Terran SCV"
+	-/sc build "Terran SCV"
 -spawn "Prefab Name" [faction]
 Spawns a completed prefab for specified faction or your faction if one is not specified.
---/sc spawn "Terran Battlecruiser" ARC
+	-/sc spawn "Terran Battlecruiser" ARC
 -follow
 Orders your faction to follow your Player Character (buggy)
---/sc follow
+	-/sc follow
 -debug
 Toggles debug mode on/off
---/sc debug
+	-/sc debug
 
 
 ## Settings
