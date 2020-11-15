@@ -66,27 +66,27 @@ More to come!
 # Command Line Interface
 SpaceCraft has a chat-based command interface that allows you to control SpaceCraft factions or change session settings. To use the CLI, simply type "/sc" into the chat, followed by your command. The following are the available commands (square brackets indicates optional arguments):
 
-- **get **
-Returns the value of a setting. All possible settings listed below.
+- **get**
+	- Returns the value of a setting. All possible settings listed below.
 	- /sc get difficulty
 - **set**
 	- Changes a configuration setting
 	- /sc set engineers 2
--**attack** [faction]
+- **attack** [faction]
 	- Orders your faction to attack the specified faction or the nearest enemy if a Faction is not specified (buggy)
-	-/sc attack "HVS"
--**build** "Prefab Name" [faction]
+	- /sc attack "HVS"
+- **build** "Prefab Name" [faction]
 	- Orders the specified faction to begin construction of a specific prefab or orders your current faction if one is not specified.
-	-/sc build "Terran SCV"
--**spawn** "Prefab Name" [faction]
+	- /sc build "Terran SCV"
+- **spawn** "Prefab Name" [faction]
 	- Spawns a completed prefab for specified faction or your faction if one is not specified.
-	-/sc spawn "Terran Battlecruiser" ARC
--**follow**
+	- /sc spawn "Terran Battlecruiser" ARC
+- **follow**
 	- Orders your faction to follow your Player Character (buggy)
-	-/sc follow
--**debug**
+	- /sc follow
+- **debug**
 	- Toggles debug mode on/off
-	-/sc debug
+	- /sc debug
 
 
 ## Settings
