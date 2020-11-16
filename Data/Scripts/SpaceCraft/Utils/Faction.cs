@@ -245,7 +245,11 @@ namespace SpaceCraft.Utils {
     }
 
     public void Stabilize() {
-      if( CurrentGoal == null || MainBase == null || MainBase.Grid == null ) return;
+      if( CurrentGoal == null || MainBase == null ) return;
+      if( MainBase.Grid == null || MainBase.Grid.Closed || MainBase.Grid.MarkedForClose ) {
+        Mulligan();
+        return;
+      }
       if( MainBase.Grid.Physics.IsMoving ) return;
       if( RespawnPoint == null || !RespawnPoint.IsFunctional ) {
         Mulligan();
@@ -285,6 +289,7 @@ namespace SpaceCraft.Utils {
     }
 
     public void Construct() {
+
       if( CurrentGoal == null ) return;
 
       if( CurrentGoal.Prefab == null && CurrentGoal.Entity == null ) {
@@ -995,8 +1000,23 @@ namespace SpaceCraft.Utils {
     public bool IsSubgrid( IMyCubeGrid grid ) {
       foreach( Controllable c in Controlled ) {
         CubeGrid g = c as CubeGrid;
-        if( g != null && g.Subgrids.Contains(grid) )
-          return true;
+        if( g != null ) {
+          if(g.Subgrids.Contains(grid)) return true;
+
+          // Determine if this grid is connected to that one
+          List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+          grid.GetBlocks(blocks);
+
+          foreach(IMySlimBlock block in blocks ) {
+            if( block.FatBlock == null ) continue;
+            IMyMotorStator stator = block.FatBlock as IMyMotorStator;
+            if( stator != null && stator.RotorGrid == g.Grid ) {
+              g.Subgrids.Add(grid);
+              return true;
+            }
+
+          }
+        }
       }
 
       return false;
@@ -1072,6 +1092,28 @@ namespace SpaceCraft.Utils {
 
 
       return priority;
+    }
+
+    public void DetermineTechTier() {
+      CubeGrid refinery = GetBestRefinery();
+      switch( refinery.RefineryTier ) {
+        case 3:
+          Tier = Tech.Advanced;
+          Resources.Add("Silver");
+          Resources.Add("Gold");
+          Resources.Add("Cobalt");
+          Resources.Add("Magnesium");
+          break;
+        case 2:
+          Tier = Tech.Established;
+          Resources.Add("Cobalt");
+          Resources.Add("Magnesium");
+          break;
+          break;
+        default:
+          Tier = Tech.Primitive;
+          break;
+      }
     }
 
     public void BlockCompleted( IMySlimBlock block ) {

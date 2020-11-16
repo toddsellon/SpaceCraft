@@ -166,38 +166,45 @@ namespace SpaceCraft {
 
 
 					IMyCubeGrid grid = entity as IMyCubeGrid;
-					List<long> owners = grid.GridSizeEnum == MyCubeSize.Large ? grid.BigOwners : grid.SmallOwners;
-					foreach(long owner in owners) {
-						Faction faction = GetFaction(owner);
+					//List<long> owners = grid.GridSizeEnum == MyCubeSize.Large ? grid.BigOwners : grid.SmallOwners;
+					//foreach(long owner in owners) {
+						//Faction faction = GetFaction( owner ); // This should have worked but didn't, assuming the NPC owner ids get jumbled?
+						Faction faction = GetFaction( grid.DisplayName.Split(' ')[0] ); // Use first word in grid name, not ideal but it works
 						if( faction != null && !faction.IsSubgrid(grid) ) {
-							// Determine if subgrid
+							if( faction.MyFaction != null ) {
+								grid.ChangeGridOwnership(faction.MyFaction.FounderId, MyOwnershipShareModeEnum.Faction);
+								//grid.UpdateOwnership(faction.MyFaction.FounderId, true);
+							}
+
 							CubeGrid g = faction.TakeControl( new CubeGrid(grid) ) as CubeGrid;
 							g.FindSubgrids();
 							//MyAPIGateway.Utilities.ShowMessage( "TakeControl", faction.Name );
 							g.CheckFlags();
-							g.FindConstructionSite();
+
 							if( g.IsStatic ) {
 								faction.Colonize( GetClosestPlanet(g.Entity.WorldMatrix.Translation) );
-								if( faction.MainBase != null ) // Until Cargo Ships, this is how resources are transferred
-									faction.MainBase.ToggleDocked(g);
 							}
-							faction.MainBase = g;
-							break;
+							if( faction.MainBase == null ) // Until Cargo Ships, this is how resources are transferred
+								faction.MainBase = g;
+							else
+								faction.MainBase.ToggleDocked(g);
+
+							//break;
 						}
-					}
+					//}
 
 				}
 
-				if( entity is IMyCharacter ) {
-					IMyCharacter character = entity as IMyCharacter;
-					//Faction faction = GetFactionByFounder(entity.DisplayName);
-					if( character.IsBot ) {
-						Faction faction = GetFaction(entity.DisplayName);
-						if( faction != null ) {
-							faction.TakeControl( new Engineer(faction, entity as IMyCharacter) );
-						}
-					}
-				}
+				// if( entity is IMyCharacter ) {
+				// 	IMyCharacter character = entity as IMyCharacter;
+				// 	//Faction faction = GetFactionByFounder(entity.DisplayName);
+				// 	if( character.IsBot ) {
+				// 		Faction faction = GetFaction(entity.DisplayName);
+				// 		if( faction != null ) {
+				// 			faction.TakeControl( new Engineer(faction, entity as IMyCharacter) );
+				// 		}
+				// 	}
+				// }
 			}
 		}
 
@@ -274,8 +281,16 @@ namespace SpaceCraft {
 
 			if( Spawned ) {
 				if( ClosestPlanet == null ) ClosestPlanet = GetClosestPlanet( MyAPIGateway.Session.Player.GetPosition() );
-				foreach( Faction faction in Factions )
+				foreach( Faction faction in Factions ) {
+					if( faction.MainBase != null ) {
+						faction.MainBase.FindConstructionSite();
+						//if( faction.MainBase.ConstructionSite != null )
+							//faction.MainBase.ConstructionSite.ClearConstructionStockpile(null);
+					}
+					faction.DetermineTechTier();
 					faction.DetermineNextGoal();
+
+				}
 			}
 
 			Loaded = true;

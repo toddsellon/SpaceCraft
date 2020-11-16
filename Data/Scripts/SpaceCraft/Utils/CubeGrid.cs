@@ -389,7 +389,7 @@ namespace SpaceCraft.Utils {
 			// if( ConstructionSite != null && ConstructionSite.FatBlock != null && (ConstructionSite.FatBlock.MarkedForClose || ConstructionSite.FatBlock.Closed) ) {
 			// 	FindConstructionSite();
 			// }
-
+			if(ConstructionSite != null) ConstructionSite.SpawnFirstItemInConstructionStockpile(); // Hack to fix world reload bug
 			float old = ConstructionSite == null ? 1.0f : ConstructionSite.BuildIntegrity;
 			List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
 			IMyAssembler main = GetAssembler();
@@ -404,7 +404,8 @@ namespace SpaceCraft.Utils {
 					if( need.Id.TypeId == OBTypes.Magazine )
 						bp = need;
 
-					needs.Add(block,need);
+					if( !needs.ContainsKey(block)) // This is a fix for bug on reload, should get removed eventually
+						needs.Add(block,need);
 				}
 				else if( block is IMyAssembler && block != main ) {
 					IMyAssembler factory = block as IMyAssembler;
@@ -478,7 +479,8 @@ namespace SpaceCraft.Utils {
 			}
 
 			if( ConstructionSite == null ) return;
-			ConstructionSite.IncreaseMountLevel(5.0f,Owner.MyFaction.FounderId);
+			//ConstructionSite.IncreaseMountLevel(5.0f,Owner.MyFaction.FounderId);
+			ConstructionSite.IncreaseMountLevel(5.0f,(long)0);
 
 			if( ConstructionSite.IsFullIntegrity ) {
 				ConstructionSite.PlayConstructionSound(MyIntegrityChangeEnum.ConstructionEnd);
@@ -1018,8 +1020,8 @@ namespace SpaceCraft.Utils {
 			} else {
 				slim.SetToConstructionSite();
 				grid = Spawn( new MyObjectBuilder_CubeGrid {
-					Name = "Converter",
-					DisplayName = "Converter",
+					Name = Owner.Name + " Converter",
+					DisplayName = Owner.Name + " Converter",
 					GridSizeEnum = MyCubeSize.Large,
 					CubeBlocks = new List<MyObjectBuilder_CubeBlock> {
 						new MyObjectBuilder_MotorAdvancedStator{
@@ -1104,7 +1106,11 @@ namespace SpaceCraft.Utils {
 		public void SetConstructionSite( IMySlimBlock block ) {
 			ConstructionSite = block;
 			Need = Needs.Components;
+
+
 			block.SetToConstructionSite();
+			block.SpawnFirstItemInConstructionStockpile();
+			//block.ClearConstructionStockpile(null);
 			block.PlayConstructionSound(MyIntegrityChangeEnum.ConstructionBegin);
 			AddQueueItems( block.FatBlock, true );
 		}
@@ -1129,6 +1135,7 @@ namespace SpaceCraft.Utils {
 					Block.DoAction(block.FatBlock as IMyTerminalBlock, "Add Wheel");
 
 					if( suspension.RotorGrid != null ) {
+						suspension.RotorGrid.DisplayName = Owner.Name + " Subgrid";
 						Subgrids.Add(suspension.RotorGrid);
 					}
 				}
@@ -1164,8 +1171,11 @@ namespace SpaceCraft.Utils {
 			List<IMySlimBlock> motors = GetBlocks<IMyMotorStator>();
 			foreach( IMySlimBlock slim in motors ) {
 				IMyMotorStator motor = slim.FatBlock as IMyMotorStator;
-				if( motor.RotorGrid != null )
+				if( motor.RotorGrid != null ) {
 					Subgrids.Add(motor.RotorGrid);
+					motor.RotorGrid.ChangeGridOwnership(Owner.MyFaction.FounderId, MyOwnershipShareModeEnum.Faction);
+					//motor.RotorGrid.UpdateOwnership(Owner.MyFaction.FounderId, true);
+				}
 			}
 		}
 

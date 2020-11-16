@@ -110,12 +110,12 @@ Convars can also technically be changed inside your save folder in a file called
 (More to come, subject to change)
 
 # Known Issues
-* Opening saved games doesn't work but will soon
 * AI Engineers do not actually belong to the correct Faction. I have been unabled to resolve this yet despite spending many hours. Anyone know why it's not working? See SpaceCraft.Utils.Engineer Spawn()
 * AI never expands/colonizes space (coming soon)
 * AI is cheating by spawning in resources and instantly transferring them. This is actually a feature, not a bug. To improve performance, the AI does not actually destroy voxels, and I've limited the amount of moving required by the units. I plan to eventually add realistic cargo ship functionality but this didn't make the cut for early access.
 * AI never actually attacks me (coming soon)
 * Using mod gives a warning "Possible entity type script logic collision". I'm still not sure why this happens but mod still works.
+* Opening saved games *created on day one* do not load propertly. This issue has been fixed but you must start a new game. Sorry about that!
 
 # Coming Soon
 - Better AI attack/move decision making
