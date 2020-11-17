@@ -82,6 +82,7 @@ namespace SpaceCraft.Utils {
         Actions[action](cmd, message);
         return true;
       }
+      Respond("Error","Unknown command " + cmd.Argument(1));
       return false;
     }
 
@@ -223,7 +224,7 @@ namespace SpaceCraft.Utils {
         Respond("Error", "Player not found", message);
         return;
       }
-      Faction faction = SpaceCraftSession.GetFaction(cmd.Argument(2));
+      Faction faction = SpaceCraftSession.GetFaction(cmd.Argument(2).ToUpper());
       if( faction == null ) {
         Respond("Error", cmd.Argument(2) + " faction could not be found", message);
         return;

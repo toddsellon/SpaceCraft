@@ -178,7 +178,7 @@ namespace SpaceCraft.Utils {
 
 		public override bool Move() {
 			if( CurrentOrder == null ) return false;
-			if( Character == null || Character.Integrity == 0 || (CurrentOrder.Destination == Vector3D.Zero && CurrentOrder.Target == null) ) {
+			if( Character == null || Jetpack == null || Character.Integrity == 0 || (CurrentOrder.Destination == Vector3D.Zero && CurrentOrder.Target == null) ) {
 				CurrentOrder.Complete();
 				return false;
 			}
