@@ -31,6 +31,7 @@ namespace SpaceCraft.Utils {
       Actions.Add("follow",Follow);
       Actions.Add("war",War);
       Actions.Add("peace",Peace);
+      Actions.Add("join",Join);
       Actions.Add("debug",Debug);
 
       MyAPIGateway.Utilities.MessageEntered += MessageEntered;
@@ -214,6 +215,30 @@ namespace SpaceCraft.Utils {
 
       faction.Follow(player);
       Respond("Following", player.DisplayName, message);
+    }
+
+    public void Join( MyCommandLine cmd, Message message ) {
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+      if( player == null ) {
+        Respond("Error", "Player not found", message);
+        return;
+      }
+      Faction faction = SpaceCraftSession.GetFaction(cmd.Argument(2));
+      if( faction == null ) {
+        Respond("Error", cmd.Argument(2) + " faction could not be found", message);
+        return;
+      }
+
+      MyAPIGateway.Session.Factions.KickPlayerFromFaction(player.PlayerID);
+      if( message == null ) // Force join (I think)
+        MyAPIGateway.Session.Factions.AddPlayerToFaction(player.PlayerID,faction.MyFaction.FactionId);
+      else {
+        MyAPIGateway.Session.Factions.SendJoinRequest(faction.MyFaction.FactionId, player.PlayerID);
+        MyAPIGateway.Session.Factions.AcceptJoin(faction.MyFaction.FactionId, player.PlayerID);
+      }
+
+      IMyFaction current = MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.PlayerID);
+      Respond("Join", current == faction.MyFaction ? "Joined faction " + cmd.Argument(2) : "Failed to join faction", message);
     }
 
     public void War( MyCommandLine cmd, Message message ) {

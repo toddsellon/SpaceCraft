@@ -389,10 +389,14 @@ namespace SpaceCraft.Utils {
 			// if( ConstructionSite != null && ConstructionSite.FatBlock != null && (ConstructionSite.FatBlock.MarkedForClose || ConstructionSite.FatBlock.Closed) ) {
 			// 	FindConstructionSite();
 			// }
-			if(ConstructionSite != null) ConstructionSite.SpawnFirstItemInConstructionStockpile(); // Hack to fix world reload bug
+			if(ConstructionSite != null) ConstructionSite.SpawnFirstItemInConstructionStockpile(); // Hack to fix world reload bug (might not be necessary)
 			float old = ConstructionSite == null ? 1.0f : ConstructionSite.BuildIntegrity;
 			List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
 			IMyAssembler main = GetAssembler();
+
+			if( ConstructionSite != null && main.GetQueue().Count == 0 ) { // Not enough components
+				AddQueueItems(ConstructionSite.FatBlock,true,main);// Try again
+			}
 			Dictionary<IMyCubeBlock,CubeGrid.Item> needs = new Dictionary<IMyCubeBlock,CubeGrid.Item>();
 			CubeGrid.Item bp = null;
 			// Assess needs
@@ -635,8 +639,11 @@ namespace SpaceCraft.Utils {
 				}
 			}
 
-			if( best != null ) {
-				SetConstructionSite(best);
+			if( best != null  ) {
+				if( !SetConstructionSite(best) ) {
+					exclude.Add(best);
+					FindConstructionSite(exclude);
+				}
 			}
 		}
 
@@ -1103,7 +1110,8 @@ namespace SpaceCraft.Utils {
 			return true;
 		}
 
-		public void SetConstructionSite( IMySlimBlock block ) {
+		public bool SetConstructionSite( IMySlimBlock block ) {
+			if( !AddQueueItems( block.FatBlock, true ) ) return false;
 			ConstructionSite = block;
 			Need = Needs.Components;
 
@@ -1112,7 +1120,7 @@ namespace SpaceCraft.Utils {
 			block.SpawnFirstItemInConstructionStockpile();
 			//block.ClearConstructionStockpile(null);
 			block.PlayConstructionSound(MyIntegrityChangeEnum.ConstructionBegin);
-			AddQueueItems( block.FatBlock, true );
+			return true;
 		}
 
 		public void SetToConstructionSite( List<IMySlimBlock> blocks = null ) {

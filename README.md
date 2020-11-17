@@ -72,6 +72,9 @@ SpaceCraft has a chat-based command interface that allows you to control SpaceCr
 - **set**
 	- Changes a configuration setting
 	- /sc set engineers 2
+- **join** =faction
+	- Joins a faction even if you haven't found them yet. Host player is force joined, others request invite.
+	- /sc join ARC
 - **attack** [faction]
 	- Orders your faction to attack the specified faction or the nearest enemy if a Faction is not specified (buggy)
 	- /sc attack "HVS"

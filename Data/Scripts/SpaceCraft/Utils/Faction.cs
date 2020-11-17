@@ -1096,6 +1096,10 @@ namespace SpaceCraft.Utils {
 
     public void DetermineTechTier() {
       CubeGrid refinery = GetBestRefinery();
+      if( refinery == null ) {
+        Tier = Tech.Primitive; // Shouldn't be happening
+        return;
+      }
       switch( refinery.RefineryTier ) {
         case 3:
           Tier = Tech.Advanced;

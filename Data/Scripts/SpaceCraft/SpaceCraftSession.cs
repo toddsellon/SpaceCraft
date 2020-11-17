@@ -225,7 +225,7 @@ namespace SpaceCraft {
 				MyCommandLine cmd = new MyCommandLine();
 				string first = String.Empty;
 
-        if( cmd.TryParse(group.DescriptionText) && cmd.Argument(0).ToLower() == "spacecraft") {
+        if( group.DescriptionText.StartsWith("spacecraft",StringComparison.OrdinalIgnoreCase) && cmd.TryParse(group.DescriptionText) ) {
 
 					string Name = cmd.Argument(1) ?? String.Empty;
 
@@ -280,7 +280,7 @@ namespace SpaceCraft {
 			ScanEntities();
 
 			if( Spawned ) {
-				if( ClosestPlanet == null ) ClosestPlanet = GetClosestPlanet( MyAPIGateway.Session.Player.GetPosition() );
+				if( ClosestPlanet == null ) ClosestPlanet = GetClosestPlanet( MyAPIGateway.Utilities.IsDedicated ? Vector3D.Zero : MyAPIGateway.Session.Player.GetPosition() );
 				foreach( Faction faction in Factions ) {
 					if( faction.MainBase != null ) {
 						faction.MainBase.FindConstructionSite();
@@ -350,8 +350,8 @@ namespace SpaceCraft {
 		}
 
 		public void SpawnFactions() {
-			if( MyAPIGateway.Session.ControlledObject == null ) return;
-			if( ClosestPlanet == null ) ClosestPlanet = GetClosestPlanet( MyAPIGateway.Session.Player.GetPosition() );
+			if( !MyAPIGateway.Utilities.IsDedicated && MyAPIGateway.Session.ControlledObject == null ) return;
+			if( ClosestPlanet == null ) ClosestPlanet = GetClosestPlanet( MyAPIGateway.Utilities.IsDedicated ? Vector3D.Zero : MyAPIGateway.Session.Player.GetPosition() );
 
 
 			foreach( Faction faction in Factions ) {
