@@ -113,7 +113,7 @@ Convars can also technically be changed inside your save folder in a file called
 (More to come, subject to change)
 
 # Creating Prefabs
-- In order for SpaceCraft to use a prefab, it must be contained in a &lt;SpawnGroup&gt;, and its **&lt;Description&gt;** must begin with the word "SpaceCraft". If the SpawnGroup is also a Faction, the Prefabs included within (except the Faction's first SpawnGroup, which defines its spawn ship), will be proprietary to that Faction (untested). I will later add a Faction Parameter which forces a Faction to only use it own proprietary prefabs. This would open the possibility of other races.
+In order for SpaceCraft to use a prefab, it must be contained in a &lt;SpawnGroup&gt;, and its **&lt;Description&gt;** must begin with the word "SpaceCraft". If the SpawnGroup is also a Faction, the Prefabs included within (except the Faction's first SpawnGroup, which defines its spawn ship), will be proprietary to that Faction (untested). I will later add a Faction Parameter which forces a Faction to only use it own proprietary prefabs. This would open the possibility of other races.
 
 ## Example
 
