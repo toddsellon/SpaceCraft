@@ -168,6 +168,8 @@ Simply open the .sbc file generated in your Blueprints folder and change the fir
 </Definitions>
 ```
 
+Subgrids in prefabs are currently not working except wheels. If your Prefab has wheels, please delete the CubeGrids containing them. The mod does support subgrids there is just a bug in the spawn position or rotation of them. I've exhausted most of my ideas so far.
+
 # Known Issues
 * AI Engineers do not actually belong to the correct Faction. I have been unabled to resolve this yet despite spending many hours. Anyone know why it's not working? See SpaceCraft.Utils.Engineer Spawn()
 * AI never expands/colonizes space (coming soon)
