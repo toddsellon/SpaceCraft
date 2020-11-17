@@ -112,6 +112,62 @@ Convars can also technically be changed inside your save folder in a file called
 - Planetary Fortress
 (More to come, subject to change)
 
+# Creating Prefabs
+- In order for SpaceCraft to use a prefab, it must be contained in a &lt;SpawnGroup&gt;, and its **&lt;Description&gt;** must begin with the word "SpaceCraft". If the SpawnGroup is also a Faction, the Prefabs included within (except the Faction's first SpawnGroup, which defines its spawn ship), will be proprietary to that Faction (untested). I will later add a Faction Parameter which forces a Faction to only use it own proprietary prefabs. This would open the possibility of other races.
+
+## Example
+
+This example adds a the "Terran SCV" prefab to all SpaceCraft factions because of its **&lt;Description&gt;**.
+
+```xml
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<SpawnGroups>
+
+<SpawnGroup>
+	<Id>
+		<TypeId>SpawnGroupDefinition</TypeId>
+		<SubtypeId>SpaceCraft</SubtypeId>
+	</Id>
+	<Description>SpaceCraft</Description>
+	<Icon>Textures\GUI\Icons\Fake.dds</Icon>
+	<Frequency>1.0</Frequency>
+	<IsPirate>true</IsPirate>
+	<Prefabs>
+		<Prefab SubtypeId="Terran SCV">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Terran SCV</BeaconText>
+			<Speed>0.0</Speed>
+		</Prefab>
+	</Prefabs>
+</SpawnGroups>
+</Definitions>
+```
+
+## Turning Blueprints into Prefabs
+
+Simply open the .sbc file generated in your Blueprints folder and change the first and last few lines to match this:
+
+```xml
+<?xml version="1.0"?>
+<Definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Prefabs>
+    <Prefab xsi:type="MyObjectBuilder_PrefabDefinition">
+      <Id Type="MyObjectBuilder_PrefabDefinition" Subtype="Terran SCV" />
+	  
+	  
+	  <!-- Everything in between is the same -->
+	  
+	  
+	</Prefab>
+  </Prefabs>
+</Definitions>
+```
+
 # Known Issues
 * AI Engineers do not actually belong to the correct Faction. I have been unabled to resolve this yet despite spending many hours. Anyone know why it's not working? See SpaceCraft.Utils.Engineer Spawn()
 * AI never expands/colonizes space (coming soon)
