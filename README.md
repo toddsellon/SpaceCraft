@@ -130,5 +130,9 @@ Convars can also technically be changed inside your save folder in a file called
 --WeaponCore
 --Shield Mod(s)
 
+## Coming later?
+- I can't design the graphics, but I have created StarCraft to allow other races. Can anyone make Protoss and/or Zerg models?
+
+
 
 ## Subject to Change
