@@ -194,6 +194,7 @@ Subgrids in prefabs are currently not working except wheels. If your Prefab has 
 ## Coming later?
 - I can't design the graphics, but I have created StarCraft to allow other races. Can anyone make Protoss and/or Zerg models?
 
-
+# Special Thanks
+A big thanks to the creators of the Modular Encounter Spawner and Rearth's NPCs. I would never have been able to create this mod without being able to review their code since this is my first mod ever. Good work guys!
 
 ## Subject to Change
