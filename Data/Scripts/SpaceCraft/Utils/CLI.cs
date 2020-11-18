@@ -33,6 +33,7 @@ namespace SpaceCraft.Utils {
       Actions.Add("peace",Peace);
       Actions.Add("join",Join);
       Actions.Add("debug",Debug);
+      Actions.Add("gps",GPS);
 
       MyAPIGateway.Utilities.MessageEntered += MessageEntered;
       MyAPIGateway.Multiplayer.RegisterMessageHandler(Id, MessageHandler);
@@ -109,6 +110,25 @@ namespace SpaceCraft.Utils {
         message.Text = text;
         SendMessageToClient(message);
       }
+    }
+
+
+    public void GPS( MyCommandLine cmd, Message message ) {
+      // GPS:here:1002758.94895413:133846.064550405:1575992.06520915:#FF75C9F1:
+      IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
+      Faction faction = SpaceCraftSession.GetFactionContaining(message == null ? player.PlayerID : message.PlayerID);
+      if( faction == null ) {
+        Respond("Error", "You do not belong to a SpaceCraft faction", message);
+        return;
+      }
+
+      foreach( Controllable c in faction.Controlled ) {
+        //Vector3D position = c.Entity.WorldMatrix.Translation;
+        IMyGps gps = MyAPIGateway.Session.GPS.Create(c.Entity.DisplayName, c.Entity.DisplayName, c.Entity.WorldMatrix.Translation, true, false);
+        MyAPIGateway.Session.GPS.AddGps(message == null ? player.PlayerID : message.PlayerID, gps);
+        //Respond("GPS", "GPS:" + c.Entity.DisplayName + ":" + position.X.ToString() + ":" + position.Y.ToString() + ":" + position.Z.ToString(), message);
+      }
+
     }
 
     public void Debug( MyCommandLine cmd, Message message ) {

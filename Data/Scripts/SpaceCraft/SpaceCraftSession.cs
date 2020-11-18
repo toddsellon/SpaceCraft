@@ -135,7 +135,8 @@ namespace SpaceCraft {
 					}
 					if( !found ) continue;
 				}
-				distance = Vector3D.Distance(position, planet.PositionLeftBottomCorner + (planet.SizeInMetres / 2));
+				//distance = Vector3D.Distance(position, planet.PositionLeftBottomCorner + (planet.SizeInMetres / 2));
+				distance = Vector3D.Distance(position, planet.WorldMatrix.Translation);
 				//distance = Vector3D.Distance(position, (planet as IMyEntity).LocalVolume.Center);
 				if( best == null || distance < bestDistance ) {
 

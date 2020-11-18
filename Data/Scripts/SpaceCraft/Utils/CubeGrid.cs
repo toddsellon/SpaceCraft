@@ -386,9 +386,9 @@ namespace SpaceCraft.Utils {
 		}
 
 		public void UpdateInventory() {
-			// if( ConstructionSite != null && ConstructionSite.FatBlock != null && (ConstructionSite.FatBlock.MarkedForClose || ConstructionSite.FatBlock.Closed) ) {
-			// 	FindConstructionSite();
-			// }
+			if( ConstructionSite != null && ConstructionSite.FatBlock != null && (ConstructionSite.FatBlock.MarkedForClose || ConstructionSite.FatBlock.Closed) ) {
+				FindConstructionSite();
+			}
 			if(ConstructionSite != null) ConstructionSite.SpawnFirstItemInConstructionStockpile(); // Hack to fix world reload bug (might not be necessary)
 			float old = ConstructionSite == null ? 1.0f : ConstructionSite.BuildIntegrity;
 			List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
@@ -430,7 +430,7 @@ namespace SpaceCraft.Utils {
 			}
 
 			// See if ammo needs queue
-			if( bp != null ) {
+			if( main != null && bp != null ) {
 
 				MyBlueprintDefinitionBase bpd =	MyDefinitionManager.Static.TryGetBlueprintDefinitionByResultId(bp.Id);
 				if( bpd != null ) {
@@ -451,6 +451,7 @@ namespace SpaceCraft.Utils {
 				foreach( IMyCubeBlock b in needs.Keys ) {
 					if( block == b ) continue;
 					IMyInventory inventory = b.GetInventory();
+					if( inventory == null ) continue;
 					CubeGrid.Item need = needs[b];
 					//bool fnd = false;
 					for( int i = 0; i < 2; i++ ) {
@@ -493,12 +494,18 @@ namespace SpaceCraft.Utils {
 				Owner.BlockCompleted(ConstructionSite);
 				if( CurrentOrder != null )
 	        CurrentOrder.Complete();
-				FindConstructionSite();
+
 				foreach( CubeGrid grid in Docked ) {
-					grid.ConstructionSite = ConstructionSite;
+					if( grid == null ) continue;
+					if( grid.ConstructionSite != null ) {
+						grid.CheckFlags();
+					}
+					grid.ConstructionSite = null;
 					if( grid.CurrentOrder != null )
 		        grid.CurrentOrder.Complete();
 				}
+
+				FindConstructionSite();
 			} else if( old < ConstructionSite.BuildIntegrity ) {
 				ConstructionSite.PlayConstructionSound(MyIntegrityChangeEnum.ConstructionProcess);
 			}
@@ -916,7 +923,7 @@ namespace SpaceCraft.Utils {
 			List<IMyCubeGrid> subgrids = new List<IMyCubeGrid>();
 			MatrixD original = matrix;
       foreach( MyObjectBuilder_CubeGrid grid in prefab.CubeGrids ) {
-				MyPositionAndOrientation po = grid.PositionAndOrientation ?? new MyPositionAndOrientation(ref matrix);
+				//MyPositionAndOrientation po = grid.PositionAndOrientation ?? new MyPositionAndOrientation(ref matrix);
 				// if( prefab.SubtypeId ) {
 				// 	grid.Name = owner.Name + " Grid" + NumGrids.ToString();
 				// 	grid.DisplayName = owner.Name + " Grid" + NumGrids.ToString();
@@ -927,20 +934,20 @@ namespace SpaceCraft.Utils {
 				//}
 				grid.EntityId = (long)0;
 
-				if( g == null ) {
-					original = po.GetMatrix();
-					grid.PositionAndOrientation = new MyPositionAndOrientation(ref matrix);
-				} else {
-					MatrixD offset = matrix + (po.GetMatrix() - original);
-					//Quaternion rotation = Quaternion.CreateFromRotationMatrix(original);
-					//Quaternion placement = Quaternion.CreateFromRotationMatrix(matrix);
-					// original.Translation = matrix.Translation;
-					// MatrixD diff = original - matrix;
-					// original = matrix + diff;
-					//original = matrix + MatrixD.CreateFromQuaternion(rotation-placement);
-
-					grid.PositionAndOrientation = new MyPositionAndOrientation(ref offset);
-				}
+				// if( g == null ) {
+				// 	original = po.GetMatrix();
+					//grid.PositionAndOrientation = new MyPositionAndOrientation(ref matrix);
+				// } else {
+				// 	MatrixD offset = matrix + (po.GetMatrix() - original);
+				// 	//Quaternion rotation = Quaternion.CreateFromRotationMatrix(original);
+				// 	//Quaternion placement = Quaternion.CreateFromRotationMatrix(matrix);
+				// 	// original.Translation = matrix.Translation;
+				// 	// MatrixD diff = original - matrix;
+				// 	// original = matrix + diff;
+				// 	//original = matrix + MatrixD.CreateFromQuaternion(rotation-placement);
+				//
+				// 	grid.PositionAndOrientation = new MyPositionAndOrientation(ref offset);
+				// }
 
 				long ownerId = owner != null && owner.MyFaction != null ? owner.MyFaction.FounderId : 0;
 				foreach( MyObjectBuilder_CubeBlock block in grid.CubeBlocks ) {
@@ -962,12 +969,13 @@ namespace SpaceCraft.Utils {
         //ent.Flags &= ~EntityFlags.NeedsUpdate;
 
         entity.Render.Visible = true;
-        //entity.WorldMatrix = matrix;
+        entity.WorldMatrix = matrix;
         //entity.PositionComp.SetPosition(new Vector3D(10,0,0));
         MyAPIGateway.Entities.AddEntity(entity);
 
 				if( g == null ) {
 	        g = entity as IMyCubeGrid;
+					g.ChangeGridOwnership(ownerId, MyOwnershipShareModeEnum.Faction);
 				} else {
 					subgrids.Add(entity as IMyCubeGrid);
 				}
@@ -1003,6 +1011,7 @@ namespace SpaceCraft.Utils {
         MyAPIGateway.Entities.AddEntity(entity);
 
         g = entity as IMyCubeGrid;
+				g.ChangeGridOwnership(ownerId, MyOwnershipShareModeEnum.Faction);
 			}
 
 			return g;
@@ -1115,6 +1124,12 @@ namespace SpaceCraft.Utils {
 			ConstructionSite = block;
 			Need = Needs.Components;
 
+			if( Docked.Count > 0 ) {
+				CubeGrid grid = Owner.GetControllable(block.CubeGrid) as CubeGrid;
+				if( grid != null ) {
+					grid.ConstructionSite = block;
+				}
+			}
 
 			block.SetToConstructionSite();
 			block.SpawnFirstItemInConstructionStockpile();

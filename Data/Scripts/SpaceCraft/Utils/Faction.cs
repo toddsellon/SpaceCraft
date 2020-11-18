@@ -326,7 +326,7 @@ namespace SpaceCraft.Utils {
         CurrentGoal.Entity = grid;
 
         grid.SetToConstructionSite();
-
+        MainBase = GetBestRefinery();
         MainBase.ToggleDocked( grid );
         //MainBase.AddQueueItems( CurrentGoal.Prefab );
         MainBase.FindConstructionSite();
@@ -369,23 +369,22 @@ namespace SpaceCraft.Utils {
       int MAX = 100;
 
 
-
+      //Vector3D 	MyAPIGateway.Entities.FindFreePlace(Vector3D basePos, float radius, int maxTestCount=20, int testsPerDistance=5, float stepSize=1)
 
         MatrixD m = last.Grid.WorldMatrix;
         Vector3D p = m.Translation;
-        MyPlanet planet;
-
-        if( prefab.IsStatic && Tier >= Tech.Space ) {
-          // TODO: Determine resource wanted
-          string resource = "Uranium";
-          if( Resources.Contains("Uranium") && !Resources.Contains("Platinum") ) {
-            resource = "Platinum";
-          }
-          planet = SpaceCraftSession.GetClosestPlanet(p, Colonized, resource);
-          Colonized.Add( planet );
-        } else {
-          planet = SpaceCraftSession.GetClosestPlanet(p);
-        }
+        MyPlanet planet = SpaceCraftSession.GetClosestPlanet(p);
+        // if( prefab.IsStatic && Tier >= Tech.Space ) {
+        //   // TODO: Determine resource wanted
+        //   string resource = "Uranium";
+        //   if( Resources.Contains("Uranium") && !Resources.Contains("Platinum") ) {
+        //     resource = "Platinum";
+        //   }
+        //   planet = SpaceCraftSession.GetClosestPlanet(p, Colonized, resource);
+        //   Colonized.Add( planet );
+        // } else {
+        //   planet = SpaceCraftSession.GetClosestPlanet(p);
+        // }
         //Quaternion q = Quaternion.CreateFromRotationMatrix(m);
         //q.W += Controlled.Count;
 
@@ -399,21 +398,20 @@ namespace SpaceCraft.Utils {
         } else {
           p = p + blocked + (box.Size*2);
         }
-        //p = Vector3D.Transform( p, q );
-        //position = planet.GetClosestSurfacePointLocal( ref p );
+
         Vector3D position = planet.GetClosestSurfacePointGlobal( p );
         Vector3D up = Vector3D.Normalize(position - planet.WorldMatrix.Translation);
+        Vector3D perp = Vector3D.CalculatePerpendicularVector(up);
 
         if( !prefab.IsStatic )
           position = position + (up * (box.Height*.75) );
-        //MatrixD matrix = MatrixD.CreateWorld( position );
         MatrixD reference = planet.WorldMatrix;
 
         MyPositionAndOrientation origin = prefab.PositionAndOrientation.HasValue ? prefab.PositionAndOrientation.Value : MyPositionAndOrientation.Default;
 
-        MatrixD matrix = MatrixD.CreateWorld( position );
+        MatrixD matrix = MatrixD.CreateWorld( position, perp, up );
         //MatrixD matrix = MatrixD.CreateWorld( position, origin.Forward,  origin.Up );
-        MatrixD rotation = MatrixD.AlignRotationToAxes(ref matrix, ref reference);
+
         //MatrixD rotationDelta = MatrixD.Invert(origin.GetMatrix()) * rotation;
         //rotation = rotation * rotationDelta;
 
@@ -421,11 +419,20 @@ namespace SpaceCraft.Utils {
         // Vector3D 	SwapYZCoordinates (Vector3D v)
         //MatrixD matrix = MatrixD.CreateWorld( position, Vector3D.CalculatePerpendicularVector(up), up );
 
-        //matrix = MatrixD.CreateWorld( position, rotation.Forward, rotation.Up );
+
         if( prefab.SubtypeId == "Terran Battlecruiser" )
-        matrix = MatrixD.CreateWorld( position, rotation.Right, rotation.Backward );
-        else
-          matrix = MatrixD.CreateWorld( position, prefab.IsStatic ? rotation.Up : rotation.Right, prefab.IsStatic ? rotation.Left : rotation.Forward );
+          matrix = MatrixD.CreateWorld( position, matrix.Right, matrix.Down );
+        else if( prefab.IsStatic )
+  			   matrix = MatrixD.CreateWorld(position, matrix.Backward, matrix.Left);
+
+
+        //matrix = MatrixD.CreateWorld( position, rotation.Forward, rotation.Up );
+        // MatrixD rotation = MatrixD.AlignRotationToAxes(ref matrix, ref reference);
+        // if( prefab.SubtypeId == "Terran Battlecruiser" )
+        // matrix = MatrixD.CreateWorld( position, rotation.Right, rotation.Backward );
+        // else
+        //   //matrix = MatrixD.CreateWorld( position, prefab.IsStatic ? rotation.Up : rotation.Right, prefab.IsStatic ? rotation.Left : rotation.Forward );
+        //   matrix = MatrixD.CreateWorld( position, prefab.IsStatic ? rotation.Up : rotation.Right, prefab.IsStatic ? rotation.Left : rotation.Forward );
         //matrix = MatrixD.CreateWorld( position, rotation.Up, rotation.Left );
 
 
@@ -444,6 +451,13 @@ namespace SpaceCraft.Utils {
         MyAPIGateway.Utilities.ShowMessage( Name, "Building " + prefab.ToString() + " at " + position.ToString() );
 
       return matrix;
+    }
+
+    public Controllable GetControllable( IMyEntity entity ) {
+      foreach( Controllable c in Controlled ) {
+        if( c.Entity == entity ) return c;
+      }
+      return null;
     }
 
     public void Attack() {
@@ -1095,8 +1109,16 @@ namespace SpaceCraft.Utils {
     }
 
     public void DetermineTechTier() {
+      foreach( Controllable c in Controlled ) {
+        CubeGrid g = c as CubeGrid;
+        if( g != null )
+          g.CheckFlags();
+      }
       CubeGrid refinery = GetBestRefinery();
       if( refinery == null ) {
+        CurrentGoal = new Goal {
+          Type = Goals.Stabilize
+        };
         Tier = Tech.Primitive; // Shouldn't be happening
         return;
       }

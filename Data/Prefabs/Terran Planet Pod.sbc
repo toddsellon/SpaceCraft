@@ -1853,7 +1853,6 @@
               <ColorMaskHSV x="0" y="-0.8" z="7.450581E-09" />
               <BuiltBy>144115188075855897</BuiltBy>
               <CustomName>Landing Gear 4</CustomName>
-              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>

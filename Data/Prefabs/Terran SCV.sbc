@@ -125,6 +125,7 @@
               <SubtypeName>SmallSuspension3x3</SubtypeName>
               <EntityId>120413834640123499</EntityId>
               <Min x="2" y="4" z="-1" />
+              <ShareMode>Faction</ShareMode>
               <BlockOrientation Forward="Up" Up="Right" />
               <ColorMaskHSV x="0" y="-0.8" z="-0.45" />
               <BuiltBy>144115188075855897</BuiltBy>
@@ -166,6 +167,7 @@
               <ColorMaskHSV x="0" y="-0.8" z="-0.45" />
               <BuiltBy>144115188075855897</BuiltBy>
               <CustomName>Wheel Suspension 3x3 Left</CustomName>
+              <ShareMode>Faction</ShareMode>
               <ShowOnHUD>false</ShowOnHUD>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
