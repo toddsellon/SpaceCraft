@@ -1,7 +1,7 @@
 ![](https://raw.githubusercontent.com/toddsellon/SpaceCraft/main/thumbnail.jpg?token=AB6IMWOXRSLL2T76BAYSH327RTGKW)
 
 # SpaceCraft
-A mod for Space Engineers allowing AI controlled factions. Simply include the clone the repository into *Users\UserName\AppData\Roaming\SpaceEngineers\Mods\SpaceCraft* before launching the game and include it in the mod list for your game.
+A mod for Space Engineers allowing AI controlled factions. Simply find the mod in the Steam Workshop or clone the repository into *Users\UserName\AppData\Roaming\SpaceEngineers\Mods\SpaceCraft* before launching the game and include it in the mod list for your game. You are free to reuse, modify, suggest, or even inquire about the code in any way including creating your own branches.
 
 # Early Access
 SpaceCraft is still a work in progress, so please expect issues/bugs/other frustrations. Don't hesitate to reach out should you encounter any difficulties and be as descriptive as possible so I can try to get to the bottom of any issues.
@@ -11,7 +11,7 @@ SpaceCraft is still a work in progress, so please expect issues/bugs/other frust
 Factions are defined inside XML formated .sbc files *outside the SpaceCraft base mod*. Custom prefabs can also be added via XML.
 
 # Example
-The &lt;SpawnGroup&gt; **&lt;Description&gt;** is parsed using a Command Line syntax (separated by spaces). The first argument of "SpaceCraft" defines a new Faction. The Faction tag is the second argument. Optionally, an HSV color may be specified as the first argument. Also, any faction-specific parameters can optionally be defined with flags (i.e. -aggressive).
+The &lt;SpawnGroup&gt; **&lt;Description&gt;** is parsed using a Command Line syntax (separated by spaces). The first argument of "SpaceCraft" defines a new Faction. The Faction tag is the second argument. Optionally, an HSV color may be specified as the third argument. Also, any faction-specific parameters can optionally be defined with flags (i.e. -aggressive).
 
 ```xml
 <?xml version="1.0"?>
