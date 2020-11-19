@@ -61,6 +61,9 @@ Faction parameters are still a work in progress but will allow factions to utili
 * outsider (Spawns on a different planet than the player)
 * scavenger (Uses a grinder rather than drilling to aquire resources (not implemented yet))
 * grounded (Does not build flying units (untested))
+* static (Only builds static prefabs)
+* nobuild (Does not build new prefabs and just does the best it can with existing prefabs)
+* spawned (Is considered already spawned by SpaceCraft and therefore does not create a planet pod for this Faction)
 More to come!
 
 # Command Line Interface
@@ -93,6 +96,12 @@ SpaceCraft has a chat-based command interface that allows you to control SpaceCr
 - **debug**
 	- Toggles debug mode on/off
 	- /sc debug
+- **control**
+	- Tells SpaceCraft to control the specified entity. This is intended to be used by other mods.
+	- /sc control 12345 ARC
+- **release**
+	- Tells SpaceCraft to stop controlling the specified entity. This is intended to be used by other mods.
+	- /sc release 12345 ARC
 
 
 ## Settings
