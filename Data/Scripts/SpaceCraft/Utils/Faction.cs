@@ -326,7 +326,8 @@ namespace SpaceCraft.Utils {
         CurrentGoal.Entity = grid;
 
         grid.SetToConstructionSite();
-        MainBase = GetBestRefinery();
+        if( MainBase == null )
+          MainBase = GetBestRefinery();
         MainBase.ToggleDocked( grid );
         //MainBase.AddQueueItems( CurrentGoal.Prefab );
         MainBase.FindConstructionSite();
@@ -766,6 +767,14 @@ namespace SpaceCraft.Utils {
     }
 
     public void DetermineNextGoal() {
+
+      if( CommandLine.Switch("nobuild") ) {
+        CurrentGoal = new Goal{
+          Type = Goals.Attack
+        };
+        return;
+      }
+
       // if( CommandLine.Switch("aggressive") || CommandLine.Switch("scavenger") ) {
       //   CurrentGoal = new Goal{
       //     Type = Goals.Attack
@@ -905,6 +914,17 @@ namespace SpaceCraft.Utils {
       return c;
     }
 
+    public Controllable ReleaseControl( IMyEntity entity ) {
+      foreach( Controllable controllable in Controlled ) {
+        if( controllable.Entity == entity ) {
+          Controlled.Remove(controllable);
+          return controllable;
+        }
+      }
+
+      return null;
+    }
+
     public MatrixD GetSpawnLocation() {
 
       if( RespawnPoint == null ) {
@@ -972,6 +992,7 @@ namespace SpaceCraft.Utils {
 
     public bool Spawn( Vector3D position ) {
       Homeworld = null;
+
       if( position == Vector3D.Zero ) {
         // Get Random Spawn
         if( CommandLine.Switch("outsider")){
@@ -987,12 +1008,16 @@ namespace SpaceCraft.Utils {
         //position = planet.GetClosestSurfacePointLocal( ref p );
         position = Homeworld.GetClosestSurfacePointGlobal( p );
         Homeworld.CorrectSpawnLocation(ref position,250f);
-        Vector3D up = (position - Homeworld.WorldMatrix.Translation);
-        up.Normalize();
-        position = position + (up * 150);
       }
 
-      MainBase = new CubeGrid(CubeGrid.Spawn(String.IsNullOrWhiteSpace(SpawnPrefab) ? "Terran Planet Pod" : SpawnPrefab, MatrixD.CreateWorld(position), this));
+      if( CommandLine.Switch("spawned") ) return true;
+
+      Vector3D up = Vector3D.Normalize(position - Homeworld.WorldMatrix.Translation);
+      //position = position + (up * 150);
+
+
+
+      MainBase = new CubeGrid(CubeGrid.Spawn(String.IsNullOrWhiteSpace(SpawnPrefab) ? "Terran Planet Pod" : SpawnPrefab, MatrixD.CreateWorld(position, up, Vector3D.CalculatePerpendicularVector(up)), this));
       //MainBase.Init(Session);
 
       TakeControl( MainBase );
@@ -1068,6 +1093,8 @@ namespace SpaceCraft.Utils {
       if( MyStats.InSpace && !prefab.Spacecraft && !prefab.IsStatic ) return 0f;
 
       if( CommandLine.Switch("grounded") && !prefab.Wheels && !prefab.IsStatic ) return 0f;
+
+      if( CommandLine.Switch("static") && !prefab.IsStatic ) return 0f;
 
       //if( CommandLine.Switch("aerial") && !prefab.Flying && !prefab.IsStatic ) return 0f;
 

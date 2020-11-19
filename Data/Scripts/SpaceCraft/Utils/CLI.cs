@@ -34,6 +34,7 @@ namespace SpaceCraft.Utils {
       Actions.Add("join",Join);
       Actions.Add("debug",Debug);
       Actions.Add("gps",GPS);
+      Actions.Add("control",Control);
 
       MyAPIGateway.Utilities.MessageEntered += MessageEntered;
       MyAPIGateway.Multiplayer.RegisterMessageHandler(Id, MessageHandler);
@@ -300,15 +301,77 @@ namespace SpaceCraft.Utils {
         Respond("Error", "Could not find faction to declare war", message);
         return;
       }
+    }
 
-      // if( MyAPIGateway.Session.Factions.IsPeaceRequestStateSent (long myFactionId, long foreignFactionId) ) {
-      //   MyAPIGateway.Session.Factions.AcceptPeace (long fromFactionId, long toFactionId);
-      //   Respond("Peace", "was made with " + target.Name, message);
-      // } else{
-      //   MyAPIGateway.Session.Factions.SendPeaceRequest (long fromFactionId, long toFactionId);
-      //   Respond("Peace", "was requested with " + target.Name, message);
-      // }
-      Respond("Peace", "Not Implemented yet", message);
+    public void Control( MyCommandLine cmd, Message message ) {
+      if( MyAPIGateway.Session.LocalHumanPlayer != SpaceCraftSession.GetPlayer(message.PlayerID) ) {
+        Respond("Error", "You do not have permission", message);
+        return; // Host/API Only
+      }
+      IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
+      if( player == null ) {
+        Respond("Error", "Player not found", message);
+        return;
+      }
+
+      long id;
+      if( !Int64.TryParse(cmd.Argument(2), out id) ) return;
+
+      IMyEntity entity = null;
+      if( !MyAPIGateway.Entities.TryGetEntityById(id, out entity) ) {
+        Respond("Error", "Entity " + id.ToString() + " not found", null);
+        return;
+      }
+
+      Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(3)) ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(3).ToUpper());
+      if( faction == null ) {
+        Respond("Error", "Could not find faction " + cmd.Argument(3), message);
+        return;
+      }
+
+      if( entity is IMyCubeGrid ) {
+        faction.TakeControl( new CubeGrid(entity as IMyCubeGrid) );
+        return;
+      } else if( entity is IMyCharacter ) {
+        faction.TakeControl( new Engineer(faction, entity as IMyCharacter) );
+        return;
+      }
+
+      Respond("Error", "Could not take control of " + entity.DisplayName, message);
+
+    }
+
+    public void Release( MyCommandLine cmd, Message message ) {
+      if( MyAPIGateway.Session.LocalHumanPlayer != SpaceCraftSession.GetPlayer(message.PlayerID) ) {
+        Respond("Error", "You do not have permission", message);
+        return; // Host/API Only
+      }
+      IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
+      if( player == null ) {
+        Respond("Error", "Player not found", message);
+        return;
+      }
+
+      long id;
+      if( !Int64.TryParse(cmd.Argument(2), out id) ) return;
+
+      IMyEntity entity = null;
+      if( !MyAPIGateway.Entities.TryGetEntityById(id, out entity) ) {
+        Respond("Error", "Entity " + id.ToString() + " not found", null);
+        return;
+      }
+
+      Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(3)) ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(3).ToUpper());
+      if( faction == null ) {
+        Respond("Error", "Could not find faction " + cmd.Argument(3), message);
+        return;
+      }
+
+      Controllable removed = faction.ReleaseControl(entity);
+
+      if( removed == null )
+        Respond("Error", "Could release control of " + entity.DisplayName, message);
+
     }
 
 
