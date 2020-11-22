@@ -64,6 +64,7 @@ Faction parameters are still a work in progress but will allow factions to utili
 * static (Only builds static prefabs)
 * nobuild (Does not build new prefabs and just does the best it can with existing prefabs)
 * spawned (Is considered already spawned by SpaceCraft and therefore does not create a planet pod for this Faction)
+* nuclear (This faction gains access to Uranium once it builds its first Refinery. This is intended for grounded factions who never reach space and get Uranium legitimately.)
 More to come!
 
 # Command Line Interface
@@ -102,6 +103,11 @@ SpaceCraft has a chat-based command interface that allows you to control SpaceCr
 - **release** entityId faction
 	- Tells SpaceCraft to stop controlling the specified entity. This is intended to be used by other mods.
 	- /sc release 12345 ARC
+- **complete**
+	- Tells your faction to complete the current building project (super laggy)
+	- /sc complete
+- **pay**
+	- Pays off any outstanding balance for your faction. A balance is incurred whenever a construction project is started and the faction has to pay off the cost of one battery to avoid garbage collection.
 
 
 ## Settings
@@ -120,8 +126,11 @@ Convars can also technically be changed inside your save folder in a file called
 - Terran Reaper
 - Terran SCV (Atmo)
 - Terran SCV (Space)
+- Terran Command Center
+- Terran Siege Tank
 - Terran Battlecruiser
 - Planetary Fortress
+- Norad II
 (More to come, subject to change)
 
 # Creating Prefabs

@@ -57,7 +57,7 @@ namespace SpaceCraft.Utils {
       public float Factories = 0f;
       public float Refineries = 0f;
       public int Spacecraft = 0;
-      public bool InSpace = false; // TODO
+      public bool InSpace = false;
       public Dictionary<string,float> Ratio = new Dictionary<string,float>{};
       public Dictionary<string,float> Desired = new Dictionary<string,float>{};
     }
@@ -370,8 +370,6 @@ namespace SpaceCraft.Utils {
       int MAX = 100;
 
 
-      //Vector3D 	MyAPIGateway.Entities.FindFreePlace(Vector3D basePos, float radius, int maxTestCount=20, int testsPerDistance=5, float stepSize=1)
-
         MatrixD m = last.Grid.WorldMatrix;
         Vector3D p = m.Translation;
         MyPlanet planet = SpaceCraftSession.GetClosestPlanet(p);
@@ -400,12 +398,20 @@ namespace SpaceCraft.Utils {
           p = p + blocked + (box.Size*2);
         }
 
+        // Experimental
+        //p = MyAPIGateway.Entities.FindFreePlace(p, prefab.Definition.BoundingSphere.Radius);
+
         Vector3D position = planet.GetClosestSurfacePointGlobal( p );
         Vector3D up = Vector3D.Normalize(position - planet.WorldMatrix.Translation);
         Vector3D perp = Vector3D.CalculatePerpendicularVector(up);
 
-        if( !prefab.IsStatic )
-          position = position + (up * (box.Height*.75) );
+        if( Tier >= Tech.Advanced && (prefab.IsStatic || prefab.Spacecraft) ) {
+          position = position + ( up * (planet.AtmosphereAltitude*3) );
+        }
+
+        else if( !prefab.IsStatic )
+          //position = position + (up * (box.Height*.75) );
+          position = position + (up * (box.Width*.75) );
         MatrixD reference = planet.WorldMatrix;
 
         MyPositionAndOrientation origin = prefab.PositionAndOrientation.HasValue ? prefab.PositionAndOrientation.Value : MyPositionAndOrientation.Default;
@@ -421,7 +427,7 @@ namespace SpaceCraft.Utils {
         //MatrixD matrix = MatrixD.CreateWorld( position, Vector3D.CalculatePerpendicularVector(up), up );
 
 
-        if( prefab.SubtypeId == "Terran Battlecruiser" )
+        if( prefab.SubtypeId == "Terran Battlecruiser" || prefab.SubtypeId == "Norad II" ) // Not sure why I have to flip upside-down
           matrix = MatrixD.CreateWorld( position, matrix.Right, matrix.Down );
         else if( prefab.IsStatic )
   			   matrix = MatrixD.CreateWorld(position, matrix.Backward, matrix.Left);
@@ -659,8 +665,14 @@ namespace SpaceCraft.Utils {
         case Tech.Primitive:
           resources.Add("Stone",(VRage.MyFixedPoint)1*Convars.Static.Difficulty);
           break;
+        case Tech.Space:
+          resources.Add("Uranium",(VRage.MyFixedPoint)0.001*Convars.Static.Difficulty);
+          resources.Add("Platinum",(VRage.MyFixedPoint)0.001*Convars.Static.Difficulty);
+          goto case Tech.Advanced;
         //case Tech.Established:
         case Tech.Advanced:
+          if( Tier != Tech.Space && CommandLine.Switch("nuclear") )
+            resources.Add("Uranium",(VRage.MyFixedPoint)0.001*Convars.Static.Difficulty);
           resources.Add("Silver",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
           resources.Add("Gold",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
           goto default;
@@ -823,7 +835,8 @@ namespace SpaceCraft.Utils {
       MyStats.Desired.Add("Fighters", CommandLine.Switch("aggressive") ? .75f : .5f );
       MyStats.Desired.Add("Factories", .45f);
       MyStats.Desired.Add("Refineries", .45f);
-      MyStats.Desired.Add("Static", CommandLine.Switch("aggressive") ? .75f : .5f );
+      //MyStats.Desired.Add("Static", CommandLine.Switch("aggressive") ? .75f : .5f );
+      MyStats.Desired.Add("Static", .25f );
 
       //MyAPIGateway.Utilities.ShowMessage( "MyStats", "Workers: " + MyStats.Workers.ToString() + " (" + MyStats.Ratio["Workers"] + "/" + MyStats.Desired["Workers"] + ")" );
 
@@ -848,27 +861,27 @@ namespace SpaceCraft.Utils {
         return;
       }
 
-      if( Tier == Tech.Advanced ) {
-        // Get to space
-        if( MyStats.Spacecraft == 0 ) {
-          // Build Spacecraft
-          CurrentGoal = new Goal{
-            Type = Goals.Construct,
-            Prefab = Prefab.Get("Terran Battlecruiser")
-          };
-          return;
-        } else {
-          CubeGrid sc = GetSpacecraft();
-          MyPlanet target = SpaceCraftSession.GetClosestPlanet( sc.Grid.WorldMatrix.Translation, new List<MyPlanet>{Homeworld}, "Ice" );
-          MyAPIGateway.Utilities.ShowMessage( "Colonize", sc.ToString() + ": " + target.ToString() );
-          CurrentGoal = new Goal{
-            Type = Goals.Colonize,
-            Entity = sc,
-            Target = target,
-            Prefab = Prefab.Get("Terran SCV (Space)")
-          };
-        }
-      }
+      // if( Tier == Tech.Advanced ) {
+      //   // Get to space
+      //   if( MyStats.Spacecraft == 0 ) {
+      //     // Build Spacecraft
+      //     CurrentGoal = new Goal{
+      //       Type = Goals.Construct,
+      //       Prefab = Prefab.Get("Terran Battlecruiser")
+      //     };
+      //     return;
+      //   } else {
+      //     CubeGrid sc = GetSpacecraft();
+      //     MyPlanet target = SpaceCraftSession.GetClosestPlanet( sc.Grid.WorldMatrix.Translation, new List<MyPlanet>{Homeworld}, "Ice" );
+      //     MyAPIGateway.Utilities.ShowMessage( "Colonize", sc.ToString() + ": " + target.ToString() );
+      //     CurrentGoal = new Goal{
+      //       Type = Goals.Colonize,
+      //       Entity = sc,
+      //       Target = target,
+      //       Prefab = Prefab.Get("Terran SCV (Space)")
+      //     };
+      //   }
+      // }
 
       CurrentGoal = new Goal{
         Type = Goals.Construct
@@ -1004,11 +1017,14 @@ namespace SpaceCraft.Utils {
         }
         Colonized.Add( Homeworld );
         //int rand = Randy.Next(Homeworld.Size.X);
+        //Vector3 p = new Vector3(Randy.Next(-Homeworld.Size.X,Homeworld.Size.X),Randy.Next(-Homeworld.Size.Y,Homeworld.Size.Y),Randy.Next(-Homeworld.Size.Z,Homeworld.Size.Z)) + Homeworld.WorldMatrix.Translation;
         Vector3 p = new Vector3(Randy.Next(Homeworld.Size.X),Randy.Next(Homeworld.Size.Y),Randy.Next(Homeworld.Size.Z)) + Vector3.Normalize(Homeworld.PositionLeftBottomCorner);
         //position = planet.GetClosestSurfacePointLocal( ref p );
         position = Homeworld.GetClosestSurfacePointGlobal( p );
         Homeworld.CorrectSpawnLocation(ref position,250f);
       }
+
+      if( CommandLine.Switch("nuclear") && !Resources.Contains("Uranium") ) Resources.Add("Uranium");
 
       if( CommandLine.Switch("spawned") ) return true;
 
@@ -1090,11 +1106,17 @@ namespace SpaceCraft.Utils {
       }
       float priority = (float)prefab.Price; // Build highest grid you can afford to reduce quantity of grids
 
-      if( MyStats.InSpace && !prefab.Spacecraft && !prefab.IsStatic ) return 0f;
+      if( !CommandLine.Switch("grounded") && Tier == Tech.Space && !prefab.Spacecraft && !prefab.IsStatic ) return 0f;
 
       if( CommandLine.Switch("grounded") && !prefab.Wheels && !prefab.IsStatic ) return 0f;
 
       if( CommandLine.Switch("static") && !prefab.IsStatic ) return 0f;
+
+      if( Tier < Tech.Space )
+        priority *= prefab.Atmosphere && !prefab.IsStatic ? 2 : 1;
+      else if( prefab.Atmosphere ) {
+        return 0f;
+      }
 
       //if( CommandLine.Switch("aerial") && !prefab.Flying && !prefab.IsStatic ) return 0f;
 
@@ -1124,12 +1146,10 @@ namespace SpaceCraft.Utils {
 
       if( prefab.IsStatic ) {
 
-          priority *= MyStats.Ratio["Static"] >= MyStats.Desired["Static"] ? .5f : 1f;
+          //priority *= MyStats.Ratio["Static"] >= MyStats.Desired["Static"] ? .5f : 1f;
+          priority *= MyStats.Ratio["Static"] < MyStats.Desired["Static"] ? 2f : .5f;
 
       }
-
-
-      priority *= prefab.Atmosphere && !prefab.IsStatic && Tier < Tech.Space ? 2 : 1;
 
 
       return priority;
@@ -1156,17 +1176,32 @@ namespace SpaceCraft.Utils {
           Resources.Add("Gold");
           Resources.Add("Cobalt");
           Resources.Add("Magnesium");
+          if( InSpace(refinery.Grid.WorldMatrix.Translation) ) {
+            Tier = Tech.Space;
+            Resources.Add("Uranium");
+            Resources.Add("Platinum");
+          }
           break;
         case 2:
           Tier = Tech.Established;
           Resources.Add("Cobalt");
           Resources.Add("Magnesium");
           break;
-          break;
         default:
           Tier = Tech.Primitive;
           break;
       }
+      if( CommandLine.Switch("nuclear") && !Resources.Contains("Uranium") )
+        Resources.Add("Uranium");
+    }
+
+    public static bool InSpace( Vector3D pos ) {
+
+      MyPlanet planet = SpaceCraftSession.GetClosestPlanet(pos);
+      if( planet == null ) return true; // No planets?
+
+      return planet.GetOxygenForPosition(pos) == 0f;
+      //return planet.GetAirDensity(pos) == 0f;
     }
 
     public void BlockCompleted( IMySlimBlock block ) {
@@ -1178,15 +1213,17 @@ namespace SpaceCraft.Utils {
           Resources.Add("Magnesium");
         }
 
-        if( block.BlockDefinition.Id.SubtypeName == "LargeRefinery" && !Resources.Contains("Silver")) {
-          Resources.Add("Silver");
-          Resources.Add("Gold");
-          Tier = Tech.Advanced;
-          //if( Tier == Tech.Established ) Tier = Tech.Space;
-          // if( MyStats.InSpace ) {
-          //   Resources.Add("Platinum");
-          //   Resources.Add("Uranium");
-          // }
+        if( block.BlockDefinition.Id.SubtypeName == "LargeRefinery" ) {
+          if( Tier == Tech.Established ) {
+            Resources.Add("Silver");
+            Resources.Add("Gold");
+            Tier = Tech.Advanced;
+          } else if( Tier == Tech.Advanced && InSpace(block.CubeGrid.WorldMatrix.Translation) ) {
+            Tier = Tech.Space;
+            Resources.Add("Platinum");
+            if( !Resources.Contains("Uranium") )
+              Resources.Add("Uranium");
+          }
         }
       }
     }

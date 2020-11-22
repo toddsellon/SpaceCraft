@@ -84,16 +84,24 @@
 			<BeaconText>Terran SCV</BeaconText>
 			<Speed>0.0</Speed>
 		</Prefab>
-		<!-- Currently Bugged -->
-		<!-- <Prefab SubtypeId="Terran Space Outpost">
+		<Prefab SubtypeId="Terran Siege Tank">
 			<Position>
 				<X>0.0</X>
 				<Y>0.0</Y>
 				<Z>0.0</Z>
 			</Position>
-			<BeaconText>Terran Space Outpost</BeaconText>
+			<BeaconText>Terran Siege Tank</BeaconText>
 			<Speed>0.0</Speed>
-		</Prefab> -->
+		</Prefab>
+		<Prefab SubtypeId="Terran Command Center">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Terran Command Center</BeaconText>
+			<Speed>0.0</Speed>
+		</Prefab>
 		<Prefab SubtypeId="Planetary Fortress">
 			<Position>
 				<X>0.0</X>
@@ -101,6 +109,15 @@
 				<Z>0.0</Z>
 			</Position>
 			<BeaconText>Planetary Fortress</BeaconText>
+			<Speed>0.0</Speed>
+		</Prefab>
+		<Prefab SubtypeId="Norad II">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Norad II</BeaconText>
 			<Speed>0.0</Speed>
 		</Prefab>
 	</Prefabs>

@@ -26,21 +26,25 @@ namespace SpaceCraft {
 	public class SurvivalKit : MyGameLogicComponent {
 
 		public IMyProductionBlock block;
+		public MyDefinitionId gravel;
 
 		public override void Init(MyObjectBuilder_EntityBase objectBuilder) {
-			NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
+			//NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
+			NeedsUpdate = MyEntityUpdateEnum.EACH_100TH_FRAME;
 			block = Entity as IMyProductionBlock;
+			gravel = MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/StoneOreToIngotBasic");
 		}
 
 
-		public override void UpdateAfterSimulation() {
+		//public override void UpdateAfterSimulation() {
+		public override void UpdateAfterSimulation100() {
 			//MyInventoryBase inv = block.GetInventoryBase();
 			MyInventoryBase inv = block.Components.Get<MyInventoryBase>();
 
 			if( inv == null ) return;
 
 			if( block.IsQueueEmpty || !block.IsProducing )
-				block.AddQueueItem( MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/StoneOreToIngotBasic"), (VRage.MyFixedPoint)10 );
+				block.AddQueueItem( gravel, (VRage.MyFixedPoint)10 );
 
 			inv.RemoveItemsOfType( (MyFixedPoint)1, MyDefinitionId.Parse("MyObjectBuilder_Ingot/Stone") );
 

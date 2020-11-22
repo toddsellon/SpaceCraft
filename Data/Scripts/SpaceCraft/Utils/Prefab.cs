@@ -51,26 +51,82 @@ namespace SpaceCraft.Utils {
         foreach( MyObjectBuilder_CubeBlock block in grid.CubeBlocks ) {
           MyCubeBlockDefinition def = MyDefinitionManager.Static.GetCubeBlockDefinition(block);
 
-          if( block is MyObjectBuilder_CargoContainer ) IsCargo = true;
+          if( def != null ) { // Calculate cost of block
+            foreach( var component in def.Components ) {
+              Price += component.Count;
+              string subtype = component.Definition.Id.SubtypeName;
+              MyBlueprintDefinitionBase blueprint = null;
+      				MyDefinitionManager.Static.TryGetComponentBlueprintDefinition(component.Definition.Id, out blueprint);
+              if( Components.ContainsKey(subtype) ) {
+                Components[subtype] += component.Count;
+              } else {
+                Components.Add(subtype,component.Count);
+              }
+              if( blueprint != null) {
+                foreach( var item in blueprint.Prerequisites ) {
+                  subtype = item.Id.SubtypeName;
+                  if( Cost.ContainsKey(subtype) ) {
+                    Cost[subtype] += item.Amount.ToIntSafe();
+                  } else {
+                    Cost.Add(subtype,item.Amount.ToIntSafe());
+                  }
+                }
+              }
+            }
+
+          }
+
+          if( block is MyObjectBuilder_CargoContainer ) {
+            IsCargo = true;
+            continue;
+          }
           if( block is MyObjectBuilder_MedicalRoom || block is MyObjectBuilder_SurvivalKit ) {
             FactoryTier = Math.Max(FactoryTier,1);
             RefineryTier = Math.Max(RefineryTier,1);
             IsRespawn = true;
+            continue;
           }
           if( block is MyObjectBuilder_Assembler ) {
             FactoryTier = block.SubtypeName == "LargeAssembler" ? 3 : Math.Max(FactoryTier,2);
+            continue;
           }
           if( block is MyObjectBuilder_Refinery ) {
             RefineryTier = block.SubtypeName == "LargeRefinery" ? 3 : Math.Max(RefineryTier,2);
+            continue;
           }
-          if( block is MyObjectBuilder_MotorSuspension ) Wheels = true;
-          if( block is MyObjectBuilder_Drill ) Worker = true;
-          if( block is MyObjectBuilder_WindTurbine ) Atmosphere = true;
+          if( block is MyObjectBuilder_MotorSuspension ) {
+            Wheels = true;
+            continue;
+          }
+          if( block is MyObjectBuilder_Drill ) {
+            Worker = true;
+            continue;
+          }
+          if( block is MyObjectBuilder_WindTurbine ) {
+            Atmosphere = true;
+            continue;
+          }
           if( block is MyObjectBuilder_Reactor && !Cost.ContainsKey("Uranium") ) {
             Cost.Add("Uranium",1);
+            continue;
           }
-          if( block is 	MyObjectBuilder_LargeGatlingTurret || block is 	MyObjectBuilder_LargeMissileTurret || block is 	MyObjectBuilder_SmallGatlingGun || block is 	MyObjectBuilder_SmallMissileLauncher )
+          if( block is MyObjectBuilder_UserControllableGun ) {
             Fighter = true;
+            if( (block is MyObjectBuilder_LargeMissileTurret || block is MyObjectBuilder_SmallMissileLauncher) && !Cost.ContainsKey("Uranium") ) {
+              Cost.Add("Uranium",1);
+            }
+            continue;
+          }
+          // if( block is MyObjectBuilder_LargeMissileTurret || block is MyObjectBuilder_SmallMissileLauncher ) {
+          //   Fighter = true;
+          //   if( !Cost.ContainsKey("Uranium") )
+          //     Cost.Add("Uranium",1);
+          //   continue;
+          // }
+          // if( block is 	MyObjectBuilder_LargeGatlingTurret || block is MyObjectBuilder_SmallGatlingGun ) {
+          //   Fighter = true;
+          //   continue;
+          // }
           if( block is MyObjectBuilder_Thrust ) {
             if( def != null )
               switch( def.Id.SubtypeName ) {
@@ -99,31 +155,6 @@ namespace SpaceCraft.Utils {
                   Spacecraft = true;
                   break;
               }
-          }
-
-          if( def != null ) {
-            foreach( var component in def.Components ) {
-              Price += component.Count;
-              string subtype = component.Definition.Id.SubtypeName;
-              MyBlueprintDefinitionBase blueprint = null;
-      				MyDefinitionManager.Static.TryGetComponentBlueprintDefinition(component.Definition.Id, out blueprint);
-              if( Components.ContainsKey(subtype) ) {
-                Components[subtype] += component.Count;
-              } else {
-                Components.Add(subtype,component.Count);
-              }
-              if( blueprint != null) {
-                foreach( var item in blueprint.Prerequisites ) {
-                  subtype = item.Id.SubtypeName;
-                  if( Cost.ContainsKey(subtype) ) {
-                    Cost[subtype] += item.Amount.ToIntSafe();
-                  } else {
-                    Cost.Add(subtype,item.Amount.ToIntSafe());
-                  }
-                }
-              }
-            }
-
           }
 
         }

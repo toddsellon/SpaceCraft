@@ -17,7 +17,6 @@ namespace SpaceCraft.Utils {
     //protected QueuedAction Queued;
     protected static ushort Id = 8008;
     protected bool Server;
-    //public static readonly Convars Settings = new Convars();
     protected Dictionary<string,Action<MyCommandLine,Message>> Actions = new Dictionary<string,Action<MyCommandLine,Message>>(StringComparer.OrdinalIgnoreCase);
 
     public CLI(bool server) {
@@ -28,6 +27,8 @@ namespace SpaceCraft.Utils {
       Actions.Add("build",Build);
       Actions.Add("set",Set);
       Actions.Add("spawn",Spawn);
+      Actions.Add("complete",Complete);
+      Actions.Add("pay",Pay);
       Actions.Add("follow",Follow);
       Actions.Add("war",War);
       Actions.Add("peace",Peace);
@@ -217,10 +218,99 @@ namespace SpaceCraft.Utils {
         return;
       }
       CubeGrid grid = new CubeGrid( CubeGrid.Spawn(prefab, faction.GetPlacementLocation(prefab), faction) );
-      if( grid != null && grid.Grid != null )
-        faction.TakeControl( grid );
+
+      if( grid == null && grid.Grid == null ) {
+          Respond("Error", "Failed to spawn " + cmd.Argument(2), message);
+          return;
+      }
+
+      List<IMySlimBlock> suspensions = grid.GetBlocks<IMyMotorSuspension>();
+      long owner = faction.MyFaction == null ? (long)0 : faction.MyFaction.FounderId;
+      foreach(IMySlimBlock block in suspensions) {
+        IMyMotorSuspension suspension = block.FatBlock as IMyMotorSuspension;
+        Block.DoAction(suspension, "Add Wheel");
+        if( suspension.RotorGrid != null ) {
+          suspension.RotorGrid.DisplayName = faction.Name + " Subgrid";
+          grid.Subgrids.Add(suspension.RotorGrid);
+          IMySlimBlock wheel = suspension.RotorGrid.GetCubeBlock(Vector3I.Zero) as IMySlimBlock;
+          if( wheel == null ) continue;
+          wheel.SpawnConstructionStockpile();
+          wheel.IncreaseMountLevel(100f,owner);
+        }
+      }
+
+      grid.CheckFlags();
+      faction.TakeControl( grid );
+      if( faction.MainBase != null )
+        faction.MainBase.ToggleDocked(grid);
 
       Respond("Spawning", cmd.Argument(2), message);
+    }
+
+    public void Complete( MyCommandLine cmd, Message message ) {
+      if( message != null ) {
+        Respond("Error","You don't have permission", message);
+        return;
+      }
+      IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
+      Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(3)) ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(3).ToUpper());
+      if( faction == null ) {
+        Respond("Error", "SpaceCraft faction not found " + cmd.Argument(3), message);
+        return;
+      }
+
+      CubeGrid grid = faction.CurrentGoal.Entity as CubeGrid;
+
+      if( grid == null ) {
+        Respond("Error", "Your faction is not constructing anything", message);
+        return;
+      }
+
+
+      long owner = faction.MyFaction == null ? (long)0 : faction.MyFaction.FounderId;
+      List<IMySlimBlock> blocks = grid.GetBlocks<IMySlimBlock>();
+      foreach(IMySlimBlock block in blocks) {
+        if( block.IsFullIntegrity ) continue;
+        //block.SetToConstructionSite();
+        block.SpawnConstructionStockpile();
+        block.IncreaseMountLevel(100f,owner);
+        faction.BlockCompleted(block);
+      }
+      grid.ConstructionSite = null;
+      grid.CheckFlags();
+      if( faction.MainBase != null )
+        foreach( CubeGrid g in faction.MainBase.Docked ) {
+          if( g == null ) continue;
+          if( g.CurrentOrder != null )
+            g.CurrentOrder.Complete();
+        }
+      //grid.ConstructionSite = null;
+
+      Respond("Completed", grid.Grid.DisplayName, message);
+    }
+
+    // Pays off a battery balance if applicable
+    public void Pay( MyCommandLine cmd, Message message ) {
+      if( message != null ) {
+        Respond("Error","You don't have permission", message);
+        return;
+      }
+      IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
+      Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(3)) ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(3).ToUpper());
+      if( faction == null ) {
+        Respond("Error", "SpaceCraft faction not found " + cmd.Argument(3), message);
+        return;
+      }
+
+      foreach( Controllable c in faction.Controlled ) {
+        CubeGrid grid = c as CubeGrid;
+        if( grid != null )
+          grid.Balance = null;
+      }
+
+      faction.CurrentGoal.Balance = null;
+
+      Respond("Pay", "Paid off all balances", message);
     }
 
     public void Follow( MyCommandLine cmd, Message message ) {
@@ -330,7 +420,10 @@ namespace SpaceCraft.Utils {
       }
 
       if( entity is IMyCubeGrid ) {
-        faction.TakeControl( new CubeGrid(entity as IMyCubeGrid) );
+        CubeGrid grid = new CubeGrid(entity as IMyCubeGrid);
+        faction.TakeControl( grid );
+        if( faction.MainBase != null )
+          faction.MainBase.ToggleDocked(grid);
         return;
       } else if( entity is IMyCharacter ) {
         faction.TakeControl( new Engineer(faction, entity as IMyCharacter) );
@@ -368,6 +461,9 @@ namespace SpaceCraft.Utils {
       }
 
       Controllable removed = faction.ReleaseControl(entity);
+      CubeGrid grid = removed as CubeGrid;
+      if( grid != null && grid.DockedTo != null )
+        grid.DockedTo.ToggleDocked(grid);
 
       if( removed == null )
         Respond("Error", "Could release control of " + entity.DisplayName, message);

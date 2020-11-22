@@ -109,9 +109,7 @@ namespace SpaceCraft.Utils {
       //MyCubeBlockDefinition def = MyDefinitionManager.Static.GetCubeBlockDefinition(slim.BlockDefinition.Id);
       string subtypeName = slim.BlockDefinition.Id.SubtypeName;
 
-      if( block is IMyReactor ) {
-        return 200;
-      }
+
 
       if( block is IMyBatteryBlock ) {
         return 101;
@@ -125,7 +123,6 @@ namespace SpaceCraft.Utils {
         //return 48;
         return subtypeName == "LargeRefinery" ? 99 : 50;
       }
-
       if( block is IMyAssembler ) {
         //switch( slim.BlockDefinition.DisplayNameString ) {
         switch(subtypeName) {
@@ -137,11 +134,16 @@ namespace SpaceCraft.Utils {
         return 48;
       }
 
+      if( block is IMyReactor ) {
+        return 97;
+      }
+
       if( block is IMyMedicalRoom ) return 47;
 
 
       if( block is IMyProductionBlock ) return 46;
 
+      //if( block is IMyShipDrill || block is IMyUserControllableGun ) return 45;
       if( block is IMyShipDrill ) return 45;
 
       if( block is IMyMotorSuspension || block is IMyWheel ) return 30;

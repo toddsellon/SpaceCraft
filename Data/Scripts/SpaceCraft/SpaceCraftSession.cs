@@ -104,20 +104,6 @@ namespace SpaceCraft {
 			MyCLI.Destroy();
 		}
 
-		// public void InitConvars() {
-		// 	if( Spawned ) {
-		// 		MyAPIGateway.Utilities.GetVariable<int>("SC-Grids", out Limits.Grids);
-		// 		MyAPIGateway.Utilities.GetVariable<float>("SC-Difficulty", out Difficulty);
-		// 		MyAPIGateway.Utilities.GetVariable<int>("SC-Engineers", out Limits.Engineers);
-		// 		MyAPIGateway.Utilities.GetVariable<bool>("SC-Debug", out Debug);
-		// 	} else {
-		// 		MyAPIGateway.Utilities.SetVariable<int>("SC-Grids", Limits.Grids);
-		// 		MyAPIGateway.Utilities.SetVariable<float>("SC-Difficulty", Difficulty);
-		// 		MyAPIGateway.Utilities.SetVariable<int>("SC-Engineers", Limits.Engineers);
-		// 		MyAPIGateway.Utilities.SetVariable<bool>("SC-Debug", Debug);
-		// 	}
-		// }
-
 		public static MyPlanet GetClosestPlanet( Vector3D position, List<MyPlanet> exclude = null, string containing = "" ) {
 			if( exclude == null ) exclude = new List<MyPlanet>();
 			MyPlanet best = null;

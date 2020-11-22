@@ -394,7 +394,7 @@ namespace SpaceCraft.Utils {
 			List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
 			IMyAssembler main = GetAssembler();
 
-			if( ConstructionSite != null && main.GetQueue().Count == 0 ) { // Not enough components
+			if( ConstructionSite != null && main != null && main.GetQueue().Count == 0 ) { // Not enough components
 				AddQueueItems(ConstructionSite.FatBlock,true,main);// Try again
 			}
 			Dictionary<IMyCubeBlock,CubeGrid.Item> needs = new Dictionary<IMyCubeBlock,CubeGrid.Item>();
@@ -485,7 +485,7 @@ namespace SpaceCraft.Utils {
 
 			if( ConstructionSite == null ) return;
 			//ConstructionSite.IncreaseMountLevel(5.0f,Owner.MyFaction.FounderId);
-			ConstructionSite.IncreaseMountLevel(5.0f,(long)0);
+			ConstructionSite.IncreaseMountLevel(5.0f, Owner.MyFaction == null ? (long)0 : Owner.MyFaction.FounderId);
 
 			if( ConstructionSite.IsFullIntegrity ) {
 				ConstructionSite.PlayConstructionSound(MyIntegrityChangeEnum.ConstructionEnd);
@@ -531,8 +531,10 @@ namespace SpaceCraft.Utils {
 				List<IMyInventoryItem> items = inventory.GetItems();
 				items.AddRange(ass.GetInventory(1).GetItems());
 
-				// Not pulling all
-				foreach( MyBlueprintDefinitionBase.Item prereq in bp.Prerequisites ) {
+				List<MyBlueprintDefinitionBase.Item> prereqs = new List<MyBlueprintDefinitionBase.Item>(bp.Prerequisites);
+				prereqs.Reverse(); // Try to pull in reverse order
+
+				foreach( MyBlueprintDefinitionBase.Item prereq in prereqs ) {
 					bool fnd = false;
 					foreach( IMyInventoryItem item in items ) {
 
