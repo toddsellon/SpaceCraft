@@ -657,33 +657,35 @@ namespace SpaceCraft.Utils {
     public Dictionary<string,VRage.MyFixedPoint> GetDrillResources( MyPlanet planet, Controllable c ) {
       Dictionary<string,VRage.MyFixedPoint> resources = new Dictionary<string,VRage.MyFixedPoint>();
       CubeGrid grid = c as CubeGrid;
+
+      resources.Add("Stone",(VRage.MyFixedPoint)(Tier == Tech.Primitive ? 100 : 10)*Convars.Static.Difficulty);
+
       if( grid != null && grid.DockedTo != null && grid.DockedTo.RefineryTier == 1 ) {
-        resources.Add("Stone",(VRage.MyFixedPoint)1*Convars.Static.Difficulty);
         return resources;
       }
       switch( Tier ) {
         case Tech.Primitive:
-          resources.Add("Stone",(VRage.MyFixedPoint)1*Convars.Static.Difficulty);
+
           break;
         case Tech.Space:
-          resources.Add("Uranium",(VRage.MyFixedPoint)0.001*Convars.Static.Difficulty);
-          resources.Add("Platinum",(VRage.MyFixedPoint)0.001*Convars.Static.Difficulty);
+          resources.Add("Uranium",(VRage.MyFixedPoint)0.02*Convars.Static.Difficulty);
+          resources.Add("Platinum",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
           goto case Tech.Advanced;
         //case Tech.Established:
         case Tech.Advanced:
           if( Tier != Tech.Space && CommandLine.Switch("nuclear") )
-            resources.Add("Uranium",(VRage.MyFixedPoint)0.001*Convars.Static.Difficulty);
-          resources.Add("Silver",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
-          resources.Add("Gold",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
+            resources.Add("Uranium",(VRage.MyFixedPoint)0.02*Convars.Static.Difficulty);
+          resources.Add("Silver",(VRage.MyFixedPoint)0.1*Convars.Static.Difficulty);
+          resources.Add("Gold",(VRage.MyFixedPoint)0.1*Convars.Static.Difficulty);
           goto default;
         default:
-          resources.Add("Iron",(VRage.MyFixedPoint)0.2*Convars.Static.Difficulty);
-          resources.Add("Nickel",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
-          resources.Add("Cobalt",(VRage.MyFixedPoint)0.002*Convars.Static.Difficulty);
-          resources.Add("Ice",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
-          resources.Add("Magnesium",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
-          resources.Add("Silicon",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
-          resources.Add("Stone",(VRage.MyFixedPoint)0.005*Convars.Static.Difficulty);
+          resources.Add("Iron",(VRage.MyFixedPoint)2*Convars.Static.Difficulty);
+          resources.Add("Nickel",(VRage.MyFixedPoint)0.2*Convars.Static.Difficulty);
+          resources.Add("Cobalt",(VRage.MyFixedPoint)0.04*Convars.Static.Difficulty);
+          resources.Add("Ice",(VRage.MyFixedPoint)3*Convars.Static.Difficulty);
+          resources.Add("Magnesium",(VRage.MyFixedPoint)0.2*Convars.Static.Difficulty);
+          resources.Add("Silicon",(VRage.MyFixedPoint)0.2*Convars.Static.Difficulty);
+          //resources.Add("Stone",(VRage.MyFixedPoint)0.05*Convars.Static.Difficulty);
           break;
       }
       return resources;

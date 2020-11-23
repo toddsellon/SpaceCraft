@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using VRage;
 using VRage.ModAPI;
@@ -64,17 +65,20 @@ namespace SpaceCraft.Utils {
 
 		// Main loop
 		public override void UpdateBeforeSimulation() {
-			if( (Character == null || Character.Integrity == 0) ) {
+			if( Character == null || Character.Integrity == 0 || Character.Closed || Character.MarkedForClose ) {
 				CurrentOrder = null;
 				MatrixD matrix = Character.WorldMatrix;
 				Character = Spawn();
 				Initialize();
+				return;
 			}
 
 			Jetpack.FuelDefinition.EnergyDensity = 1.0f;
 
 			if( CurrentOrder == null || CurrentOrder.Step == Steps.Completed ) Next();
 			if( CurrentOrder == null ) return;
+
+			Tick++;
 
 			switch( CurrentOrder.Type ) {
 				case Orders.Attack:
@@ -99,10 +103,10 @@ namespace SpaceCraft.Utils {
 					Follow();
 					break;
 			}
-			// Tick++;
-			// if( Tick == 99 ) {
-			// 	Tick = 0;
-			// }
+
+			if( Tick == 99 ) {
+				Tick = 0;
+			}
 
 		}
 
@@ -212,7 +216,11 @@ namespace SpaceCraft.Utils {
 				}
 				//destination.Normalize();
 				Vector3 targetDelta = Vector3.Normalize(destination - Character.WorldMatrix.Translation);
-				Jetpack.MoveAndRotate( ref targetDelta, ref rotation, 0.0f, false );
+				try {
+					Jetpack.MoveAndRotate( ref targetDelta, ref rotation, 0.0f, false );
+				} catch( NullReferenceException e ) {
+					// Sometimes the character is dead and this is the only way I could prevent a crash
+				}
 				//Jetpack.MoveAndRotate( ref destination, ref rotation, 0.0f, false );
 			}
 
@@ -243,7 +251,7 @@ namespace SpaceCraft.Utils {
 		// https://github.com/KeenSoftwareHouse/SpaceEngineers/blob/a109106fc0ded66bdd5da70e099646203c56550f/Sources/Sandbox.Game/Game/Weapons/Guns/MyHandDrill.cs
 		// MyHandDrillDefinition
 		public void Drill() {
-			if( Character == null || Character.Integrity == 0 ) {
+			if( Character == null || Character.Integrity == 0 || CurrentOrder == null ) {
 				CurrentOrder = null;
 				return;
 			}
@@ -276,23 +284,28 @@ namespace SpaceCraft.Utils {
 			} else {
 				// Add resources to inventory
 				IMyInventory inv = GetInventory()[0];
+				if( inv == null ) return;
 				if( inv.IsFull ) {
 					//MyAPIGateway.Utilities.ShowMessage( "Drill", "Inventory Full: " + ToString() );
 					Execute( new Order{
 						Type = Orders.Deposit,
-						Range = 50f,
+						Range = 5000f,
 						Entity = Owner.GetBestRefinery(this)
+						//Entity = Owner.MainBase
 					}, true );
 					return;
-				} else {
-					foreach( string ore in CurrentOrder.Resources.Keys ) {
-						inv.AddItems(CurrentOrder.Resources[ore], new MyObjectBuilder_Ore(){
-			        SubtypeName = ore
-			      } );
-					}
+				} else if( CurrentOrder.Resources != null ) {
+					if( Tick == 99 )
+						foreach( string ore in CurrentOrder.Resources.Keys ) {
+							inv.AddItems(CurrentOrder.Resources[ore], new MyObjectBuilder_Ore(){
+				        SubtypeName = ore
+				      } );
+						}
 					// inv.AddItems((VRage.MyFixedPoint)1, new MyObjectBuilder_Ore(){
 		      //   SubtypeName = CurrentOrder.SubtypeName ?? "Stone"
 		      // } );
+				} else {
+					CurrentOrder = null;
 				}
 
 			}

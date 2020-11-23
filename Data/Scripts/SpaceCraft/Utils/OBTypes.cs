@@ -21,6 +21,7 @@ namespace SpaceCraft.Utils {
     public static MyDefinitionId AnyOre;
     public static MyDefinitionId Stone;
     public static MyDefinitionId Ice;
+    public static MyDefinitionId Gravel;
     //public static MyDefinitionId Magazine;
 
 
@@ -48,6 +49,7 @@ namespace SpaceCraft.Utils {
       Hydrogen = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Hydrogen");
       //Magazine = MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/NATO_25x184mmMagazine");
       StoneBP =	MyDefinitionManager.Static.GetBlueprintDefinition( MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/StoneOreToIngot") );
+      Gravel = MyDefinitionId.Parse("MyObjectBuilder_Ingot/Stone");
       //MagazineBP =	MyDefinitionManager.Static.GetBlueprintDefinition( Magazine );
     }
   }

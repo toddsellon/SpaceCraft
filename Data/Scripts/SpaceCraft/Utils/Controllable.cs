@@ -310,9 +310,9 @@ namespace SpaceCraft.Utils {
 			if( CurrentOrder.Step == Steps.Pending ) {
 
 				if( !Move() ) {
-          if( this is CubeGrid && CurrentOrder.Entity is CubeGrid ) {
-            (CurrentOrder.Entity as CubeGrid).ToggleDocked(this as CubeGrid);
-          }
+          // if( this is CubeGrid && CurrentOrder.Entity is CubeGrid ) {
+          //   (CurrentOrder.Entity as CubeGrid).ToggleDocked(this as CubeGrid);
+          // }
 					CurrentOrder.Progress();
 				}
 			} else {
@@ -335,13 +335,13 @@ namespace SpaceCraft.Utils {
           // }
         }
 
-        if( this is CubeGrid ) {
-          if( PercentFull < .1f ) {
-            (CurrentOrder.Entity as CubeGrid).ToggleDocked(this as CubeGrid);
-            CurrentOrder.Complete();
-          }
-          return;
-        }
+        // if( this is CubeGrid ) {
+        //   if( PercentFull < .1f ) {
+        //     (CurrentOrder.Entity as CubeGrid).ToggleDocked(this as CubeGrid);
+        //     CurrentOrder.Complete();
+        //   }
+        //   return;
+        // }
 
         int remaining = 0;
 				List<IMyInventory> inventories = GetInventory();
@@ -401,12 +401,13 @@ namespace SpaceCraft.Utils {
 
     public void Drop( MyObjectBuilderType type ) {
       List<IMyInventory> inventories = GetInventory();
+      VRage.MyFixedPoint amount = (VRage.MyFixedPoint)100000;
       foreach( IMyInventory inventory in inventories ) {
         List<IMyInventoryItem> items = inventory.GetItems();
         for( int i = items.Count -1; i >= 0; i-- ) {
           IMyInventoryItem item = items[i];
           if( item.Content.TypeId == type ) {
-            inventory.RemoveItemsAt(i, (VRage.MyFixedPoint)100000);
+            inventory.RemoveItemsAt(i, amount);
           }
         }
       }

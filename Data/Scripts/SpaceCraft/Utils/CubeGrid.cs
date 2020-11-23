@@ -63,7 +63,7 @@ namespace SpaceCraft.Utils {
 		}
 
 		private static SerializableVector3 DefaultColor = new SerializableVector3(0.575f,0.150000036f,0.199999958f);
-
+		private static readonly uint DrillLimit = 3;
 		public IMySlimBlock ConstructionSite;
 		public Needs Need = Needs.None;
     public IMyCubeGrid Grid;
@@ -263,11 +263,43 @@ namespace SpaceCraft.Utils {
 			foreach( IMySlimBlock slim in drills ) {
 				if( !slim.FatBlock.IsFunctional ) continue;
 				IMyInventory inv = slim.FatBlock.GetInventory(0);
-				foreach( string ore in CurrentOrder.Resources.Keys ) {
-					inv.AddItems(CurrentOrder.Resources[ore]*100, new MyObjectBuilder_Ore(){
-						SubtypeName = ore
-					} );
-				}
+				if( inv == null ) continue;
+				//if( inv.IsFull ) {
+				//if( inv.CurrentVolume.ToIntSafe() > inv.MaxVolume.ToIntSafe()/8 ) {
+				if( inv.CurrentVolume > inv.MaxVolume * (VRage.MyFixedPoint)0.0625f  ) {
+					/*Execute( new Order{
+						Type = Orders.Deposit,
+						Range = 50000f,
+						Entity = Owner.GetBestRefinery(this)
+					}, true );*/
+					CubeGrid destination = Owner.MainBase ?? Owner.GetBestRefinery(this);
+					if( destination == null ) {
+						CurrentOrder.Complete();
+						return;
+					}
+					List<IMyInventoryItem> items = null;
+					List<IMyInventory> theirs = destination.GetInventory();
+					foreach(IMyInventory inventory in theirs) {
+						items = inv.GetItems();
+						if( items.Count == 0 ) break;
+  					for( int i = items.Count-1; i >= 0; i-- ) {
+              IMyInventoryItem item = items[i];
+              if( item == null ) continue;
+              inv.TransferItemTo(inventory, i, null, true, item.Amount, false );
+  					}
+					}
+
+					items = inv.GetItems();
+					VRage.MyFixedPoint amount = (VRage.MyFixedPoint)100000;
+					for( int i = items.Count-1; i >= 0; i-- ) {
+						inv.RemoveItemsAt(i, amount);
+					}
+				} else
+					foreach( string ore in CurrentOrder.Resources.Keys ) {
+						inv.AddItems(CurrentOrder.Resources[ore], new MyObjectBuilder_Ore(){
+							SubtypeName = ore
+						} );
+					}
 			}
 		}
 
@@ -282,10 +314,11 @@ namespace SpaceCraft.Utils {
 				blocks = GetBlocks<IMySlimBlock>();
 			}
 
-			foreach( IMySlimBlock block in blocks ) {
-				if( block.FatBlock == null ) continue;
+			foreach( IMySlimBlock slim in blocks ) {
+				IMyCubeBlock block = slim.FatBlock;
+				if( block == null || !block.IsFunctional ) continue;
 				for( int i = 0; i < 2; i++ ) {
-					IMyInventory inv = block.FatBlock.GetInventory(i);
+					IMyInventory inv = block.GetInventory(i);
 					if( inv != null )
 						list.Add( inv );
 				}
@@ -425,8 +458,8 @@ namespace SpaceCraft.Utils {
 						}
 					}
 				}
-
-				AllocateResources(block);
+				if( slim != ConstructionSite )
+					AllocateResources(block);
 			}
 
 			// See if ammo needs queue
@@ -453,7 +486,7 @@ namespace SpaceCraft.Utils {
 					IMyInventory inventory = b.GetInventory();
 					if( inventory == null ) continue;
 					CubeGrid.Item need = needs[b];
-					//bool fnd = false;
+					bool fnd = false;
 					for( int i = 0; i < 2; i++ ) {
 						IMyInventory inv = block.GetInventory(i);
 						if( inv == null ) continue;
@@ -473,10 +506,15 @@ namespace SpaceCraft.Utils {
 
 									//fnd = true;
 									break;
+								} else {
+									fnd = true;
 								}
 							}
 							j++;
 						}
+
+						if( fnd )
+							fulfilled.Add(b);
 					}
 				}
 
@@ -514,6 +552,7 @@ namespace SpaceCraft.Utils {
 
 		internal CubeGrid.Item AssessNeed(IMyCubeBlock block) {
 			IMyInventory inventory = null;
+			List<IMyInventoryItem> items = null;
 			if( block is IMyAssembler ) {
 				if( block.BlockDefinition.TypeIdString == "MyObjectBuilder_SurvivalKit" )
 					return new CubeGrid.Item {
@@ -528,7 +567,7 @@ namespace SpaceCraft.Utils {
 				// item.Blueprint.Id.SubtypeName;
 				MyBlueprintDefinitionBase bp =	MyDefinitionManager.Static.GetBlueprintDefinition(queue[0].Blueprint.Id);
 				inventory = ass.GetInventory(0);
-				List<IMyInventoryItem> items = inventory.GetItems();
+				items = inventory.GetItems();
 				items.AddRange(ass.GetInventory(1).GetItems());
 
 				List<MyBlueprintDefinitionBase.Item> prereqs = new List<MyBlueprintDefinitionBase.Item>(bp.Prerequisites);
@@ -543,15 +582,27 @@ namespace SpaceCraft.Utils {
 							break;
 						}
 					}
-					if( !fnd )
-						return new CubeGrid.Item(prereq);
+					if( !fnd ) {
+						// if( prereq.Id == OBTypes.Gravel ) {
+						// 	inventory.AddItems(prereq.Amount, new MyObjectBuilder_Ingot(){
+						// 		SubtypeName = "Stone"
+						// 	} );
+						// 	return null;
+						// } else {
+							return new CubeGrid.Item(prereq);
+						//}
+					}
 				}
 			}
 
-			if( block is IMyOxygenGenerator )
+			inventory = block.GetInventory();
+			if( inventory == null ) return null;
+			items = inventory.GetItems();
+
+			if( block is IMyOxygenGenerator && items.Count == 0 )
 				return new CubeGrid.Item {
 					Id = OBTypes.Ice,
-					Amount = (MyFixedPoint)100
+					Amount = (MyFixedPoint)500
 				};
 
 			// if( block is IMyGasTank )
@@ -564,12 +615,13 @@ namespace SpaceCraft.Utils {
 
 			if( block is IMyRefinery ) {
 				// Shuffle ores
-				if( inventory.GetItems().Count > 1 )
+				if( items.Count > 1 )
 					inventory.TransferItemTo(inventory, 0, inventory.GetItems().Count, true, inventory.GetItems()[0].Amount, false);
-				return new CubeGrid.Item {
-					Id = OBTypes.AnyOre,
-					Amount = (MyFixedPoint)500
-				};
+				else if( items.Count == 0 )
+					return new CubeGrid.Item {
+						Id = OBTypes.AnyOre,
+						Amount = (MyFixedPoint)500
+					};
 			}
 
 			if( block is IMyUserControllableGun ) {
@@ -577,7 +629,7 @@ namespace SpaceCraft.Utils {
 				MyWeaponBlockDefinition def = MyDefinitionManager.Static.GetCubeBlockDefinition(block.BlockDefinition) as MyWeaponBlockDefinition;
 				MyWeaponDefinition weapon =	MyDefinitionManager.Static.GetWeaponDefinition(def.WeaponDefinitionId);
 				//IMyUserControllableGun gun = block as IMyUserControllableGun;
-				if( inventory.GetItems().Count == 0 ) {
+				if( items.Count == 0 ) {
 					return new CubeGrid.Item {
 						Id = weapon.AmmoMagazinesId[0],
 						Amount = (MyFixedPoint)1
@@ -591,13 +643,10 @@ namespace SpaceCraft.Utils {
 
 		public void AllocateResources(IMyCubeBlock block) {
 			if( Balance == null || Balance.Count == 0 ) {
-				//MyAPIGateway.Utilities.ShowNotification( "Trying to allocate resources" );
 				for( int i = 0; i < 2; i++ ) {
 					IMyInventory inv = block.GetInventory(i);
 					if( inv == null ) continue;
-					//inventories.Add( inv );
 					if( ConstructionSite != null ) {
-						//MyAPIGateway.Utilities.ShowNotification( "Trying to move to stockpile" );
 						ConstructionSite.MoveItemsToConstructionStockpile( inv );
 					}
 				}

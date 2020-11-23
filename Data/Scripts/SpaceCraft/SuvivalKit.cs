@@ -27,26 +27,30 @@ namespace SpaceCraft {
 
 		public IMyProductionBlock block;
 		public MyDefinitionId gravel;
+		public MyDefinitionId stone;
+		public VRage.MyFixedPoint amount = (VRage.MyFixedPoint)10;
 
 		public override void Init(MyObjectBuilder_EntityBase objectBuilder) {
 			//NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
 			NeedsUpdate = MyEntityUpdateEnum.EACH_100TH_FRAME;
 			block = Entity as IMyProductionBlock;
-			gravel = MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/StoneOreToIngotBasic");
+			stone = MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/StoneOreToIngotBasic");
+			gravel = MyDefinitionId.Parse("MyObjectBuilder_Ingot/Stone");
 		}
 
 
 		//public override void UpdateAfterSimulation() {
 		public override void UpdateAfterSimulation100() {
 			//MyInventoryBase inv = block.GetInventoryBase();
+			if( block == null ) return;
 			MyInventoryBase inv = block.Components.Get<MyInventoryBase>();
 
 			if( inv == null ) return;
 
 			if( block.IsQueueEmpty || !block.IsProducing )
-				block.AddQueueItem( gravel, (VRage.MyFixedPoint)10 );
+				block.AddQueueItem( stone, amount );
 
-			inv.RemoveItemsOfType( (MyFixedPoint)1, MyDefinitionId.Parse("MyObjectBuilder_Ingot/Stone") );
+			inv.RemoveItemsOfType( amount, gravel );
 
 			// if( (int)(inv.CurrentVolume) < (int)(inv.MaxVolume) / 2 )
 			// 	inv.AddItems((VRage.MyFixedPoint)1, new MyObjectBuilder_Ore(){

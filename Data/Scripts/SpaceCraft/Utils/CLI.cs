@@ -36,6 +36,7 @@ namespace SpaceCraft.Utils {
       Actions.Add("debug",Debug);
       Actions.Add("gps",GPS);
       Actions.Add("control",Control);
+      Actions.Add("release",Release);
 
       MyAPIGateway.Utilities.MessageEntered += MessageEntered;
       MyAPIGateway.Multiplayer.RegisterMessageHandler(Id, MessageHandler);
