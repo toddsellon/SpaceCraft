@@ -122,7 +122,7 @@ namespace SpaceCraft.Utils {
 	    Welders = true;
 	    Griders = true;
 			Cargo = true;
-			Fighter = true;
+			Fighter = false;
 			//MyAPIGateway.Session.RegisterComponent(this, MyUpdateOrder.BeforeSimulation, 0);
 			/*if( data == string.Empty ) return;
 			try {
@@ -149,7 +149,6 @@ namespace SpaceCraft.Utils {
 			}
 
 			Character.Physics.Activate();
-
 
 		}
 
@@ -186,7 +185,11 @@ namespace SpaceCraft.Utils {
 				CurrentOrder.Complete();
 				return false;
 			}
-
+			// Simple timeout
+			CurrentOrder.Tick++;
+			if( CurrentOrder.Tick == 500 ) {
+				return false;
+			}
 			Vector2 rotation = Vector2.Zero;
 			// Vector3 destination = Vector3.Normalize(MyAPIGateway.Session.Player.GetPosition() - Character.WorldMatrix.Translation);
 			// double distance = Vector3D.Distance(MyAPIGateway.Session.Player.GetPosition(),Character.WorldMatrix.Translation);
@@ -275,23 +278,23 @@ namespace SpaceCraft.Utils {
 						return;
 					} else {
 						Character.SwitchThrusts();
-						//SwitchToWeapon( Weapons.Drill );
 						//BeginShoot( MyShootActionEnum.PrimaryAction );
+						SwitchToWeapon( Weapons.Drill );
 					}
-					if( CurrentOrder != null )
+					if( CurrentOrder != null ) {
 						CurrentOrder.Progress();
+					}
 				}
 			} else {
 				// Add resources to inventory
 				IMyInventory inv = GetInventory()[0];
 				if( inv == null ) return;
-				if( inv.IsFull ) {
+				if( inv.CurrentVolume > inv.MaxVolume * (VRage.MyFixedPoint)0.9f ) {
 					//MyAPIGateway.Utilities.ShowMessage( "Drill", "Inventory Full: " + ToString() );
 					Execute( new Order{
 						Type = Orders.Deposit,
 						Range = 5000f,
-						Entity = Owner.GetBestRefinery(this)
-						//Entity = Owner.MainBase
+						Entity = Owner.MainBase ?? Owner.GetBestRefinery(this)
 					}, true );
 					return;
 				} else if( CurrentOrder.Resources != null ) {

@@ -138,15 +138,23 @@ namespace SpaceCraft.Utils {
         return 97;
       }
 
-      if( block is IMyMedicalRoom ) return 47;
-
+      if( block is IMyOxygenGenerator || block is IMyOxygenTank ) return 47;
 
       if( block is IMyProductionBlock ) return 46;
 
+      if( block is IMyMedicalRoom ) return 45;
+
+
+
+
       //if( block is IMyShipDrill || block is IMyUserControllableGun ) return 45;
-      if( block is IMyShipDrill ) return 45;
+      if( block is IMyShipDrill ) return 44;
 
       if( block is IMyMotorSuspension || block is IMyWheel ) return 30;
+
+      if( block is IMyUserControllableGun ) return 15;
+
+      if( block is IMyConveyor ) return 14;
 
       return block is IMyFunctionalBlock ? 2 : 1;
 		}

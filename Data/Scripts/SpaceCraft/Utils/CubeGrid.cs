@@ -62,6 +62,7 @@ namespace SpaceCraft.Utils {
       }
 		}
 
+		private static float PlayerDistance = 10000;
 		private static SerializableVector3 DefaultColor = new SerializableVector3(0.575f,0.150000036f,0.199999958f);
 		private static readonly uint DrillLimit = 3;
 		public IMySlimBlock ConstructionSite;
@@ -74,6 +75,7 @@ namespace SpaceCraft.Utils {
 		public int Tick = 0;
 		public IMyRemoteControl Remote;
 		public Dictionary<string,int> Balance = null;
+		private bool Drone = false;
 
 		public CubeGrid DockedTo;
     public List<CubeGrid> Docked = new List<CubeGrid>();
@@ -166,8 +168,6 @@ namespace SpaceCraft.Utils {
 			}
 
 			if( Tick == 99 ) {
-
-
 				//AssessInventory();
 				if( DockedTo == null )
 					UpdateInventory();
@@ -259,19 +259,21 @@ namespace SpaceCraft.Utils {
 			// 		}, true );
 			// 	return;
 			// }
+			int max = 3;
 			List<IMySlimBlock> drills = GetBlocks<IMyShipDrill>();
 			foreach( IMySlimBlock slim in drills ) {
 				if( !slim.FatBlock.IsFunctional ) continue;
 				IMyInventory inv = slim.FatBlock.GetInventory(0);
 				if( inv == null ) continue;
+
 				//if( inv.IsFull ) {
 				//if( inv.CurrentVolume.ToIntSafe() > inv.MaxVolume.ToIntSafe()/8 ) {
-				if( inv.CurrentVolume > inv.MaxVolume * (VRage.MyFixedPoint)0.0625f  ) {
-					/*Execute( new Order{
-						Type = Orders.Deposit,
-						Range = 50000f,
-						Entity = Owner.GetBestRefinery(this)
-					}, true );*/
+				/*if( inv.CurrentVolume > inv.MaxVolume * (VRage.MyFixedPoint)0.0625f  ) {
+					// Execute( new Order{
+					// 	Type = Orders.Deposit,
+					// 	Range = 50000f,
+					// 	Entity = Owner.GetBestRefinery(this)
+					// }, true );
 					CubeGrid destination = Owner.MainBase ?? Owner.GetBestRefinery(this);
 					if( destination == null ) {
 						CurrentOrder.Complete();
@@ -294,12 +296,17 @@ namespace SpaceCraft.Utils {
 					for( int i = items.Count-1; i >= 0; i-- ) {
 						inv.RemoveItemsAt(i, amount);
 					}
-				} else
+				} else*/
 					foreach( string ore in CurrentOrder.Resources.Keys ) {
 						inv.AddItems(CurrentOrder.Resources[ore], new MyObjectBuilder_Ore(){
 							SubtypeName = ore
 						} );
 					}
+
+
+				max--;
+
+				if( max == 0 ) break;
 			}
 		}
 
@@ -350,7 +357,7 @@ namespace SpaceCraft.Utils {
 				RefineryTier = (uint)Math.Max(RefineryTier,block.FatBlock.BlockDefinition.SubtypeId == "LargeRefinery" ? 3 : 2);
 			}
 			//IMySmallMissileLauncher IMyUserControllableGun
-			if( Drills)
+			if( Drills || IsStatic )
 				Fighter = false;
 			else
 				Fighter = GetBlocks<IMyUserControllableGun>(null,true).Count > 0 || GetBlocks<IMySmallGatlingGun>(null,true).Count > 0 || GetBlocks<IMySmallMissileLauncher>(null,true).Count > 0;
@@ -375,6 +382,17 @@ namespace SpaceCraft.Utils {
 						break;
 				}
 			}
+		}
+
+		public void SetBehaviour( string presetName = "Default" ) {
+			// MyVisualScriptLogicProvider.SetName(cubeGrid.EntityId, cubeGrid.EntityId.ToString());
+			if( !Drone && Grid != null && !Grid.MarkedForClose && !Grid.Closed ) {
+				MyVisualScriptLogicProvider.SetName(Grid.EntityId, Grid.EntityId.ToString());
+
+				//MyVisualScriptLogicProvider.MusicPlayMusicCue(MusicId);
+				Drone = true;
+			}
+			MyVisualScriptLogicProvider.SetDroneBehaviourFull(Grid.EntityId.ToString(), presetName, true, false, null, false, null, 10, PlayerDistance);
 		}
 
 		public List<IMySlimBlock> GetBlocks<t>( List<IMySlimBlock> blocks = null, bool excludeDocked = false ) {
@@ -486,7 +504,7 @@ namespace SpaceCraft.Utils {
 					IMyInventory inventory = b.GetInventory();
 					if( inventory == null ) continue;
 					CubeGrid.Item need = needs[b];
-					bool fnd = false;
+					//bool fnd = false;
 					for( int i = 0; i < 2; i++ ) {
 						IMyInventory inv = block.GetInventory(i);
 						if( inv == null ) continue;
@@ -496,25 +514,28 @@ namespace SpaceCraft.Utils {
 						foreach( IMyInventoryItem item in items ) {
 							if( item.Content.TypeId == need.Id.TypeId
 									&& (need.Id.SubtypeName == String.Empty || need.Id.SubtypeName == item.Content.SubtypeName )
-									&& (!needs.ContainsKey(block) || needs[block] != need ) // Need same thing
-									&& (need.Id != OBTypes.AnyOre || (need.Id == OBTypes.AnyOre && (item.Content.SubtypeName != "Ice" && item.Content.SubtypeName != "Stone" ) ) ) ) {
+									&& (b.BlockDefinition.TypeId != block.BlockDefinition.TypeId ) // Same type of block
+									//&& (!needs.ContainsKey(block) || needs[block] != need ) // Need same thing
+									//&& (need.Id != OBTypes.AnyOre || (need.Id == OBTypes.AnyOre && (item.Content.SubtypeName != "Ice" && item.Content.SubtypeName != "Stone" ) ) )
+									&& (need.Id != OBTypes.AnyOre || (need.Id == OBTypes.AnyOre && block.BlockDefinition.TypeIdString != "MyObjectBuilder_SurvivalKit" ) )
+								) {
 
 								inv.TransferItemTo(inventory, j, null, true, need.Amount, false);
 								//if( !fnd )
-								if( need.Id != OBTypes.AnyOre ) {
+								if( need.Id != OBTypes.AnyOre && need.Id != OBTypes.Ice ) {
 									fulfilled.Add(b);
 
 									//fnd = true;
 									break;
-								} else {
+								}/* else {
 									fnd = true;
-								}
+								}*/
 							}
 							j++;
 						}
 
-						if( fnd )
-							fulfilled.Add(b);
+						//if( fnd )
+							//fulfilled.Add(b);
 					}
 				}
 
@@ -522,14 +543,17 @@ namespace SpaceCraft.Utils {
 			}
 
 			if( ConstructionSite == null ) return;
+			long owner = Owner.MyFaction == null ? (long)0 : Owner.MyFaction.FounderId;
 			//ConstructionSite.IncreaseMountLevel(5.0f,Owner.MyFaction.FounderId);
-			ConstructionSite.IncreaseMountLevel(5.0f, Owner.MyFaction == null ? (long)0 : Owner.MyFaction.FounderId);
+			ConstructionSite.IncreaseMountLevel(5.0f, owner);
 
 			if( ConstructionSite.IsFullIntegrity ) {
+				ConstructionSite.CubeGrid.UpdateBlockNeighbours(ConstructionSite);
 				ConstructionSite.PlayConstructionSound(MyIntegrityChangeEnum.ConstructionEnd);
 				StopProduction();
 				CheckFlags();
 				Owner.BlockCompleted(ConstructionSite);
+				ConstructionSite.CubeGrid.ChangeGridOwnership(owner, MyOwnershipShareModeEnum.Faction);
 				if( CurrentOrder != null )
 	        CurrentOrder.Complete();
 
@@ -583,21 +607,26 @@ namespace SpaceCraft.Utils {
 						}
 					}
 					if( !fnd ) {
-						// if( prereq.Id == OBTypes.Gravel ) {
-						// 	inventory.AddItems(prereq.Amount, new MyObjectBuilder_Ingot(){
-						// 		SubtypeName = "Stone"
-						// 	} );
-						// 	return null;
-						// } else {
 							return new CubeGrid.Item(prereq);
-						//}
 					}
 				}
+			}
+
+			if( block is IMyBatteryBlock ) { // Cheating for now
+				MyResourceSinkComponent sink = block.Components.Get<MyResourceSinkComponent>();
+				sink.SetInputFromDistributor(OBTypes.Electricity,10f,true,true);
+				return null;
 			}
 
 			inventory = block.GetInventory();
 			if( inventory == null ) return null;
 			items = inventory.GetItems();
+
+			if( block is IMyReactor && items.Count == 0 )
+				return new CubeGrid.Item {
+					Id = OBTypes.Uranium,
+					Amount = (MyFixedPoint)1
+				};
 
 			if( block is IMyOxygenGenerator && items.Count == 0 )
 				return new CubeGrid.Item {
@@ -878,6 +907,7 @@ namespace SpaceCraft.Utils {
 		}
 
 		public IMySlimBlock TryPlace( MyObjectBuilder_CubeBlock block ) {
+			if( block == null || Grid == null ) return null;
 			if( block.Min.X == 0 && block.Min.Y == 0 && block.Min.Z == 0 ) {
 				Vector3I pos = Vector3I.Zero;
 				MyCubeBlockDefinition def = MyDefinitionManager.Static.GetCubeBlockDefinition( block );
@@ -887,7 +917,7 @@ namespace SpaceCraft.Utils {
 
 			IMySlimBlock slim = Grid.AddBlock( block, false );
 
-			if( block.BuildPercent == 0.0f ) {
+			if( slim != null && block.BuildPercent == 0.0f ) {
 				slim.SetToConstructionSite();
 			}
 
@@ -962,6 +992,22 @@ namespace SpaceCraft.Utils {
 			return Spawn( prefab.Definition, matrix, owner );
 		}
 
+		public static IMyCubeGrid Spawn_new(string prefabName, MatrixD matrix, Faction owner) {
+			SpawningOptions options = SpawningOptions.None;
+			//options |= SpawningOptions.RotateFirstCockpitTowardsDirection;
+			//options |= SpawningOptions.UseGridOrigin;
+			//try{
+
+				List<IMyCubeGrid> grids = new List<IMyCubeGrid>();
+				MyAPIGateway.PrefabManager.SpawnPrefab(grids, prefabName, matrix.Translation, matrix.Forward, matrix.Up, Vector3.Zero, Vector3.Zero, null, options, owner.MyFaction == null ? (long)0 : owner.MyFaction.FounderId );
+
+				if( grids.Count > 0 ) return grids[0];
+			//}catch(Exception exc){
+			//}
+
+			return null;
+		}
+
 		public static IMyCubeGrid Spawn(string prefabName, MatrixD matrix, Faction owner) {
 			MyPrefabDefinition prefab = MyDefinitionManager.Static.GetPrefabDefinition(prefabName);
 			return Spawn( prefab, matrix, owner );
@@ -973,6 +1019,19 @@ namespace SpaceCraft.Utils {
       IMyCubeGrid g = null;
 			List<IMyCubeGrid> subgrids = new List<IMyCubeGrid>();
 			MatrixD original = matrix;
+
+
+			// MyObjectBuilder_CubeGrid[] grids = prefab.CubeGrids;
+			//
+			// if (grids.Length == 0) return null;
+			//
+			// for (int i = 0; i < grids.Length; i++)
+      // {
+      //     grids[i] = (MyObjectBuilder_CubeGrid)prefab.CubeGrids[i].Clone();
+      // }
+			//
+			// MyAPIGateway.Entities.RemapObjectBuilderCollection(grids);
+
       foreach( MyObjectBuilder_CubeGrid grid in prefab.CubeGrids ) {
 				//MyPositionAndOrientation po = grid.PositionAndOrientation ?? new MyPositionAndOrientation(ref matrix);
 				// if( prefab.SubtypeId ) {
@@ -983,7 +1042,7 @@ namespace SpaceCraft.Utils {
 					grid.Name = owner.Name + " " + prefab.Id.SubtypeName;
 					grid.DisplayName = owner.Name + " " + prefab.Id.SubtypeName;
 				//}
-				grid.EntityId = (long)0;
+				//grid.EntityId = (long)0;
 
 				// if( g == null ) {
 				// 	original = po.GetMatrix();
@@ -1002,9 +1061,10 @@ namespace SpaceCraft.Utils {
 
 				long ownerId = owner != null && owner.MyFaction != null ? owner.MyFaction.FounderId : 0;
 				foreach( MyObjectBuilder_CubeBlock block in grid.CubeBlocks ) {
-					block.EntityId = (long)0;
+					//block.EntityId = (long)0;
 					block.Owner = ownerId;
-					block.BuiltBy = ownerId;
+					//block.BuiltBy = ownerId;
+					block.ShareMode = MyOwnershipShareModeEnum.Faction;
 					if( block.ColorMaskHSV == DefaultColor )
 						block.ColorMaskHSV = owner.Color;
 					//block.Min = new Vector3I(Vector3D.Transform(new Vector3D(block.Min), matrix))	;
@@ -1024,10 +1084,27 @@ namespace SpaceCraft.Utils {
         //entity.PositionComp.SetPosition(new Vector3D(10,0,0));
         MyAPIGateway.Entities.AddEntity(entity);
 
+
 				if( g == null ) {
 	        g = entity as IMyCubeGrid;
-					g.ChangeGridOwnership(ownerId, MyOwnershipShareModeEnum.Faction);
+					//g.ChangeGridOwnership(ownerId, MyOwnershipShareModeEnum.Faction);
+
+					// Double check them really needed?
+					// List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+					// g.GetBlocks(blocks);
+					// foreach(IMySlimBlock slim in blocks ) {
+					//
+					// 	MyCubeBlock block = slim.FatBlock as MyCubeBlock;
+					//
+					// 	if( block == null ) continue;
+					// 	// block.ChangeOwner(0, MyOwnershipShareModeEnum.Faction);
+					// 	// block.ChangeBlockOwnerRequest(ownerId, MyOwnershipShareModeEnum.Faction);
+					// 	//block.ChangeOwner(ownerId, MyOwnershipShareModeEnum.Faction);
+					// }
+
+
 				} else {
+					//(entity as IMyCubeGrid).ChangeGridOwnership(ownerId, MyOwnershipShareModeEnum.Faction);
 					subgrids.Add(entity as IMyCubeGrid);
 				}
       }

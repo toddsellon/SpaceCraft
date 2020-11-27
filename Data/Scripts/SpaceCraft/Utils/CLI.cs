@@ -232,6 +232,7 @@ namespace SpaceCraft.Utils {
         Block.DoAction(suspension, "Add Wheel");
         if( suspension.RotorGrid != null ) {
           suspension.RotorGrid.DisplayName = faction.Name + " Subgrid";
+          suspension.RotorGrid.ChangeGridOwnership(owner, MyOwnershipShareModeEnum.Faction);
           grid.Subgrids.Add(suspension.RotorGrid);
           IMySlimBlock wheel = suspension.RotorGrid.GetCubeBlock(Vector3I.Zero) as IMySlimBlock;
           if( wheel == null ) continue;
@@ -240,6 +241,7 @@ namespace SpaceCraft.Utils {
         }
       }
 
+      grid.Grid.ChangeGridOwnership(owner, MyOwnershipShareModeEnum.Faction);
       grid.CheckFlags();
       faction.TakeControl( grid );
       if( faction.MainBase != null )
@@ -273,9 +275,15 @@ namespace SpaceCraft.Utils {
       foreach(IMySlimBlock block in blocks) {
         if( block.IsFullIntegrity ) continue;
         //block.SetToConstructionSite();
+        //block.SpawnFirstItemInConstructionStockpile();
+        block.ClearConstructionStockpile(null);
         block.SpawnConstructionStockpile();
-        block.IncreaseMountLevel(100f,owner);
+        block.IncreaseMountLevel(100f,owner,null,0f,true,MyOwnershipShareModeEnum.Faction);
         faction.BlockCompleted(block);
+      }
+      grid.Grid.ChangeGridOwnership(owner, MyOwnershipShareModeEnum.Faction);
+      foreach( IMyCubeGrid g in grid.Subgrids ) {
+        g.ChangeGridOwnership(owner, MyOwnershipShareModeEnum.Faction);
       }
       grid.ConstructionSite = null;
       grid.CheckFlags();

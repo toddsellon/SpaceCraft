@@ -1,6 +1,7 @@
 using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
 using Sandbox.Game;
+using Sandbox.Game.Entities.Cube;
 using Sandbox.Definitions;
 using Sandbox.Common.ObjectBuilders.Definitions;
 using Sandbox.ModAPI.Interfaces;
@@ -62,6 +63,7 @@ namespace SpaceCraft.Utils {
       public Dictionary<string,float> Desired = new Dictionary<string,float>{};
     }
 
+
     public static int LIMIT = 20;
 
     public int Engineers = 0;
@@ -70,15 +72,16 @@ namespace SpaceCraft.Utils {
     public MyCommandLine CommandLine = new MyCommandLine();
     public List<MySpawnGroupDefinition> Groups = new List<MySpawnGroupDefinition>();
     public bool Spawned = false;
+    private static Vector3 DefaultColor = new Vector3(0.575f,0.150000036f,0.199999958f);
     public SerializableVector3 Color = new SerializableVector3(0f,-0.8f,-0.306840628f);
     public Goal CurrentGoal = new Goal{ Type = Goals.Stabilize };
     private IMyCubeBlock RespawnPoint;
     private Progression Progress = Progression.None;
     private string Roadblock = string.Empty;
     public List<Controllable> Controlled = new List<Controllable>();
-    private List<IMyEntity> Enemies = new List<IMyEntity>();
+    private List<IMyFaction> Enemies = new List<IMyFaction>();
+    private List<IMyEntity> Targets = new List<IMyEntity>();
     public CubeGrid MainBase;
-    //private List<string> Resources = new List<string>(){"Stone","Iron","Silicon","Nickel","Cobalt"};
     private List<string> Resources = new List<string>(){"Stone","Iron","Silicon","Nickel"};
     protected static Random Randy = new Random();
     protected int Tick = 0;
@@ -88,32 +91,26 @@ namespace SpaceCraft.Utils {
     public Tech Tier = Tech.Primitive;
     public IMyFaction MyFaction;
     public IMyIdentity Founder;
-    public string SpawnPrefab;
+    public string StartingPrefab;
     public Stats MyStats = new Stats();
     public Vector3D Origin = Vector3D.Zero;
     public IMyPlayer Following;
-    // public Vector3I Scouted = Vector3I.Zero;
-    //
-    // public enum Axes {
-    //   X,
-    //   Y,
-    //   Z
-    // }
-    //
-    // public uint ScoutAxis = Axes.X;
+    public List<IMyCubeGrid> SpawnedGrids;
+    public bool Spawning = false;
+    public bool Building = false;
 
     // Main loop
     public void UpdateBeforeSimulation() {
       Tick++;
 
-      if( Enemies.Count > 0 && (Enemies[0] == null || Enemies[0].MarkedForClose) ) {
-        Enemies.RemoveAt(0);
+      if( Targets.Count > 0 && (Targets[0] == null || Targets[0].MarkedForClose) ) {
+        Targets.RemoveAt(0);
       }
       AssessGoal();
 
       Controllable remove = null;
       foreach( Controllable c in Controlled ) {
-        if( c is CubeGrid && c.Entity == null )
+        if( c is CubeGrid && (c.Entity == null || c.Entity.Closed || c.Entity.MarkedForClose)  )
           remove = c;
         else
           c.UpdateBeforeSimulation();
@@ -123,6 +120,7 @@ namespace SpaceCraft.Utils {
 
       if( Tick == 99 ) {
         Tick = 0;
+        if( Spawning ) return;
 
         if( Engineers < Convars.Static.Engineers ) {
           TakeControl( new Engineer(this) );
@@ -131,6 +129,76 @@ namespace SpaceCraft.Utils {
         }
 
       }
+    }
+
+    public void SpawnPrefab(string prefabName, MatrixD position, SpawningOptions options = SpawningOptions.None ) {
+      Spawning = true;
+      SpawnedGrids = new List<IMyCubeGrid>();
+
+      Prefab prefab = Prefab.Get(prefabName);
+      // if( prefab != null )
+      //   prefab.ChangeColor(Color);
+			//options |= SpawningOptions.RotateFirstCockpitTowardsDirection;
+			// options |= SpawningOptions.UseGridOrigin;
+      try {
+        MyAPIGateway.PrefabManager.SpawnPrefab(SpawnedGrids, prefabName, position.Translation, position.Forward, position.Up, Vector3.Zero, Vector3.Zero, null, options, MyFaction == null ? 0 : MyFaction.FounderId, false, PrefabSpawned );
+        // if( prefab != null )
+        //   prefab.ChangeColor(Prefab.DefaultColor,Color);
+      }catch(Exception exc){
+        Spawning = false;
+      }
+    }
+
+    public void PrefabSpawned() {
+      if( SpawnedGrids.Count == 0 ) {
+        if(Convars.Static.Debug) MyAPIGateway.Utilities.ShowMessage( "PrefabSpawned", "Fail" );
+        Spawning = false;
+        Building = false;
+        return;
+      }
+
+      if(Convars.Static.Debug) MyAPIGateway.Utilities.ShowMessage( "PrefabSpawned", "Success" );
+      CubeGrid grid = new CubeGrid(SpawnedGrids[0]);
+      foreach( IMyCubeGrid g in SpawnedGrids ) {
+
+        g.DisplayName = Name + " " + g.DisplayName;
+        if( g == SpawnedGrids[0] ) continue;
+        grid.Subgrids.Add(g);
+
+        // This was all to try and fix thruster sharing
+        // List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+        // g.GetBlocks(blocks);
+        // foreach(IMySlimBlock slim in blocks) {
+        //   // MyCubeBlock block = slim.FatBlock as MyCubeBlock;
+        //   // MyAPIGateway.Players.SetControlledEntity((ulong)MyFaction.FounderId, slim.FatBlock);
+        //   // if( block == null ) continue;
+        //   // block.ChangeOwner(MyFaction.FounderId, MyOwnershipShareModeEnum.None);
+        //   // block.ChangeOwner(MyFaction.FounderId, MyOwnershipShareModeEnum.Faction);
+        //   //if( block == null ) continue;
+        //   // block.ChangeOwner(0, MyOwnershipShareModeEnum.None);
+        //   //block.ChangeOwner(MyFaction.FounderId, MyOwnershipShareModeEnum.All);
+        //   //block.ChangeBlockOwnerRequest(MyFaction.FounderId, MyOwnershipShareModeEnum.All);
+        //
+        //   // IMyThrust thrust = slim.FatBlock as IMyThrust;
+        //   // if( thrust != null ) {
+        //   //   thrust.PowerConsumptionMultiplier = 1f;
+        //   // }
+        // }
+
+      }
+      Controllable c = TakeControl( grid );
+      MainBase = MainBase ?? grid;
+
+      if( Building ) {
+        CurrentGoal.Entity = grid;
+
+        grid.SetToConstructionSite();
+        //MainBase = MainBase ?? GetBestRefinery();
+        MainBase.ToggleDocked( grid );
+        MainBase.FindConstructionSite();
+      }
+      Spawning = false;
+      Building = false;
     }
 
     public void Follow( IMyPlayer player ) {
@@ -147,8 +215,8 @@ namespace SpaceCraft.Utils {
     }
 
     public void DetectedEnemy( IMyEntity enemy ) {
-      if( !Enemies.Contains( enemy ) )
-        Enemies.Add( enemy );
+      if( !Targets.Contains( enemy ) )
+        Targets.Add( enemy );
     }
 
     public void RemoveEngineer() {
@@ -174,78 +242,20 @@ namespace SpaceCraft.Utils {
           if( Tick == 99 )
             Stabilize();
           break;
+        case Goals.Attack:
+        case Goals.Defend:
         case Goals.Construct:
           Construct();
           break;
-        case Goals.Attack:
-          Attack();
-          break;
-        case Goals.Defend:
-          Defend();
-          break;
-        case Goals.Colonize:
-          Colonize();
-          break;
+        // case Goals.Colonize:
+        //   Colonize();
+        //   break;
       }
 
-    }
-
-    public void Colonize(MyPlanet planet) {
-      if( planet == null || Colonized.Contains(planet)) return;
-      Colonized.Add(planet);
-    }
-
-    public void Colonize() {
-      if( CurrentGoal == null ) return;
-      if( CurrentGoal.Entity == null ) CurrentGoal.Entity = GetSpacecraft();
-      if( CurrentGoal.Entity == null ) return;
-
-      if( CurrentGoal.Step == Steps.Pending ) {
-        if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "Colonize", "Started Colonization" );
-        (CurrentGoal.Entity as CubeGrid).AddQueueItems( CurrentGoal.Prefab );
-        CurrentGoal.Progress();
-      } else if( CurrentGoal.Step == Steps.Started ) {
-        if( !(CurrentGoal.Entity as CubeGrid).IsProducing ) {
-          if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "Colonize", "Production finished" );
-          CurrentGoal.Entity.Execute( new Order {
-            Type = Orders.Move,
-            Target = CurrentGoal.Target,
-            Range = 100f
-          }, true );
-        }
-        CurrentGoal.Progress();
-      } else {
-        if( CurrentGoal.Entity.CurrentOrder == null || CurrentGoal.Entity.CurrentOrder.Step == Steps.Completed || CurrentGoal.Entity.CurrentOrder.Type != Orders.Move ) {
-          if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "Colonize", "Goal reached" );
-          MainBase = CurrentGoal.Entity as CubeGrid;
-          MatrixD location = GetPlacementLocation( CurrentGoal.Prefab, MainBase );
-          CubeGrid grid = new CubeGrid( CubeGrid.Spawn( CurrentGoal.Prefab, location, this) );
-
-          if( grid == null || grid.Grid == null ) {
-            return;
-          }
-
-          TakeControl(grid);
-          CurrentGoal.Entity = grid;
-
-          grid.SetToConstructionSite();
-
-          MainBase.ToggleDocked( grid );
-          //MainBase.AddQueueItems( CurrentGoal.Prefab );
-          MainBase.FindConstructionSite();
-
-          CurrentGoal = new Goal {
-            Type = Goals.Construct,
-            Prefab = CurrentGoal.Prefab,
-            Entity = grid,
-            Step = Steps.Started
-          };
-        }
-      }
     }
 
     public void Stabilize() {
-      if( CurrentGoal == null || MainBase == null ) return;
+      if( Spawning || CurrentGoal == null || MainBase == null ) return;
       if( MainBase.Grid == null || MainBase.Grid.Closed || MainBase.Grid.MarkedForClose ) {
         Mulligan();
         return;
@@ -290,9 +300,9 @@ namespace SpaceCraft.Utils {
 
     public void Construct() {
 
-      if( CurrentGoal == null ) return;
+      if( Spawning || CurrentGoal == null ) return;
 
-      if( CurrentGoal.Prefab == null && CurrentGoal.Entity == null ) {
+      if( CurrentGoal.Prefab == null && CurrentGoal.Entity == null && MyStats.Grids < Convars.Static.Grids ) {
 
         CurrentGoal.Prefab = CurrentGoal.Prefab ?? GetConstructionProject();
 
@@ -315,22 +325,24 @@ namespace SpaceCraft.Utils {
         // Wait for balance to be paid
         if( CurrentGoal.Balance != null && CurrentGoal.Balance.Count > 0 ) return;
 
+        Building = true;
         MatrixD location = GetPlacementLocation( CurrentGoal.Prefab );
-        CubeGrid grid = new CubeGrid( CubeGrid.Spawn( CurrentGoal.Prefab, location, this) );
+        //CubeGrid grid = new CubeGrid( CubeGrid.Spawn( CurrentGoal.Prefab, location, this) );
+        if( CurrentGoal.Prefab.IsStatic ) { // Haven't gotten static alignment to work yet
+          CubeGrid grid = new CubeGrid( CubeGrid.Spawn( CurrentGoal.Prefab, location, this) );
+          if( grid == null || grid.Grid == null ) {
+            CurrentGoal.Complete();
+            return;
+          }
+          TakeControl(grid);
+          CurrentGoal.Entity = grid;
+          grid.SetToConstructionSite();
+          MainBase = MainBase ?? GetBestRefinery();
+          MainBase.ToggleDocked( grid );
+          MainBase.FindConstructionSite();
+        } else
+          SpawnPrefab(CurrentGoal.Prefab.SubtypeId, location, CurrentGoal.Prefab.IsStatic ? SpawningOptions.UseGridOrigin : SpawningOptions.RotateFirstCockpitTowardsDirection );
 
-        if( grid == null || grid.Grid == null ) {
-          return;
-        }
-
-        TakeControl(grid);
-        CurrentGoal.Entity = grid;
-
-        grid.SetToConstructionSite();
-        if( MainBase == null )
-          MainBase = GetBestRefinery();
-        MainBase.ToggleDocked( grid );
-        //MainBase.AddQueueItems( CurrentGoal.Prefab );
-        MainBase.FindConstructionSite();
         CurrentGoal.Progress();
 
       } else if( CurrentGoal.Step == Steps.Started ) {
@@ -405,16 +417,21 @@ namespace SpaceCraft.Utils {
         Vector3D up = Vector3D.Normalize(position - planet.WorldMatrix.Translation);
         Vector3D perp = Vector3D.CalculatePerpendicularVector(up);
 
-        if( Tier >= Tech.Advanced && (prefab.IsStatic || prefab.Spacecraft) ) {
+        if( Tier >= Tech.Advanced && (prefab.IsStatic || prefab.Spacecraft) && !CommandLine.Switch("grounded") ) {
           position = position + ( up * (planet.AtmosphereAltitude*3) );
         }
 
-        else if( !prefab.IsStatic )
-          //position = position + (up * (box.Height*.75) );
-          position = position + (up * (box.Width*.75) );
+        else {
+          // if( prefab.IsStatic )
+          //   position = position + (up * (box.Height *.5) );
+          // else
+          if( !prefab.IsStatic )
+            //position = position + (up * (box.Height*.75) );
+            position = position + (up * (box.Width) );
+        }
         MatrixD reference = planet.WorldMatrix;
 
-        MyPositionAndOrientation origin = prefab.PositionAndOrientation.HasValue ? prefab.PositionAndOrientation.Value : MyPositionAndOrientation.Default;
+        //MyPositionAndOrientation origin = prefab.PositionAndOrientation.HasValue ? prefab.PositionAndOrientation.Value : MyPositionAndOrientation.Default;
 
         MatrixD matrix = MatrixD.CreateWorld( position, perp, up );
         //MatrixD matrix = MatrixD.CreateWorld( position, origin.Forward,  origin.Up );
@@ -427,10 +444,19 @@ namespace SpaceCraft.Utils {
         //MatrixD matrix = MatrixD.CreateWorld( position, Vector3D.CalculatePerpendicularVector(up), up );
 
 
-        if( prefab.SubtypeId == "Terran Battlecruiser" || prefab.SubtypeId == "Norad II" ) // Not sure why I have to flip upside-down
-          matrix = MatrixD.CreateWorld( position, matrix.Right, matrix.Down );
-        else if( prefab.IsStatic )
-  			   matrix = MatrixD.CreateWorld(position, matrix.Backward, matrix.Left);
+        // if( prefab.SubtypeId == "Terran Battlecruiser" || prefab.SubtypeId == "Norad II" )
+        //   matrix = MatrixD.CreateWorld( position, matrix.Right, matrix.Down );
+        // else if( prefab.IsStatic )
+  			//   matrix = MatrixD.CreateWorld(position, matrix.Backward, matrix.Left);
+        if( prefab.IsStatic ) {
+          //position = position + (up * (box.Height *.5) );
+          //matrix = MatrixD.CreateWorld(position, matrix.Backward, matrix.Left);
+          // Vector3D.CalculatePerpendicularVector(matrix.Forward);
+          // Vector3D.CalculatePerpendicularVector(matrix.Up);
+          //matrix = MatrixD.CreateWorld( position, perp* 45, up* 45 );
+          matrix = MatrixD.CreateWorld(position, matrix.Backward, matrix.Left);
+          //matrix = MatrixD.CreateWorld(position, matrix.Backward*45, matrix.Left*45);
+        }
 
 
         //matrix = MatrixD.CreateWorld( position, rotation.Forward, rotation.Up );
@@ -460,6 +486,63 @@ namespace SpaceCraft.Utils {
       return matrix;
     }
 
+
+    public void SetReputation( long playerId, int reputation = 0 ) {
+      if( MyFaction != null )
+        MyAPIGateway.Session.Factions.SetReputationBetweenPlayerAndFaction(playerId, MyFaction.FactionId, reputation);
+    }
+
+    public int GetReputation( long playerId ) {
+      if( MyFaction != null )
+        return MyAPIGateway.Session.Factions.GetReputationBetweenPlayerAndFaction(playerId, MyFaction.FactionId);
+      return 0;
+    }
+
+    public static MatrixD CalculateDerelictSpawnMatrix(MatrixD existingMatrix, Vector3D rotationValues) {
+
+			//X: Pitch - Up/Forward | +Up -Down
+			//Y: Yaw   - Forward/Up | +Right -Left
+			//Z: Roll  - Up/Forward | +Right -Left
+
+			var resultMatrix = existingMatrix;
+
+			if(rotationValues.X != 0) {
+
+				var translation = resultMatrix.Translation;
+				var fowardPos = resultMatrix.Forward * 45;
+				var upPos = resultMatrix.Up * 45;
+				var pitchForward = Vector3D.Normalize(resultMatrix.Up * rotationValues.X + fowardPos);
+				var pitchUp = Vector3D.Normalize(resultMatrix.Backward * rotationValues.X + upPos);
+				resultMatrix = MatrixD.CreateWorld(translation, pitchForward, pitchUp);
+
+			}
+
+			if(rotationValues.Y != 0) {
+
+				var translation = resultMatrix.Translation;
+				var fowardPos = resultMatrix.Forward * 45;
+				var upPos = resultMatrix.Up * 45;
+				var yawForward = Vector3D.Normalize(resultMatrix.Right * rotationValues.Y + fowardPos);
+				var yawUp = resultMatrix.Up;
+				resultMatrix = MatrixD.CreateWorld(translation, yawForward, yawUp);
+
+			}
+
+			if(rotationValues.Z != 0) {
+
+				var translation = resultMatrix.Translation;
+				var fowardPos = resultMatrix.Forward * 45;
+				var upPos = resultMatrix.Up * 45;
+				var rollForward = resultMatrix.Forward;
+				var rollUp = Vector3D.Normalize(resultMatrix.Right * rotationValues.Z + upPos);
+				resultMatrix = MatrixD.CreateWorld(translation, rollForward, rollUp);
+
+			}
+
+			return resultMatrix;
+
+		}
+
     public Controllable GetControllable( IMyEntity entity ) {
       foreach( Controllable c in Controlled ) {
         if( c.Entity == entity ) return c;
@@ -467,94 +550,50 @@ namespace SpaceCraft.Utils {
       return null;
     }
 
-    public void Attack() {
-      if( CurrentGoal == null ) return;
-      if( CurrentGoal.Target == null && Enemies.Count > 0 ) {
-        return;// Waiting for scouting intel
-      } else if( CurrentGoal.Target == null ) {
-        CurrentGoal.Target = Enemies[0];
-      }
-
-      if( CurrentGoal.Step == Steps.Pending && CurrentGoal.Target != null ) {
-        // This crashes the game for some reason
-        foreach( Controllable c in Controlled ) {
-          c.Execute( new Order{
-            Type = Orders.Attack,
-            Target = CurrentGoal.Target
-          }, true );
-        }
-        CurrentGoal.Progress();
-      } else if( CurrentGoal.Step == Steps.Started ) {
-
-        if( CurrentGoal.Target == null || CurrentGoal.Target.MarkedForClose || CurrentGoal.Target.Closed ) {
-          CurrentGoal.Complete();
-          foreach( Controllable c in Controlled ) {
-            if( c.CurrentOrder != null && c.CurrentOrder.Type == Orders.Attack ) {
-              c.CurrentOrder.Complete();
-            }
-          }
-        }
-      }
-    }
-
-    public void Defend() {
-      if( CurrentGoal == null ) return;
-      // TODO: Prune list
-      if( Enemies.Count == 0 ) {
-        CurrentGoal.Complete();
-      }
-    }
-
     public Order NeedsOrder( Controllable c ) {
-      if( c == null || CurrentGoal == null ) return null;
+      if( c == null || CurrentGoal == null || c.Entity == null ) return null;
 
-      switch( CurrentGoal.Type ) {
+      if( c.Fighter )
+        switch( CurrentGoal.Type ) {
+          // case Goals.Stabilize:
+          // case Goals.Construct:
+          //   if( c == CurrentGoal.Entity ) break;
+          //   // Determine if unit should transfer items
+          //   /*if( c.Cargo && !c.IsStatic && CurrentGoal.Entity != MainBase && GetWithdrawlSource(c) != null ) {
+          //     return null;
+          //   } else*/ if( c.Drills && !CommandLine.Switch("scavenger") ) {
+          //     break;
+          //   }
+          //   goto case Goals.Defend;
 
-        case Goals.Stabilize:
-        case Goals.Construct:
-          if( c == CurrentGoal.Entity ) break;
-          // Determine if unit should transfer items
-          /*if( c.Cargo && !c.IsStatic && CurrentGoal.Entity != MainBase && GetWithdrawlSource(c) != null ) {
-            return null;
-          } else*/ if( c.Drills && !CommandLine.Switch("scavenger") ) {
+          // case Goals.Defend:
+          //   if( CurrentGoal.Type == Goals.Defend && Targets.Count == 0 ) {
+          //     CurrentGoal.Complete();
+          //     break;
+          //   }
+          //   goto case Goals.Attack;
+
+          case Goals.Attack:
+            // if( !CommandLine.Switch("defensive") ) break;
+            // if( Targets.Count == 0 ) {
+            //   IMyEntity enemy = GetClosestEnemy(c.Entity.WorldMatrix.Translation);
+            //   if( enemy == null) break;
+            //   Targets.Add(enemy);
+            // }
+            if( CurrentGoal.Type == Goals.Attack ) {
+              CubeGrid g = c as CubeGrid;
+              if( g != null )
+                g.SetBehaviour();
+
+              return new Order {
+                Type = Orders.Attack
+              };
+            }
+
             break;
-          }
-          goto case Goals.Defend;
+        }
 
-        case Goals.Defend:
-          if( CurrentGoal.Type == Goals.Defend && Enemies.Count == 0 ) {
-            CurrentGoal.Complete();
-            break;
-          }
-          goto case Goals.Attack;
 
-        case Goals.Attack:
-          if( !CommandLine.Switch("defensive") ) break;
-          if( Enemies.Count == 0 ) {
-            IMyEntity enemy = GetClosestEnemy(c.Entity.WorldMatrix.Translation);
-            if( enemy == null) break;
-            Enemies.Add(enemy);
-          }
-          return new Order {
-            Type = Orders.Attack,
-            Target = Enemies[0]
-          };
-            // if( Enemies.Count == 0 ) {
-            //   c.OrderQueue = GetScoutOrders();
-            //   if( c.OrderQueue.Count > 0 ) {
-            //     Order o = c.OrderQueue[0];
-            //     c.OrderQueue.RemoveAt(0);
-            //     return o;
-            //   }
-            // } else return new Order {
-            //   Type = Orders.Attack,
-            //   Target = Enemies[0]
-            // };
-
-          break;
-      }
-
-      if( c.Entity == null ) return null;
       //Vector3D position = c.Entity.WorldMatrix.Translation;
       Vector3D position = GetBestRefinery().Entity.WorldMatrix.Translation;
       //Vector3D position = c.Wheels || c.Atmosphere ? c.Entity.WorldMatrix.Translation : GetBestRefinery().Entity.WorldMatrix.Translation;
@@ -632,12 +671,12 @@ namespace SpaceCraft.Utils {
     }
 
     public void Detected( IMyEntity detected ) {
-      if( Enemies.Contains(detected) ) return;
+      if( Targets.Contains(detected) ) return;
       if( detected is IMyCharacter ) {
         foreach( Controllable c in Controlled ) {
           if( c.Entity == detected ) return;
         }
-        Enemies.Add( detected );
+        Targets.Add( detected );
       } else if( detected is IMyCubeGrid ) {
         IMyCubeGrid grid = detected as IMyCubeGrid;
         List<long> owners = new List<long>(grid.BigOwners);
@@ -646,7 +685,7 @@ namespace SpaceCraft.Utils {
           IMyFaction faction = MyAPIGateway.Session.Factions.TryGetPlayerFaction(owner);
           if( faction == null ) continue;
           if( MyRelationsBetweenFactions.Enemies == MyAPIGateway.Session.Factions.GetRelationBetweenFactions(MyFaction.FactionId, faction.FactionId) ) {
-            Enemies.Add(detected);
+            Targets.Add(detected);
             return;
           }
         }
@@ -658,7 +697,8 @@ namespace SpaceCraft.Utils {
       Dictionary<string,VRage.MyFixedPoint> resources = new Dictionary<string,VRage.MyFixedPoint>();
       CubeGrid grid = c as CubeGrid;
 
-      resources.Add("Stone",(VRage.MyFixedPoint)(Tier == Tech.Primitive ? 100 : 10)*Convars.Static.Difficulty);
+      //resources.Add("Stone",(VRage.MyFixedPoint)(Tier == Tech.Primitive ? 100 : 10)*Convars.Static.Difficulty);
+      resources.Add("Stone",(VRage.MyFixedPoint)100*Convars.Static.Difficulty);
 
       if( grid != null && grid.DockedTo != null && grid.DockedTo.RefineryTier == 1 ) {
         return resources;
@@ -669,21 +709,21 @@ namespace SpaceCraft.Utils {
           break;
         case Tech.Space:
           resources.Add("Uranium",(VRage.MyFixedPoint)0.02*Convars.Static.Difficulty);
-          resources.Add("Platinum",(VRage.MyFixedPoint)0.01*Convars.Static.Difficulty);
+          resources.Add("Platinum",(VRage.MyFixedPoint)0.1*Convars.Static.Difficulty);
           goto case Tech.Advanced;
         //case Tech.Established:
         case Tech.Advanced:
           if( Tier != Tech.Space && CommandLine.Switch("nuclear") )
             resources.Add("Uranium",(VRage.MyFixedPoint)0.02*Convars.Static.Difficulty);
-          resources.Add("Silver",(VRage.MyFixedPoint)0.1*Convars.Static.Difficulty);
-          resources.Add("Gold",(VRage.MyFixedPoint)0.1*Convars.Static.Difficulty);
+          resources.Add("Silver",(VRage.MyFixedPoint)1*Convars.Static.Difficulty);
+          resources.Add("Gold",(VRage.MyFixedPoint)0.5*Convars.Static.Difficulty);
           goto default;
         default:
           resources.Add("Iron",(VRage.MyFixedPoint)2*Convars.Static.Difficulty);
           resources.Add("Nickel",(VRage.MyFixedPoint)0.2*Convars.Static.Difficulty);
-          resources.Add("Cobalt",(VRage.MyFixedPoint)0.04*Convars.Static.Difficulty);
-          resources.Add("Ice",(VRage.MyFixedPoint)3*Convars.Static.Difficulty);
-          resources.Add("Magnesium",(VRage.MyFixedPoint)0.2*Convars.Static.Difficulty);
+          resources.Add("Cobalt",(VRage.MyFixedPoint)0.4*Convars.Static.Difficulty);
+          resources.Add("Ice",(VRage.MyFixedPoint)6*Convars.Static.Difficulty);
+          resources.Add("Magnesium",(VRage.MyFixedPoint)1.5*Convars.Static.Difficulty);
           resources.Add("Silicon",(VRage.MyFixedPoint)0.2*Convars.Static.Difficulty);
           //resources.Add("Stone",(VRage.MyFixedPoint)0.05*Convars.Static.Difficulty);
           break;
@@ -784,7 +824,7 @@ namespace SpaceCraft.Utils {
 
       if( CommandLine.Switch("nobuild") ) {
         CurrentGoal = new Goal{
-          Type = Goals.Attack
+          Type = CommandLine.Switch("defensive") ? Goals.Defend : Goals.Attack
         };
         return;
       }
@@ -795,6 +835,16 @@ namespace SpaceCraft.Utils {
       //   };
       //   return;
       // }
+
+      CurrentGoal = new Goal{
+        Type = Goals.Defend
+      };
+
+
+      // Should attack?
+      if( CommandLine.Switch("aggressive") || (!CommandLine.Switch("defensive") && GetEnemies().Count > 0) ) {
+        CurrentGoal.Type = Goals.Attack;
+      }
 
       MyStats = new Stats();
 
@@ -840,55 +890,58 @@ namespace SpaceCraft.Utils {
       //MyStats.Desired.Add("Static", CommandLine.Switch("aggressive") ? .75f : .5f );
       MyStats.Desired.Add("Static", .25f );
 
-      //MyAPIGateway.Utilities.ShowMessage( "MyStats", "Workers: " + MyStats.Workers.ToString() + " (" + MyStats.Ratio["Workers"] + "/" + MyStats.Desired["Workers"] + ")" );
+
 
       if( building != null ) {
-        CurrentGoal = new Goal{
-          Type = Goals.Construct,
-          Entity = building,
-          Step = Steps.Started
-        };
+        // CurrentGoal = new Goal{
+        //   Type = Goals.Construct,
+        //   Entity = building,
+        //   Step = Steps.Started
+        // };
+        CurrentGoal.Entity = building;
+        CurrentGoal.Step = Steps.Started;
         return;
       }
 
-      if( MyStats.Grids >= Convars.Static.Grids ) { // Limit reached
-        CurrentGoal = new Goal{
-          Type = CommandLine.Switch("defensive") ? Goals.Defend : Goals.Attack
-        };
-        // if( CurrentGoal.Type == Goals.Attack && Enemies.Count == 0 ) {
-        //   IMyEntity enemy = GetClosestEnemy(MainBase.Entity.WorldMatrix.Translation);
-        //   if( enemy == null) break;
-        //   Enemies.Add(enemy);
-        // }
-        return;
-      }
-
-      // if( Tier == Tech.Advanced ) {
-      //   // Get to space
-      //   if( MyStats.Spacecraft == 0 ) {
-      //     // Build Spacecraft
-      //     CurrentGoal = new Goal{
-      //       Type = Goals.Construct,
-      //       Prefab = Prefab.Get("Terran Battlecruiser")
-      //     };
-      //     return;
-      //   } else {
-      //     CubeGrid sc = GetSpacecraft();
-      //     MyPlanet target = SpaceCraftSession.GetClosestPlanet( sc.Grid.WorldMatrix.Translation, new List<MyPlanet>{Homeworld}, "Ice" );
-      //     MyAPIGateway.Utilities.ShowMessage( "Colonize", sc.ToString() + ": " + target.ToString() );
-      //     CurrentGoal = new Goal{
-      //       Type = Goals.Colonize,
-      //       Entity = sc,
-      //       Target = target,
-      //       Prefab = Prefab.Get("Terran SCV (Space)")
-      //     };
-      //   }
+      // if( MyStats.Grids >= Convars.Static.Grids ) { // Limit reached
+      //   return;
       // }
 
-      CurrentGoal = new Goal{
-        Type = Goals.Construct
-      };
 
+
+    }
+
+    public void DeclareWar() {
+      MyObjectBuilder_FactionCollection fc = MyAPIGateway.Session.Factions.GetObjectBuilder();
+			foreach( MyObjectBuilder_Faction ob in fc.Factions ) {
+				if( MyFaction.FactionId == ob.FactionId ) continue;
+				MyAPIGateway.Session.Factions.DeclareWar(MyFaction.FactionId, ob.FactionId);
+        MyAPIGateway.Session.Factions.DeclareWar(ob.FactionId,MyFaction.FactionId);
+			}
+
+      // List<IMyPlayer> players = new List<IMyPlayer>();
+			// MyAPIGateway.Players.GetPlayers(players);
+			// foreach( IMyPlayer player in players ) {
+      //   if( !MyFaction.IsMember(player.PlayerID) )
+      //     MyAPIGateway.Session.Factions.SetReputationBetweenPlayerAndFaction(player.PlayerID, MyFaction.FactionId, -501);
+      // }
+
+    }
+
+    public List<IMyFaction> GetEnemies() {
+      List<IMyFaction> enemies = new List<IMyFaction>();
+      if( MyFaction == null ) return enemies;
+
+      IMyFactionCollection factions = MyAPIGateway.Session.Factions;
+      MyObjectBuilder_FactionCollection fc = factions.GetObjectBuilder();
+      foreach( MyObjectBuilder_Faction ob in fc.Factions ) {
+        IMyFaction faction = factions.TryGetFactionById(ob.FactionId);
+        if( faction != null && factions.AreFactionsEnemies(faction.FactionId, MyFaction.FactionId) || factions.AreFactionsEnemies(MyFaction.FactionId,faction.FactionId) ) {
+          enemies.Add(faction);
+        }
+      }
+
+      return enemies;
     }
 
     public CubeGrid GetSpacecraft() {
@@ -907,6 +960,7 @@ namespace SpaceCraft.Utils {
       Controlled = new List<Controllable>();
       Colonized = new List<MyPlanet>();
       Engineers = 0;
+      MainBase = null;
       Tier = Tech.Primitive;
       CurrentGoal = new Goal{
         Type = Goals.Stabilize
@@ -975,7 +1029,7 @@ namespace SpaceCraft.Utils {
       //List<IMyEntity> entities = MyAPIGateway.Entities.GetEntitiesInSphere( ref sphere );
       IMyEntity best = null;
       double distance = 0.0f;
-      foreach( IMyEntity entity in Enemies ) {
+      foreach( IMyEntity entity in Targets ) {
         IMyFaction owner = null;
         if( faction != null ) {
           if( entity is IMyCubeGrid ) {
@@ -1031,25 +1085,27 @@ namespace SpaceCraft.Utils {
       if( CommandLine.Switch("spawned") ) return true;
 
       Vector3D up = Vector3D.Normalize(position - Homeworld.WorldMatrix.Translation);
+      // Vector3D perp = up;
+      // Vector3D.CalculatePerpendicularVector(perp);
       //position = position + (up * 150);
 
 
+      SpawnPrefab(String.IsNullOrWhiteSpace(StartingPrefab) ? "Terran Planet Pod" : StartingPrefab, MatrixD.CreateWorld(position, up, Vector3D.CalculatePerpendicularVector(up)), SpawningOptions.UseGridOrigin );
+      // MainBase = new CubeGrid(CubeGrid.Spawn(String.IsNullOrWhiteSpace(StartingPrefab) ? "Terran Planet Pod" : StartingPrefab, MatrixD.CreateWorld(position, up, Vector3D.CalculatePerpendicularVector(up)), this));
+      // //MainBase.Init(Session);
+      //
+      // TakeControl( MainBase );
+      //
+      // if( MainBase.Grid == null ) {
+      //   //Mulligan();
+      //   return false;
+      // }
 
-      MainBase = new CubeGrid(CubeGrid.Spawn(String.IsNullOrWhiteSpace(SpawnPrefab) ? "Terran Planet Pod" : SpawnPrefab, MatrixD.CreateWorld(position, up, Vector3D.CalculatePerpendicularVector(up)), this));
-      //MainBase.Init(Session);
-
-      TakeControl( MainBase );
-
-      if( MainBase.Grid == null ) {
-        Mulligan();
-        return false;
-      }
-
-      RespawnPoint = MainBase.GetRespawnBlock();
-
-      position.X += 5;
-
-      TakeControl( new Engineer(this) );
+      // RespawnPoint = MainBase.GetRespawnBlock();
+      //
+      // position.X += 5;
+      //
+      // TakeControl( new Engineer(this) );
 
       return true;
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Sandbox.Definitions;
 using VRage.Game;
@@ -24,11 +25,26 @@ namespace SpaceCraft.Utils {
     public bool Worker = false;
     public bool Atmosphere = false;
     public Tech Teir = Tech.Primitive;
+    public static readonly SerializableVector3 DefaultColor = new SerializableVector3(0.575f,0.150000036f,0.199999958f);
 
     public MyPrefabDefinition Definition;
     public MyPositionAndOrientation? PositionAndOrientation;
 
     public static List<Prefab> Prefabs = new List<Prefab>();
+
+    public void ChangeColor( SerializableVector3 color ) {
+      ChangeColor( color, DefaultColor );
+    }
+
+    public void ChangeColor( SerializableVector3 color, SerializableVector3 from ) {
+      foreach( MyObjectBuilder_CubeGrid grid in Definition.CubeGrids ) {
+        if( grid == null ) continue;
+        foreach( MyObjectBuilder_CubeBlock block in grid.CubeBlocks ) {
+          if( block.ColorMaskHSV == from )
+						block.ColorMaskHSV = color;
+        }
+      }
+    }
 
     public void Init() {
       if( SubtypeId == String.Empty && Definition == null ) return;
@@ -38,19 +54,40 @@ namespace SpaceCraft.Utils {
 
       if( Definition == null ) return;
 
+
       Prefabs.Add( this );
 
       if( Definition.CubeGrids == null ) return;
 
+      //List<MyObjectBuilder_CubeGrid> copiedPrefab = new List<MyObjectBuilder_CubeGrid>();
+
+      int i = 0;
       foreach( MyObjectBuilder_CubeGrid grid in Definition.CubeGrids ) {
+        //MyAPIGateway.Entities.RemapObjectBuilder(grid);
         if( grid == null ) continue;
         if( grid.IsStatic ) IsStatic = true;
         PositionAndOrientation = grid.PositionAndOrientation;
         Count += grid.CubeBlocks.Count;
+        MyObjectBuilder_CubeGrid clone = grid.Clone() as MyObjectBuilder_CubeGrid;
+        clone.EntityId = 0;
 
-        foreach( MyObjectBuilder_CubeBlock block in grid.CubeBlocks ) {
+
+
+        // MyObjectBuilder_CubeGrid clone = grid.Clone() as MyObjectBuilder_CubeGrid;
+        // clone.EntityId = 0;
+        // copiedPrefab.Add(clone);
+        //
+        // foreach( MyObjectBuilder_CubeBlock block in clone.CubeBlocks ) {
+        //   block.EntityId = 0;
+        // }
+
+        //foreach( MyObjectBuilder_CubeBlock block in grid.CubeBlocks.ToList() ) {
+        foreach( MyObjectBuilder_CubeBlock block in clone.CubeBlocks.ToList() ) {
+
+
+          block.ShareMode = MyOwnershipShareModeEnum.Faction;
           MyCubeBlockDefinition def = MyDefinitionManager.Static.GetCubeBlockDefinition(block);
-
+          block.EntityId = 0;
           if( def != null ) { // Calculate cost of block
             foreach( var component in def.Components ) {
               Price += component.Count;
@@ -157,13 +194,36 @@ namespace SpaceCraft.Utils {
               }
           }
 
+          MyObjectBuilder_CubeBlock replacement = Clone(block);
+          clone.CubeBlocks.Remove(block);
+          clone.CubeBlocks.Add(replacement);
+
         }
 
+        Definition.CubeGrids[i] = clone;
 
+        i++;
       }
+
+
+      // Copy over original definition
+      // for( int i = 0; i < Definition.CubeGrids.Length; i++ ) {
+      //   Definition.CubeGrids[i] = copiedPrefab[i];
+      // }
+
+
 
       if( Worker ) Fighter = false;
       if( !IsStatic && Flying && !Spacecraft ) Atmosphere = true;
+    }
+
+    public static MyObjectBuilder_CubeBlock Clone( MyObjectBuilder_CubeBlock block ) {
+      MyObjectBuilder_CubeBlock replacement = MyObjectBuilderSerializer.CreateNewObject(block.TypeId, block.SubtypeName) as MyObjectBuilder_CubeBlock;
+      replacement.BlockOrientation = block.BlockOrientation;
+      replacement.Min = block.Min;
+      replacement.ColorMaskHSV = block.ColorMaskHSV;
+      replacement.Owner = block.Owner;
+      return replacement;
     }
 
     // Returns the cost of the first battery, minumum required to spawn

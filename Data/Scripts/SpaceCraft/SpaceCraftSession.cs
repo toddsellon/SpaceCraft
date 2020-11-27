@@ -47,6 +47,7 @@ namespace SpaceCraft {
 		public static List<MyPlanet> Planets = new List<MyPlanet>();
 		public static MyPlanet ClosestPlanet { get; protected set; }
 		public static CLI MyCLI;
+		public static long NumPlayers = 0;
 
     public override void Init(MyObjectBuilder_SessionComponent session) {
       base.Init(session);
@@ -68,9 +69,7 @@ namespace SpaceCraft {
 				MyAPIGateway.Session.SessionSettings.EnableRemoteBlockRemoval = false;
 				//IMyDamageSystem
 				//MyAPIGateway.Session.DamageSystem.RegisterAfterDamageHandler (int priority, Action< object, MyDamageInformation > handler);
-
-				//InitConvars();
-
+				NumPlayers = MyAPIGateway.Players.Count;
 
 			}
     }
@@ -92,6 +91,16 @@ namespace SpaceCraft {
 				faction.UpdateBeforeSimulation();
 			}
 
+
+			if( MyAPIGateway.Players.Count > NumPlayers ) {
+				List<IMyPlayer> players = new List<IMyPlayer>();
+				MyAPIGateway.Players.GetPlayers(players);
+				IMyPlayer player = players.Last();
+				SetReputation(player.PlayerID);
+			}
+
+			NumPlayers = MyAPIGateway.Players.Count;
+			//MyAPIGateway.Players.NewPlayerRequestSucceeded += NewPlayerAdded;
       /*if(SaveName != MyAPIGateway.Session.Name) {
         // Saved
         SaveName = MyAPIGateway.Session.Name;
@@ -101,6 +110,7 @@ namespace SpaceCraft {
 
 		// Destructor
 		protected override void UnloadData(){
+			//MyAPIGateway.Players.NewPlayerRequestSucceeded -= NewPlayerAdded;
 			MyCLI.Destroy();
 		}
 
@@ -168,9 +178,9 @@ namespace SpaceCraft {
 							//MyAPIGateway.Utilities.ShowMessage( "TakeControl", faction.Name );
 							g.CheckFlags();
 
-							if( g.IsStatic ) {
-								faction.Colonize( GetClosestPlanet(g.Entity.WorldMatrix.Translation) );
-							}
+							// if( g.IsStatic ) {
+							// 	faction.Colonize( GetClosestPlanet(g.Entity.WorldMatrix.Translation) );
+							// }
 							if( faction.MainBase == null ) // Until Cargo Ships, this is how resources are transferred
 								faction.MainBase = g;
 							else
@@ -236,18 +246,24 @@ namespace SpaceCraft {
 								//LoadIdentities (List< MyObjectBuilder_Identity > list)
 						}
 						faction.Groups.Add( group );
-						faction.SpawnPrefab = first;
+						faction.StartingPrefab = first;
 
           }
         }
 
       }
 
+			foreach( Faction faction in Factions ) {
+				if( faction.CommandLine.Switch("aggressive") )
+					faction.DeclareWar();
+			}
+
 			List<IMyIdentity> identities = new List<IMyIdentity>();
 			MyAPIGateway.Players.GetAllIdentites(identities);
 			foreach( IMyIdentity identity in identities) {
 				foreach( Faction faction in Factions ) {
 					if( faction.MyFaction == null ) continue;
+
 					if( faction.MyFaction.FounderId == identity.IdentityId ) {
 						faction.Founder = identity;
 						//faction.Founder.SetColorMask((Vector3)faction.Color);
@@ -279,6 +295,18 @@ namespace SpaceCraft {
 
 				}
 			}
+
+
+			// Faction murica = GetFaction("USA");
+			// if( murica != null ) {
+			//
+      //   Vector3D position = Vector3D.Zero;
+			// 	MyPlanet planet = GetClosestPlanet(position);
+			// 	position = planet.GetClosestSurfacePointGlobal(position);
+			// 	planet.CorrectSpawnLocation(ref position,250f);
+			// 	Vector3D up = Vector3D.Normalize(position - planet.WorldMatrix.Translation);
+      //   murica.SpawnPrefab("Terran Battlecruiser", MatrixD.CreateWorld(position) );
+      // }
 
 			Loaded = true;
 
@@ -324,6 +352,14 @@ namespace SpaceCraft {
 			};
 
 			Factions.Add(faction);
+
+			// Make peace with existing factions
+			MyObjectBuilder_FactionCollection fc = MyAPIGateway.Session.Factions.GetObjectBuilder();
+			foreach( MyObjectBuilder_Faction ob in fc.Factions ) {
+				if( faction.MyFaction.FactionId == ob.FactionId ) continue;
+				MyAPIGateway.Session.Factions.SendPeaceRequest(faction.MyFaction.FactionId, ob.FactionId);
+				MyAPIGateway.Session.Factions.AcceptPeace(faction.MyFaction.FactionId, ob.FactionId);
+			}
 			return faction;
 		}
 
@@ -336,10 +372,31 @@ namespace SpaceCraft {
 			return null;
 		}
 
+		// public void NewPlayerAdded( int playerId ) {
+		// 	MyAPIGateway.Utilities.ShowMessage( "NewPlayerAdded", playerId.ToString() );
+		// 	IMyPlayer player = MyAPIGateway.Players.GetPlayerById(playerId);
+		// 	foreach( Faction faction in Factions ) {
+		// 		if( !faction.CommandLine.Switch("aggressive") ) {
+		// 			faction.SetReputation(player.PlayerID);
+		// 		}
+		// 	}
+		// }
+
+		public void SetReputation(long playerID) {
+			foreach( Faction faction in Factions ) {
+				if( !faction.CommandLine.Switch("aggressive") ) {
+					faction.SetReputation(playerID);
+				}
+			}
+		}
+
 		public void SpawnFactions() {
 			if( !MyAPIGateway.Utilities.IsDedicated && MyAPIGateway.Session.ControlledObject == null ) return;
 			if( ClosestPlanet == null ) ClosestPlanet = GetClosestPlanet( MyAPIGateway.Utilities.IsDedicated ? Vector3D.Zero : MyAPIGateway.Session.Player.GetPosition() );
 
+			if( !MyAPIGateway.Utilities.IsDedicated ) {
+				SetReputation(MyAPIGateway.Session.Player.PlayerID);
+			}
 
 			foreach( Faction faction in Factions ) {
 

@@ -18,10 +18,13 @@ namespace SpaceCraft.Utils {
     public static MyObjectBuilderType Turret;
     public static MyObjectBuilderType Magazine;
     public static MyDefinitionId Hydrogen;
+    public static MyDefinitionId Electricity;
     public static MyDefinitionId AnyOre;
     public static MyDefinitionId Stone;
     public static MyDefinitionId Ice;
+    public static MyDefinitionId Uranium;
     public static MyDefinitionId Gravel;
+    public static MyDefinitionId Drill;
     //public static MyDefinitionId Magazine;
 
 
@@ -43,10 +46,13 @@ namespace SpaceCraft.Utils {
       Magazine = MyObjectBuilderType.Parse("MyObjectBuilder_AmmoMagazine");
       Stone = MyDefinitionId.Parse("MyObjectBuilder_Ore/Stone");
       Ice = MyDefinitionId.Parse("MyObjectBuilder_Ore/Ice");
+      Uranium = MyDefinitionId.Parse("MyObjectBuilder_Ingot/Uranium");
+      Drill = MyDefinitionId.Parse( "MyObjectBuilder_PhysicalGunObject/HandDrillItem" );
 
       AnyOre = new MyDefinitionId(Ore);
       Turret = MyObjectBuilderType.Parse("MyObjectBuilder_LargeGatlingTurret");
       Hydrogen = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Hydrogen");
+      Electricity = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Electricity");
       //Magazine = MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/NATO_25x184mmMagazine");
       StoneBP =	MyDefinitionManager.Static.GetBlueprintDefinition( MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/StoneOreToIngot") );
       Gravel = MyDefinitionId.Parse("MyObjectBuilder_Ingot/Stone");
