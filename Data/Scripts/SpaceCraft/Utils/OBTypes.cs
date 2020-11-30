@@ -10,6 +10,7 @@ namespace SpaceCraft.Utils {
 
 
   public class OBTypes {
+    public readonly static MyDefinitionId Psi = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Psi");
     public static MyObjectBuilderType Tool;
     public static MyObjectBuilderType Blueprint;
     public static MyObjectBuilderType Component;

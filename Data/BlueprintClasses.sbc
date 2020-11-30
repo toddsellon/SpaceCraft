@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <BlueprintClasses>
+        <Class>
+            <Id>
+                <TypeId>BlueprintClassDefinition</TypeId>
+                <SubtypeId>Vespene</SubtypeId>
+            </Id>
+            <DisplayName>Vespene Gas</DisplayName>
+            <Description>Vespene Gas</Description>
+            <Icon>Textures\GUI\Icons\component\gravity_generator_components_component.dds</Icon>
+            <HighlightIcon>Textures\GUI\Icons\buttons\large_block.dds</HighlightIcon>
+            <FocusIcon>Textures\GUI\Icons\buttons\large_block_focus.dds</FocusIcon>
+            <InputConstraintIcon>Textures\GUI\Icons\filter_ore.dds</InputConstraintIcon>
+            <OutputConstraintIcon>Textures\GUI\Icons\filter_ingot.dds</OutputConstraintIcon>
+        </Class>
+        <Class>
+            <Id>
+                <TypeId>BlueprintClassDefinition</TypeId>
+                <SubtypeId>VespeneBottles</SubtypeId>
+            </Id>
+            <DisplayName>Vespene Bottles</DisplayName>
+            <Description>Description_BlueprintClass_HydrogenBottles</Description>
+            <Icon>Textures\GUI\Icons\ore_H2O_ice.dds</Icon>
+            <HighlightIcon>Textures\GUI\Icons\buttons\large_block.dds</HighlightIcon>
+            <FocusIcon>Textures\GUI\Icons\buttons\large_block_focus.dds</FocusIcon>
+            <InputConstraintIcon>Textures\GUI\Icons\filter_ore.dds</InputConstraintIcon>
+            <OutputConstraintIcon>Textures\GUI\Icons\filter_ingot.dds</OutputConstraintIcon>
+        </Class>
+        <Class>
+            <Id>
+                <TypeId>BlueprintClassDefinition</TypeId>
+                <SubtypeId>Organic</SubtypeId>
+            </Id>
+            <DisplayName>Zerg Biomass</DisplayName>
+            <Description>Turn organic compounds into Zerg Biomass</Description>
+            <Icon>Textures\GUI\Icons\ore_biomass.dds</Icon>
+            <HighlightIcon>Textures\GUI\Icons\buttons\large_block.dds</HighlightIcon>
+            <FocusIcon>Textures\GUI\Icons\buttons\large_block_focus.dds</FocusIcon>
+            <InputConstraintIcon>Textures\GUI\Icons\filter_ore.dds</InputConstraintIcon>
+            <OutputConstraintIcon>Textures\GUI\Icons\filter_ingot.dds</OutputConstraintIcon>
+        </Class>
+  </BlueprintClasses>
+  <BlueprintClassEntries>
+
+    <!-- <Entry Class="LargeBlocks" BlueprintSubtypeId="OxygenTank/LargeVespeneTank" />
+    <Entry Class="LargeBlocks" BlueprintSubtypeId="OxygenTank/LargeVespeneTankSmall" />
+    <Entry Class="LargeBlocks" BlueprintSubtypeId="OxygenFarm/LargeBlockVespeneFarm" />
+    <Entry Class="LargeBlocks" BlueprintSubtypeId="Thrust/LargeBlockLargeVespeneThrust" />
+    <Entry Class="LargeBlocks" BlueprintSubtypeId="Thrust/LargeBlockSmallVespeneThrust" />
+    <Entry Class="SmallBlocks" BlueprintSubtypeId="OxygenTank/SmallVespeneTank" />
+    <Entry Class="SmallBlocks" BlueprintSubtypeId="OxygenTank/SmallVespeneTankSmall" />
+    <Entry Class="SmallBlocks" BlueprintSubtypeId="OxygenGenerator/VespeneGeneratorSmall" />
+    <Entry Class="SmallBlocks" BlueprintSubtypeId="Thrust/SmallBlockLargeHVespeneThrust" />
+    <Entry Class="SmallBlocks" BlueprintSubtypeId="Thrust/SmallBlockSmallVespeneThrust" /> -->
+
+    <Entry Class="Vespene" BlueprintSubtypeId="RawToVespene" />
+    <Entry Class="VespeneBottles" BlueprintSubtypeId="VespeneBottlesRefill" />
+    <Entry Class="Organic" BlueprintSubtypeId="Organic" />
+  </BlueprintClassEntries>
+</Definitions>

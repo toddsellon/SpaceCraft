@@ -46,6 +46,14 @@ namespace SpaceCraft.Utils {
     Future
   };
 
+  public enum Races {
+    Terran,
+    Zerg,
+    Protoss,
+    Hybrid
+  };
+
+
   //[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
   //public class Faction:MySessionComponentBase {
   public class Faction {
@@ -98,6 +106,7 @@ namespace SpaceCraft.Utils {
     public List<IMyCubeGrid> SpawnedGrids;
     public bool Spawning = false;
     public bool Building = false;
+    public Races Race = Races.Terran;
 
     // Main loop
     public void UpdateBeforeSimulation() {
@@ -120,7 +129,7 @@ namespace SpaceCraft.Utils {
 
       if( Tick == 99 ) {
         Tick = 0;
-        if( Spawning ) return;
+        if( Spawning || CommandLine.Switch("spawned") ) return;
 
         if( Engineers < Convars.Static.Engineers ) {
           TakeControl( new Engineer(this) );
@@ -595,7 +604,10 @@ namespace SpaceCraft.Utils {
 
 
       //Vector3D position = c.Entity.WorldMatrix.Translation;
-      Vector3D position = GetBestRefinery().Entity.WorldMatrix.Translation;
+      CubeGrid refinery = GetBestRefinery();
+      if( refinery == null ) return null;
+
+      Vector3D position = refinery.Entity.WorldMatrix.Translation;
       //Vector3D position = c.Wheels || c.Atmosphere ? c.Entity.WorldMatrix.Translation : GetBestRefinery().Entity.WorldMatrix.Translation;
       MyPlanet planet = SpaceCraftSession.GetClosestPlanet( position );
       if( planet == null ) return null;

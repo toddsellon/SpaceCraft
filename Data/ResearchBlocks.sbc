@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ResearchBlocks>
+    <!-- <GroupSubtype>23</GroupSubtype> Refinery -->
+
+    <!-- Vespene tech -->
+    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_OxygenFarm" Subtype="VespeneFarm" />
+      <UnlockedByGroups>
+        <GroupSubtype>7055</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock>
+
+    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_OxygenGenerator" Subtype="VespeneGenerator" />
+      <UnlockedByGroups>
+        <GroupSubtype>7055</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock>
+
+    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_OxygenGenerator" Subtype="VespeneGeneratorSmall" />
+      <UnlockedByGroups>
+        <GroupSubtype>7055</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock>
+
+    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_OxygenTank" Subtype="SmallVespeneTankSmall" />
+      <UnlockedByGroups>
+        <GroupSubtype>7055</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock>
+
+    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_OxygenTank" Subtype="SmallVespeneTank" />
+      <UnlockedByGroups>
+        <GroupSubtype>7055</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock>
+
+    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_OxygenTank" Subtype="LargeVespeneTankSmall" />
+      <UnlockedByGroups>
+        <GroupSubtype>7055</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock>
+
+    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_OxygenTank" Subtype="LargeVespeneTank" />
+      <UnlockedByGroups>
+        <GroupSubtype>7055</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock>
+
+
+    <!-- Vespene Tier 2 -->
+    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_Thrust" Subtype="LargeBlockLargeVespeneThrust" />
+      <UnlockedByGroups>
+        <GroupSubtype>645</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock>
+
+    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_Thrust" Subtype="LargeBlockSmallVespeneThrust" />
+      <UnlockedByGroups>
+        <GroupSubtype>645</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock>
+
+    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_Thrust" Subtype="SmallBlockLargeVespeneThrust" />
+      <UnlockedByGroups>
+        <GroupSubtype>645</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock>
+
+    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_Thrust" Subtype="SmallBlockSmallVespeneThrust" />
+      <UnlockedByGroups>
+        <GroupSubtype>645</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock>
+
+
+    <!-- Protoss Tech -->
+    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_BatteryBlock" Subtype="LargeProtossShield" />
+      <UnlockedByGroups>
+        <GroupSubtype>7055</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock>
+
+    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_BatteryBlock" Subtype="SmallProtossShield" />
+      <UnlockedByGroups>
+        <GroupSubtype>7055</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock>
+
+    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_BatteryBlock" Subtype="LargePylon" />
+      <UnlockedByGroups>
+        <GroupSubtype>7055</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock>
+
+    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_BatteryBlock" Subtype="SmallPylon" />
+      <UnlockedByGroups>
+        <GroupSubtype>7055</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock>
+
+
+  </ResearchBlocks>
+</Definitions>

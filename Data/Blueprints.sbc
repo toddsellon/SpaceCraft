@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Blueprints>
+    <Blueprint>
+        <Id>
+            <TypeId>BlueprintDefinition</TypeId>
+            <SubtypeId>Crystal</SubtypeId>
+        </Id>
+        <DisplayName>Khaydarin Crystal</DisplayName>
+        <Icon>Textures\GUI\Icons\Items\ZoneChip_Item.dds</Icon>
+        <Prerequisites>
+            <Item Amount="1" TypeId="Component" SubtypeId="Crystal" />
+        </Prerequisites>
+        <Result Amount="1" TypeId="Component" SubtypeId="Crystal" />
+        <BaseProductionTimeInSeconds>99999</BaseProductionTimeInSeconds>
+    </Blueprint>
+
+    <Blueprint>
+        <Id>
+            <TypeId>BlueprintDefinition</TypeId>
+            <SubtypeId>Organic</SubtypeId>
+        </Id>
+        <DisplayName>Zerg Biomass</DisplayName>
+        <Icon>Textures\GUI\Icons\ore_biomass.dds</Icon>
+        <Prerequisites>
+            <Item Amount="1" TypeId="Ingot" SubtypeId="Organic" />
+        </Prerequisites>
+        <Result Amount="1" TypeId="Component" SubtypeId="Organic" />
+        <BaseProductionTimeInSeconds>0.1</BaseProductionTimeInSeconds>
+    </Blueprint>
+
+    <Blueprint>
+      <Id>
+        <TypeId>BlueprintDefinition</TypeId>
+        <SubtypeId>VespeneBottlesRefill</SubtypeId>
+      </Id>
+      <DisplayName>DisplayName_Item_HydrogenBottles</DisplayName>
+      <Icon>Textures\GUI\Icons\ingot\gravel_ingot.dds</Icon>
+      <Prerequisites>
+        <Item Amount="1" TypeId="GasContainerObject" SubtypeId="VespeneBottle" />
+      </Prerequisites>
+      <Result Amount="0.9" TypeId="Ingot" SubtypeId="Stone" />
+      <BaseProductionTimeInSeconds>0.1</BaseProductionTimeInSeconds>
+    </Blueprint>
+
+    <Blueprint>
+      <Id>
+        <TypeId>BlueprintDefinition</TypeId>
+        <SubtypeId>VespeneBottle</SubtypeId>
+      </Id>
+      <DisplayName>Vespene Bottle</DisplayName>
+      <Icon>Textures\GUI\Icons\component\HydrogenBottle_Component.dds</Icon>
+      <Prerequisites>
+        <Item Amount="80" TypeId="Ingot" SubtypeId="Iron" />
+        <Item Amount="10" TypeId="Ingot" SubtypeId="Silicon" />
+        <Item Amount="30" TypeId="Ingot" SubtypeId="Nickel" />
+      </Prerequisites>
+      <Result Amount="1" TypeId="GasContainerObject" SubtypeId="HydrogenBottle" />
+      <BaseProductionTimeInSeconds>10</BaseProductionTimeInSeconds>
+      <IsPrimary>true</IsPrimary>
+    </Blueprint>
+
+    <Blueprint>
+      <Id>
+        <TypeId>BlueprintDefinition</TypeId>
+        <SubtypeId>RawToVespene</SubtypeId>
+      </Id>
+      <DisplayName>Refine vespene gas</DisplayName>
+      <Icon>Textures\GUI\Icons\ingot\gravel_ingot.dds</Icon>
+      <Prerequisites>
+        <Item Amount="1" TypeId="Ore" SubtypeId="Vespene" />
+      </Prerequisites>
+      <Result Amount="0.9" TypeId="Ingot" SubtypeId="Stone" />
+      <BaseProductionTimeInSeconds>0.1</BaseProductionTimeInSeconds>
+    </Blueprint>
+
+  </Blueprints>
+
+  <GasProperties>
+    <Gas>
+      <Id>
+        <TypeId>MyObjectBuilder_GasProperties</TypeId>
+        <SubtypeId>Vespene</SubtypeId>
+      </Id>
+      <EnergyDensity>0.01556</EnergyDensity>
+    </Gas>
+    <Gas>
+      <Id>
+        <TypeId>MyObjectBuilder_GasProperties</TypeId>
+        <SubtypeId>Psi</SubtypeId>
+      </Id>
+      <EnergyDensity>1</EnergyDensity>
+    </Gas>
+  </GasProperties>
+
+</Definitions>

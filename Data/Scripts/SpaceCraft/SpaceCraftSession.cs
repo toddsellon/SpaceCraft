@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 //using System.Text.Json;
@@ -38,7 +39,10 @@ namespace SpaceCraft {
 	[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
 	public class SpaceCraftSession:MySessionComponentBase {
 
-		public int Tick = 0;
+		private readonly static MyStringHash SourceGroup = MyStringHash.Get("Battery");
+		private readonly static MyStringHash SinkGroup = MyStringHash.Get("BatteryBlock");
+
+		public ulong Current = 0;
     public string SaveName;
 		public bool Loaded = false;
 		public bool Spawned = false;
@@ -48,6 +52,8 @@ namespace SpaceCraft {
 		public static MyPlanet ClosestPlanet { get; protected set; }
 		public static CLI MyCLI;
 		public static long NumPlayers = 0;
+		protected static ConcurrentDictionary<ProtossShield,IMyCubeGrid> ShieldedGrids = new ConcurrentDictionary<ProtossShield,IMyCubeGrid>();
+		protected static List<IMySlimBlock> ZergBlocks = new List<IMySlimBlock>();
 
     public override void Init(MyObjectBuilder_SessionComponent session) {
       base.Init(session);
@@ -67,11 +73,138 @@ namespace SpaceCraft {
 				Spawned = Convars.Static.Spawned;
 				//SaveName = MyAPIGateway.Session.Name;
 				MyAPIGateway.Session.SessionSettings.EnableRemoteBlockRemoval = false;
-				//IMyDamageSystem
-				//MyAPIGateway.Session.DamageSystem.RegisterAfterDamageHandler (int priority, Action< object, MyDamageInformation > handler);
 				NumPlayers = MyAPIGateway.Players.Count;
-
+				MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, DamageHandler);
+				MyAPIGateway.Entities.OnEntityAdd += EntityAdded;
 			}
+    }
+
+		public void EntityAdded( IMyEntity entity ) {
+			IMyCubeGrid grid = entity as IMyCubeGrid;
+			if( grid == null ) return;
+			grid.OnBlockAdded += BlockAdded;
+			// Determine if zerg
+			List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+			grid.GetBlocks(blocks);
+			foreach( IMySlimBlock block in blocks ) {
+				if( Zerg.Static.IsZerg(block) ) {
+					ZergBlocks.Add(block);
+				}
+			}
+		}
+
+		public void BlockAdded( IMySlimBlock block ) {
+			if( Zerg.Static.IsZerg(block) )
+				ZergBlocks.Add(block);
+		}
+
+		protected static void DamageHandler(object target, ref MyDamageInformation info) {
+			IMySlimBlock slim = target as IMySlimBlock;
+			if( slim == null || slim.FatBlock == null ) return;
+			IMyCubeGrid grid = slim.FatBlock.CubeGrid;
+
+			if( ShieldedGrids.Values.Contains(grid) ) {
+				List<ProtossShield> shields = new List<ProtossShield>();
+				foreach( ProtossShield shield in ShieldedGrids.Keys.ToList() ) {
+					if( shield.Block == null )  {
+						ShieldedGrids.TryRemove(shield, out grid);
+						continue;
+					}
+					if( ShieldedGrids[shield] == grid && shield.Activate() ) {
+						info.Amount *= .5f;
+						break;
+					}
+				}
+			}
+		}
+
+		public static void AddShield( ProtossShield shield, IMyCubeGrid grid ) {
+			ShieldedGrids.TryAdd(shield,grid);
+		}
+
+		// // Enable Zerg Healing
+		// public static void SwitchToZerg( IMySlimBlock block ) {
+		// 	if( !ZergBlocks.Contains(block) )
+		// 		ZergBlocks.Add(block);
+		// }
+
+		public static void HealZergBlocks() {
+			foreach( IMySlimBlock block in ZergBlocks.ToList() ) {
+				if( block == null ) {
+					ZergBlocks.Remove(block);
+					continue;
+				}
+				if( block.IsFullIntegrity ) continue;
+				// block.SetToConstructionSite();
+				block.SpawnFirstItemInConstructionStockpile();
+				// block.ClearConstructionStockpile(null);
+				// block.SpawnConstructionStockpile();
+				// block.MoveItemsToConstructionStockpile(null);
+				// block.ClearConstructionStockpile(null);
+        // block.SpawnConstructionStockpile();
+				block.IncreaseMountLevel(2.5f,block.FatBlock == null ? 0 : block.FatBlock.OwnerId);
+			}
+		}
+
+		public static void SwitchToPsi( IMyCubeBlock block, bool isSource = false ) {
+			MyResourceSourceComponent source = block.Components.Get<MyResourceSourceComponent>();
+			MyResourceSinkComponent sink = block.Components.Get<MyResourceSinkComponent>();
+			MyResourceDistributorComponent dist = block.Components.Get<MyResourceDistributorComponent>();
+
+
+
+			if( sink != null ) {
+				// sink.SetMaxRequiredInputByType(OBTypes.Psi, sink.MaxRequiredInput);
+				// sink.SetMaxRequiredInputByType(OBTypes.Electricity, 0f);
+				// sink.SetRequiredInputByType(OBTypes.Psi, sink.RequiredInput);
+				// sink.SetRequiredInputByType(OBTypes.Electricity, 0f);
+				MyResourceSinkInfo info = new MyResourceSinkInfo {
+			 			MaxRequiredInput = sink.MaxRequiredInput,
+            ResourceTypeId = OBTypes.Psi,
+            RequiredInputFunc = Sink_ComputeRequiredPower,
+        };
+				sink.AddType(ref info);
+				MyDefinitionId electricity = OBTypes.Electricity;
+				// sink.RemoveType(ref electricity);
+			}
+
+			if( source != null ) {
+				// source.Init(SourceGroup, new MyResourceSourceInfo {
+				// 		ResourceTypeId = OBTypes.Psi,
+				// 		DefinedOutput = source.MaxOutput,
+				// 		ProductionToCapacityMultiplier = 60*60
+				// });
+				source.SetOutputByType(OBTypes.Psi, isSource ? source.CurrentOutput : 0f);
+				source.SetOutputByType(OBTypes.Electricity, 0f);
+				source.SetMaxOutputByType(OBTypes.Psi, source.MaxOutput);
+				source.SetMaxOutputByType(OBTypes.Electricity, 0f);
+				// if( source.ProductionEnabledByType(OBTypes.Electricity) ) {
+				//
+				// 	source.SetProductionEnabledByType(OBTypes.Electricity, false);
+				//
+				// }
+
+				source.SetRemainingCapacityByType(OBTypes.Electricity, 0f);
+				if( isSource && source.ProductionEnabledByType(OBTypes.Electricity) ) {
+					source.SetProductionEnabledByType(OBTypes.Psi, true);
+					source.SetRemainingCapacityByType(OBTypes.Psi, source.RemainingCapacity);
+				}
+			}
+
+			if( sink != null ) sink.Update();
+
+			// if( dist != null ) {
+			// 	dist.ChangeSourcesState(Psi, MyMultipleEnabledEnum.AllEnabled, block.OwnerId);
+			// 	dist.ChangeSourcesState(Electricity, MyMultipleEnabledEnum.AllDisabled, block.OwnerId);
+			// }
+		}
+
+		public static float Sink_ComputeRequiredPower() {
+			return 0f;
+        // float inputRequiredToFillIn100Updates = (MyEnergyConstants.BATTERY_MAX_CAPACITY - ResourceSource.RemainingCapacityByType(MyResourceDistributorComponent.ElectricityId)) * VRage.Game.MyEngineConstants.UPDATE_STEPS_PER_SECOND / m_productionUpdateInterval * ResourceSource.ProductionToCapacityMultiplierByType(MyResourceDistributorComponent.ElectricityId);
+        // float currentOutput = ResourceSource.CurrentOutputByType(MyResourceDistributorComponent.ElectricityId);
+        // currentOutput *= MySession.Static.CreativeMode ? 0f : 1f;
+        // return Math.Min(inputRequiredToFillIn100Updates + currentOutput, MyEnergyConstants.BATTERY_MAX_POWER_INPUT);
     }
 
 		// Main loop
@@ -100,6 +233,14 @@ namespace SpaceCraft {
 			}
 
 			NumPlayers = MyAPIGateway.Players.Count;
+
+
+			Current++;
+
+			if( Current == 4000 ) {
+				Current = 0;
+				HealZergBlocks();
+			}
 			//MyAPIGateway.Players.NewPlayerRequestSucceeded += NewPlayerAdded;
       /*if(SaveName != MyAPIGateway.Session.Name) {
         // Saved
@@ -112,6 +253,7 @@ namespace SpaceCraft {
 		protected override void UnloadData(){
 			//MyAPIGateway.Players.NewPlayerRequestSucceeded -= NewPlayerAdded;
 			MyCLI.Destroy();
+			MyAPIGateway.Entities.OnEntityAdd -= EntityAdded;
 		}
 
 		public static MyPlanet GetClosestPlanet( Vector3D position, List<MyPlanet> exclude = null, string containing = "" ) {
