@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<SpawnGroups>
+
+<SpawnGroup>
+	<Id>
+		<TypeId>SpawnGroupDefinition</TypeId>
+		<SubtypeId>ProtossPrefabs</SubtypeId>
+	</Id>
+	<Description>SpaceCraft -toss</Description>
+	<Icon>Textures\GUI\Icons\Fake.dds</Icon>
+	<Frequency>1.0</Frequency>
+	<IsPirate>true</IsPirate>
+	<Prefabs>
+
+		<Prefab SubtypeId="Protoss Outpost">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Protoss Outpost</BeaconText>
+			<Speed>20.0</Speed>
+		</Prefab>
+
+		<Prefab SubtypeId="Protoss Probe">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Protoss Probe</BeaconText>
+			<Speed>20.0</Speed>
+		</Prefab>
+
+		<Prefab SubtypeId="Protoss Gateway">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Protoss Gateway</BeaconText>
+			<Speed>20.0</Speed>
+		</Prefab>
+
+		<Prefab SubtypeId="Protoss Scout">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Protoss Scout</BeaconText>
+			<Speed>100.0</Speed>
+		</Prefab>
+
+		<Prefab SubtypeId="Protoss Nexus">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Protoss Nexus</BeaconText>
+			<Speed>20.0</Speed>
+		</Prefab>
+
+		<Prefab SubtypeId="Protoss Tempest">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Protoss Tempest</BeaconText>
+			<Speed>100.0</Speed>
+		</Prefab>
+
+		<Prefab SubtypeId="Protoss Stargate">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Protoss Stargate</BeaconText>
+			<Speed>20.0</Speed>
+		</Prefab>
+
+	</Prefabs>
+</SpawnGroup>
+
+</SpawnGroups>
+</Definitions>

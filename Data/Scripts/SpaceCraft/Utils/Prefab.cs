@@ -25,6 +25,7 @@ namespace SpaceCraft.Utils {
     public bool Worker = false;
     public bool Atmosphere = false;
     public Tech Teir = Tech.Primitive;
+    public Races Race = Races.Terran;
     public static readonly SerializableVector3 DefaultColor = new SerializableVector3(0.575f,0.150000036f,0.199999958f);
 
     public MyPrefabDefinition Definition;
@@ -94,6 +95,9 @@ namespace SpaceCraft.Utils {
               string subtype = component.Definition.Id.SubtypeName;
               MyBlueprintDefinitionBase blueprint = null;
       				MyDefinitionManager.Static.TryGetComponentBlueprintDefinition(component.Definition.Id, out blueprint);
+              if( blueprint == null )
+                blueprint = SpaceCraftSession.GetBlueprintDefinition(component.Definition.Id.SubtypeName);
+
               if( Components.ContainsKey(subtype) ) {
                 Components[subtype] += component.Count;
               } else {
@@ -124,11 +128,11 @@ namespace SpaceCraft.Utils {
             continue;
           }
           if( block is MyObjectBuilder_Assembler ) {
-            FactoryTier = block.SubtypeName == "LargeAssembler" ? 3 : Math.Max(FactoryTier,2);
+            FactoryTier = (block.SubtypeName == "LargeAssembler" || block.SubtypeName == "LargeProtossAssembler") ? 3 : Math.Max(FactoryTier,2);
             continue;
           }
           if( block is MyObjectBuilder_Refinery ) {
-            RefineryTier = block.SubtypeName == "LargeRefinery" ? 3 : Math.Max(RefineryTier,2);
+            RefineryTier = (block.SubtypeName == "LargeRefinery" || block.SubtypeName == "LargeProtossRefinery") ? 3 : Math.Max(RefineryTier,2);
             continue;
           }
           if( block is MyObjectBuilder_MotorSuspension ) {
@@ -250,14 +254,14 @@ namespace SpaceCraft.Utils {
       return null;
     }
 
-    public static Prefab Add( string subtypeId, string faction ) {
+    public static Prefab Add( string subtypeId, string faction, Races race ) {
       Prefab prefab = Prefab.Get(subtypeId);
       if( prefab == null ) {
         prefab = new Prefab{
           SubtypeId = subtypeId,
-          Faction = faction
+          Faction = faction,
+          Race = race
         };
-
         prefab.Init();
       }
       return prefab;

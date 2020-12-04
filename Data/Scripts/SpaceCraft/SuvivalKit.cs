@@ -22,7 +22,7 @@ using VRage.Game.Entity;
 
 namespace SpaceCraft {
 
-	[MyEntityComponentDescriptor(typeof(MyObjectBuilder_SurvivalKit), false, "SurvivalKit", "SurvivalKit")]
+	[MyEntityComponentDescriptor(typeof(MyObjectBuilder_SurvivalKit), false, "SurvivalKit", "SurvivalKitLarge", "ProtossSurvivalKit", "ProtossSurvivalKitLarge")]
 	public class SurvivalKit : MyGameLogicComponent {
 
 		public IMyProductionBlock block;

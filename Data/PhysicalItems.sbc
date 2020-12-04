@@ -77,6 +77,31 @@
             <IconSymbol>IconSymbol_Organic</IconSymbol>
         </PhysicalItem>
 
+        <!-- <PhysicalItem xsi:type="MyObjectBuilder_WeaponItemDefinition">
+            <Id>
+                <TypeId>PhysicalGunObject</TypeId>
+                <SubtypeId>PhotonRifle</SubtypeId>
+            </Id>
+            <DisplayName>Photon Rifle</DisplayName>
+            <Icon>Textures\GUI\Icons\WeaponAutomaticRifle.dds</Icon>
+            <Description>Description_Rifle</Description>
+            <Size>
+                <X>0.8</X>
+                <Y>0.24</Y>
+                <Z>0.08</Z>
+            </Size>
+            <Mass>3</Mass>
+            <Volume>14</Volume>
+            <Model>Models\Weapons\AutomaticRifle.mwm</Model>
+            <PhysicalMaterial>Metal</PhysicalMaterial>
+            <WeaponDefinitionId Subtype="PhotonRifle" />
+            <ShowAmmoCount>true</ShowAmmoCount>
+            <MinimumOfferAmount>10</MinimumOfferAmount>
+            <MaximumOfferAmount>20</MaximumOfferAmount>
+            <MinimumOrderAmount>10</MinimumOrderAmount>
+            <MaximumOrderAmount>100</MaximumOrderAmount>
+            <CanPlayerOrder>true</CanPlayerOrder>
+        </PhysicalItem> -->
 
     </PhysicalItems>
 </Definitions>

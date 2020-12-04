@@ -130,7 +130,14 @@ Convars can also technically be changed inside your save folder in a file called
 - Terran Siege Tank
 - Terran Battlecruiser
 - Planetary Fortress
-- Norad II
+- Terran Wraith
+- Protoss Outpost
+- Protoss Probe
+- Protoss Gateway
+- Protoss Scout
+- Protoss Nexus
+- Protoss Tempest
+- Protoss Stargate
 (More to come, subject to change)
 
 # Creating Prefabs

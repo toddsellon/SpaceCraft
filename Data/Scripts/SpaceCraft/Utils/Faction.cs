@@ -46,13 +46,6 @@ namespace SpaceCraft.Utils {
     Future
   };
 
-  public enum Races {
-    Terran,
-    Zerg,
-    Protoss,
-    Hybrid
-  };
-
 
   //[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
   //public class Faction:MySessionComponentBase {
@@ -75,7 +68,7 @@ namespace SpaceCraft.Utils {
     public static int LIMIT = 20;
 
     public int Engineers = 0;
-
+    public Races Race = Races.Terran;
     public string Name;
     public MyCommandLine CommandLine = new MyCommandLine();
     public List<MySpawnGroupDefinition> Groups = new List<MySpawnGroupDefinition>();
@@ -106,7 +99,6 @@ namespace SpaceCraft.Utils {
     public List<IMyCubeGrid> SpawnedGrids;
     public bool Spawning = false;
     public bool Building = false;
-    public Races Race = Races.Terran;
 
     // Main loop
     public void UpdateBeforeSimulation() {
@@ -143,7 +135,6 @@ namespace SpaceCraft.Utils {
     public void SpawnPrefab(string prefabName, MatrixD position, SpawningOptions options = SpawningOptions.None ) {
       Spawning = true;
       SpawnedGrids = new List<IMyCubeGrid>();
-
       Prefab prefab = Prefab.Get(prefabName);
       // if( prefab != null )
       //   prefab.ChangeColor(Color);
@@ -197,6 +188,8 @@ namespace SpaceCraft.Utils {
       }
       Controllable c = TakeControl( grid );
       MainBase = MainBase ?? grid;
+      if( MainBase != null )
+        RespawnPoint = RespawnPoint ?? MainBase.GetRespawnBlock();
 
       if( Building ) {
         CurrentGoal.Entity = grid;
@@ -266,17 +259,17 @@ namespace SpaceCraft.Utils {
     public void Stabilize() {
       if( Spawning || CurrentGoal == null || MainBase == null ) return;
       if( MainBase.Grid == null || MainBase.Grid.Closed || MainBase.Grid.MarkedForClose ) {
-        Mulligan();
+        Mulligan("MainBase.Grid was null or closed");
         return;
       }
       if( MainBase.Grid.Physics.IsMoving ) return;
-      if( RespawnPoint == null || !RespawnPoint.IsFunctional ) {
-        Mulligan();
-        return;
-      }
+      // if( RespawnPoint == null || !RespawnPoint.IsFunctional ) {
+      //   Mulligan();
+      //   return;
+      // }
       List<IMySlimBlock> batteries = MainBase.GetBlocks<IMyBatteryBlock>();
       if( batteries.Count == 0 || batteries[0].IsDestroyed ) {
-        Mulligan();
+        Mulligan("No batteries or batteries destroyed");
         return;
       }
 
@@ -291,15 +284,16 @@ namespace SpaceCraft.Utils {
           if( MainBase.AddLargeGridConverter() ) {
             CurrentGoal.Progress();
           } else {
-            Mulligan();
+            Mulligan("Could not add large grid converter");
           }
         } else {
+          MainBase.FindConstructionSite();
           CurrentGoal.Complete();
         }
       } else {
         List<IMySlimBlock> assemblers = MainBase.GetBlocks<IMyAssembler>();
         if( MainBase.SuperGrid == null || MainBase.SuperGrid.MarkedForClose || MainBase.SuperGrid.Closed || assemblers.Count < 2 ) {
-          Mulligan();
+          Mulligan("Failed to add large grid convreter");
         } else {
           CurrentGoal.Complete();
         }
@@ -457,7 +451,7 @@ namespace SpaceCraft.Utils {
         //   matrix = MatrixD.CreateWorld( position, matrix.Right, matrix.Down );
         // else if( prefab.IsStatic )
   			//   matrix = MatrixD.CreateWorld(position, matrix.Backward, matrix.Left);
-        if( prefab.IsStatic ) {
+        if( prefab.IsStatic && prefab.SubtypeId.StartsWith("Terran") ) {
           //position = position + (up * (box.Height *.5) );
           //matrix = MatrixD.CreateWorld(position, matrix.Backward, matrix.Left);
           // Vector3D.CalculatePerpendicularVector(matrix.Forward);
@@ -720,13 +714,13 @@ namespace SpaceCraft.Utils {
 
           break;
         case Tech.Space:
-          resources.Add("Uranium",(VRage.MyFixedPoint)0.02*Convars.Static.Difficulty);
+          resources.Add("Uranium",(VRage.MyFixedPoint)0.05*Convars.Static.Difficulty);
           resources.Add("Platinum",(VRage.MyFixedPoint)0.1*Convars.Static.Difficulty);
           goto case Tech.Advanced;
         //case Tech.Established:
         case Tech.Advanced:
           if( Tier != Tech.Space && CommandLine.Switch("nuclear") )
-            resources.Add("Uranium",(VRage.MyFixedPoint)0.02*Convars.Static.Difficulty);
+            resources.Add("Uranium",(VRage.MyFixedPoint)0.05*Convars.Static.Difficulty);
           resources.Add("Silver",(VRage.MyFixedPoint)1*Convars.Static.Difficulty);
           resources.Add("Gold",(VRage.MyFixedPoint)0.5*Convars.Static.Difficulty);
           goto default;
@@ -881,7 +875,7 @@ namespace SpaceCraft.Utils {
       }
 
       if( MyStats.Grids == 0 ) {
-        Mulligan();
+        Mulligan("No grids were found");
         return;
       }
 
@@ -963,8 +957,9 @@ namespace SpaceCraft.Utils {
       return null;
     }
 
-    public void Mulligan() {
-      if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "Mulligan", Name + " took a mulligan" );
+    public void Mulligan( string reason = "No reason specified" ) {
+      if( Convars.Static.Debug )
+        MyAPIGateway.Utilities.ShowMessage( "Mulligan", Name + " took a mulligan:" + reason );
       foreach( Controllable c in Controlled ) {
         if( c.Entity == null ) continue;
         MyAPIGateway.Entities.RemoveEntity( c.Entity );
@@ -978,7 +973,7 @@ namespace SpaceCraft.Utils {
         Type = Goals.Stabilize
       };
       if( !Spawn() ) {
-        Mulligan();
+        Mulligan("Previous mulligan failed");
       }
     }
 
@@ -1029,7 +1024,7 @@ namespace SpaceCraft.Utils {
 
         return MatrixD.CreateWorld( translation + (forward*3) );
       } else {
-        Mulligan();
+        Mulligan("Failed to get spawn location");
       }
 
 
@@ -1101,19 +1096,41 @@ namespace SpaceCraft.Utils {
       // Vector3D.CalculatePerpendicularVector(perp);
       //position = position + (up * 150);
 
+      string subtypeId = String.IsNullOrWhiteSpace(StartingPrefab) ? "Terran Planet Pod" : StartingPrefab;
+      Prefab prefab = Prefab.Get(subtypeId);
 
-      SpawnPrefab(String.IsNullOrWhiteSpace(StartingPrefab) ? "Terran Planet Pod" : StartingPrefab, MatrixD.CreateWorld(position, up, Vector3D.CalculatePerpendicularVector(up)), SpawningOptions.UseGridOrigin );
+      // if( prefab == null ) return false;
+
+      Vector3D perp = Vector3D.CalculatePerpendicularVector(up);
+      MatrixD matrix = MatrixD.CreateWorld(position, perp, up);
+
+      // SpawnPrefab(String.IsNullOrWhiteSpace(StartingPrefab) ? "Terran Planet Pod" : StartingPrefab, MatrixD.CreateWorld(position, up, Vector3D.CalculatePerpendicularVector(up)), SpawningOptions.UseGridOrigin );
+      if( prefab != null && prefab.IsStatic ) {
+        position = Homeworld.GetClosestSurfacePointGlobal( position );
+        up = Vector3D.Normalize(position - Homeworld.WorldMatrix.Translation);
+        perp = Vector3D.CalculatePerpendicularVector(up);
+        matrix = MatrixD.CreateWorld(position, perp, up);
+        MainBase = new CubeGrid(CubeGrid.Spawn(subtypeId, matrix, this));
+        //MainBase = new CubeGrid(CubeGrid.Spawn(subtypeId, MatrixD.CreateWorld(position, matrix.Backward, matrix.Left), this));
+      } else MainBase = new CubeGrid(CubeGrid.Spawn(subtypeId, matrix, this));
+
+
+      //else
+        // SpawnPrefab(subtypeId, MatrixD.CreateWorld(position, up, Vector3D.CalculatePerpendicularVector(up)), SpawningOptions.UseGridOrigin );
+
       // MainBase = new CubeGrid(CubeGrid.Spawn(String.IsNullOrWhiteSpace(StartingPrefab) ? "Terran Planet Pod" : StartingPrefab, MatrixD.CreateWorld(position, up, Vector3D.CalculatePerpendicularVector(up)), this));
       // //MainBase.Init(Session);
       //
-      // TakeControl( MainBase );
+
+      TakeControl( MainBase );
+      RespawnPoint = MainBase.GetRespawnBlock();
       //
       // if( MainBase.Grid == null ) {
       //   //Mulligan();
       //   return false;
       // }
 
-      // RespawnPoint = MainBase.GetRespawnBlock();
+
       //
       // position.X += 5;
       //
@@ -1152,7 +1169,7 @@ namespace SpaceCraft.Utils {
     // }
 
     protected float Prioritize( Prefab prefab ) {
-      //if( Tier < prefab.Tier ) return 0f;
+      if( prefab.Race != Race ) return 0;
 
       foreach( string resource in prefab.Cost.Keys ) {
         // Doesn't have access to resources
@@ -1210,15 +1227,13 @@ namespace SpaceCraft.Utils {
 
       if( prefab.Fighter ) {
 
-          priority *= MyStats.Ratio["Fighters"] <= MyStats.Desired["Fighters"] ? 2f : 1f;
+          priority *= MyStats.Ratio["Fighters"] <= MyStats.Desired["Fighters"] ? 1.5f : 1f;
 
       }
 
       if( prefab.IsStatic ) {
-
-          //priority *= MyStats.Ratio["Static"] >= MyStats.Desired["Static"] ? .5f : 1f;
-          priority *= MyStats.Ratio["Static"] < MyStats.Desired["Static"] ? 2f : .5f;
-
+          // priority *= MyStats.Ratio["Static"] < MyStats.Desired["Static"] ? 2f : .5f;
+          priority *= MyStats.Ratio["Static"] < MyStats.Desired["Static"] ? 4f : .25f;
       }
 
 
@@ -1277,13 +1292,14 @@ namespace SpaceCraft.Utils {
     public void BlockCompleted( IMySlimBlock block ) {
       if( block.FatBlock == null ) return;
       if( block.FatBlock is IMyRefinery ) {
+        string subtypeName = block.BlockDefinition.Id.SubtypeName;
         if( Tier == Tech.Primitive ) {
           Tier = Tech.Established;
           Resources.Add("Cobalt");
           Resources.Add("Magnesium");
         }
 
-        if( block.BlockDefinition.Id.SubtypeName == "LargeRefinery" ) {
+        if( subtypeName == "LargeRefinery" || subtypeName == "LargeProtossRefinery" ) {
           if( Tier == Tech.Established ) {
             Resources.Add("Silver");
             Resources.Add("Gold");

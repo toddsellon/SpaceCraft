@@ -5,7 +5,7 @@
 <SpawnGroup>
 	<Id>
 		<TypeId>SpawnGroupDefinition</TypeId>
-		<SubtypeId>SpaceCraft</SubtypeId>
+		<SubtypeId>TerranPrefabs</SubtypeId>
 	</Id>
 	<Description>SpaceCraft</Description>
 	<Icon>Textures\GUI\Icons\Fake.dds</Icon>
@@ -111,13 +111,13 @@
 			<BeaconText>Planetary Fortress</BeaconText>
 			<Speed>0.0</Speed>
 		</Prefab>
-		<Prefab SubtypeId="Norad II">
+		<Prefab SubtypeId="Terran Wraith">
 			<Position>
 				<X>0.0</X>
 				<Y>0.0</Y>
 				<Z>0.0</Z>
 			</Position>
-			<BeaconText>Norad II</BeaconText>
+			<BeaconText>Terran Wraith</BeaconText>
 			<Speed>0.0</Speed>
 		</Prefab>
 	</Prefabs>

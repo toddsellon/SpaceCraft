@@ -127,8 +127,10 @@ namespace SpaceCraft.Utils {
         //switch( slim.BlockDefinition.DisplayNameString ) {
         switch(subtypeName) {
           case "LargeAssembler":
+          case "LargeProtossAssembler":
             return 98;
           case "BasicAssembler":
+          case "BasicProtossAssembler":
             return 49;
         }
         return 48;

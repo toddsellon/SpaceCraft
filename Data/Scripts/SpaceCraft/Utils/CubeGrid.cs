@@ -553,7 +553,7 @@ namespace SpaceCraft.Utils {
 				StopProduction();
 				CheckFlags();
 				Owner.BlockCompleted(ConstructionSite);
-				ConstructionSite.CubeGrid.ChangeGridOwnership(owner, MyOwnershipShareModeEnum.Faction);
+				// ConstructionSite.CubeGrid.ChangeGridOwnership(owner, MyOwnershipShareModeEnum.Faction);
 				if( CurrentOrder != null )
 	        CurrentOrder.Complete();
 
@@ -759,7 +759,7 @@ namespace SpaceCraft.Utils {
 		}
 
 		public bool AddQueueItems( IMyCubeBlock block, bool clear = false, IMyAssembler ass = null ) {
-			if( ass == null ) ass = GetAssembler();
+			ass = ass ?? GetAssembler();
 
 			if( ass == null || block == null ) return false;
 
@@ -774,22 +774,46 @@ namespace SpaceCraft.Utils {
 		}
 
 		public bool AddQueueItems( MyCubeBlockDefinition def, bool clear = false, IMyAssembler ass = null ) {
-			if( def == null ) return false;
-			if( ass == null ) ass = GetAssembler();
+			if( def == null ) {
+				if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "AddQueueItems", "MyCubeBlockDefinition was null" );
+				return false;
+			}
+			ass = ass ?? GetAssembler();
+			if( ass == null ) {
+				if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "AddQueueItems", "No assembler found" );
+				return false;
+			}
 			//VRage.Game.MyObjectBuilder_CubeBlockDefinition.Component.CubeBlockComponent
 
 			foreach( var component in def.Components ){
 				MyBlueprintDefinitionBase blueprint = null;
 				MyDefinitionManager.Static.TryGetComponentBlueprintDefinition(component.Definition.Id, out blueprint);
 
-				if( blueprint == null ) continue;
+				if( blueprint == null ) {
+					// blueprint = MyDefinitionManager.Static.TryGetBlueprintDefinitionByResultId( new MyDefinitionId(OBTypes.Blueprint,component.Definition.Id.SubtypeName) );
+					// if( blueprint == null )
+						continue;
+				}
 
-				if( !ass.CanUseBlueprint(blueprint) ) return false;
+				if( !ass.CanUseBlueprint(blueprint) ) {
+					if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "AddQueueItems", "Assembler can not use BP:" + blueprint.ToString() );
+					return false;
+				}
 			}
 
 			foreach( var component in def.Components ){
 				MyBlueprintDefinitionBase blueprint = null;
 				MyDefinitionManager.Static.TryGetComponentBlueprintDefinition(component.Definition.Id, out blueprint);
+				if( blueprint == null ) {
+					// MyDefinitionId id = new MyDefinitionId(OBTypes.Blueprint,component.Definition.Id.SubtypeName);
+					// blueprint = MyDefinitionManager.Static.TryGetBlueprintDefinitionByResultId( id );
+					blueprint = SpaceCraftSession.GetBlueprintDefinition(component.Definition.Id.SubtypeName);
+
+					if( blueprint == null ) {
+						if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "AddQueueItems", "BP was null:" + component.Definition.Id.ToString() );
+						return false;
+					}
+				}
 				ass.AddQueueItem( blueprint, component.Count );
 			}
 
@@ -992,22 +1016,6 @@ namespace SpaceCraft.Utils {
 			return Spawn( prefab.Definition, matrix, owner );
 		}
 
-		public static IMyCubeGrid Spawn_new(string prefabName, MatrixD matrix, Faction owner) {
-			SpawningOptions options = SpawningOptions.None;
-			//options |= SpawningOptions.RotateFirstCockpitTowardsDirection;
-			//options |= SpawningOptions.UseGridOrigin;
-			//try{
-
-				List<IMyCubeGrid> grids = new List<IMyCubeGrid>();
-				MyAPIGateway.PrefabManager.SpawnPrefab(grids, prefabName, matrix.Translation, matrix.Forward, matrix.Up, Vector3.Zero, Vector3.Zero, null, options, owner.MyFaction == null ? (long)0 : owner.MyFaction.FounderId );
-
-				if( grids.Count > 0 ) return grids[0];
-			//}catch(Exception exc){
-			//}
-
-			return null;
-		}
-
 		public static IMyCubeGrid Spawn(string prefabName, MatrixD matrix, Faction owner) {
 			MyPrefabDefinition prefab = MyDefinitionManager.Static.GetPrefabDefinition(prefabName);
 			return Spawn( prefab, matrix, owner );
@@ -1042,7 +1050,7 @@ namespace SpaceCraft.Utils {
 					grid.Name = owner.Name + " " + prefab.Id.SubtypeName;
 					grid.DisplayName = owner.Name + " " + prefab.Id.SubtypeName;
 				//}
-				//grid.EntityId = (long)0;
+				grid.EntityId = (long)0;
 
 				// if( g == null ) {
 				// 	original = po.GetMatrix();
@@ -1061,7 +1069,7 @@ namespace SpaceCraft.Utils {
 
 				long ownerId = owner != null && owner.MyFaction != null ? owner.MyFaction.FounderId : 0;
 				foreach( MyObjectBuilder_CubeBlock block in grid.CubeBlocks ) {
-					//block.EntityId = (long)0;
+					block.EntityId = (long)0;
 					block.Owner = ownerId;
 					//block.BuiltBy = ownerId;
 					block.ShareMode = MyOwnershipShareModeEnum.Faction;
@@ -1077,11 +1085,9 @@ namespace SpaceCraft.Utils {
 
         entity.Flags &= ~EntityFlags.Save;
 				entity.Save = true;
-        //ent.Flags &= ~EntityFlags.NeedsUpdate;
 
         entity.Render.Visible = true;
         entity.WorldMatrix = matrix;
-        //entity.PositionComp.SetPosition(new Vector3D(10,0,0));
         MyAPIGateway.Entities.AddEntity(entity);
 
 
@@ -1248,7 +1254,10 @@ namespace SpaceCraft.Utils {
 		}
 
 		public bool SetConstructionSite( IMySlimBlock block ) {
-			if( !AddQueueItems( block.FatBlock, true ) ) return false;
+			if( !AddQueueItems( block.FatBlock, true ) ) {
+				// if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "SetConstructionSite", "Failed to add to queue: " + block.FatBlock.ToString() );
+				return false;
+			}
 			ConstructionSite = block;
 			Need = Needs.Components;
 

@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<Ammos>
+  <Ammo xsi:type="MyObjectBuilder_ProjectileAmmoDefinition">
+    <Id>
+      <TypeId>AmmoDefinition</TypeId>
+      <SubtypeId>Photon</SubtypeId>
+    </Id>
+    <BasicProperties>
+      <DesiredSpeed>300</DesiredSpeed>
+      <SpeedVariance>0</SpeedVariance>
+      <MaxTrajectory>800</MaxTrajectory>
+      <BackkickForce>3.2</BackkickForce>
+      <PhysicalMaterial>RifleBullet</PhysicalMaterial>
+    </BasicProperties>
+    <ProjectileProperties>
+      <ProjectileTrailScale>0.05</ProjectileTrailScale>
+      <ProjectileHitImpulse>1</ProjectileHitImpulse>
+      <ProjectileMassDamage>30</ProjectileMassDamage>
+      <ProjectileHealthDamage>24</ProjectileHealthDamage>
+      <HeadShot>true</HeadShot>
+      <ProjectileHeadShotDamage>60</ProjectileHeadShotDamage>
+    </ProjectileProperties>
+    <!-- <MissileProperties>
+        <MissileMass>30</MissileMass>
+        <MissileExplosionRadius>4</MissileExplosionRadius>
+        <MissileModelName>Models\Debug\Sphere.mwm</MissileModelName>
+        <MissileAcceleration>600</MissileAcceleration>
+        <MissileInitialSpeed>100</MissileInitialSpeed>
+        <MissileSkipAcceleration>false</MissileSkipAcceleration>
+        <MissileExplosionDamage>24</MissileExplosionDamage>
+      </MissileProperties> -->
+  </Ammo>
+</Ammos>
+<AmmoMagazines>
+    <AmmoMagazine>
+        <Id>
+            <TypeId>AmmoMagazine</TypeId>
+            <SubtypeId>PhotonRounds</SubtypeId>
+        </Id>
+        <DisplayName>Photon Charge</DisplayName>
+        <Icon>Textures\GUI\Icons\Cubes\SpaceBall.dds</Icon>
+        <Size>
+            <X>0.2</X>
+            <Y>0.05</Y>
+            <Z>0.02</Z>
+        </Size>
+        <Mass>0.45</Mass>
+        <Volume>0.2</Volume>
+        <!-- <Model>Models\Weapons\Rifle_Ammo.mwm</Model> -->
+        <Model>Models\Debug\Sphere.mwm</Model>
+
+        <PhysicalMaterial>Ammo</PhysicalMaterial>
+        <Capacity>30</Capacity>
+        <AmmoDefinitionId Subtype="Photon" />
+
+        <MinimumOfferAmount>100</MinimumOfferAmount>
+        <MaximumOfferAmount>1000</MaximumOfferAmount>
+        <MinimumOrderAmount>100</MinimumOrderAmount>
+        <MaximumOrderAmount>2000</MaximumOrderAmount>
+        <CanPlayerOrder>true</CanPlayerOrder>
+    </AmmoMagazine>
+</AmmoMagazines>
+</Definitions>

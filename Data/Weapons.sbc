@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <!-- Particle Effects:
+  Meteory_Fire_Atmosphere
+  Meteory_Fire_Space
+  MaterialHit_Rock
+  MaterialHit_Ice
+  MaterialHit_MoonSoil
+  Grinder_Character
+  Warp
+  Hit_BasicAmmoSmall
+  Blood_Spider
+  PlanetCrashDust
+  PlanetCrash
+  Smoke_Autocannon
+  Smoke_LargeGunShot
+  Smoke_DrillDust
+  Collision_Sparks_HandDrill
+  AngleGrinder
+  Explosion_Warhead_15
+  Explosion_Warhead_30
+  Explosion_Warhead_02
+  Explosion_Warhead_50
+  Smoke_Construction
+  Meteorit_Smoke1AfterHit
+  Landing_Jet_Ground_Dust
+  Collision_Sparks_LargeGrid_Close
+  Collision_Sparks_LargeGrid_Distant
+  Explosion_Missile
+  Muzzle_Flash_Large
+  Smoke_Missile
+  WelderFlame
+  WelderContactPoint_soft
+  Collision_Sparks
+  Collision_Sparks_Directional
+  Explosion_Debris
+  Landing_Jet_Ground
+  WelderContactPoint
+  WelderContactPoint_medium
+  ShipGrinder
+  ShipWelderArc
+  Landing_Jet_Grid_Large
+  Landing_Jet_Grid_Small
+  ExhaustSmokeSparks_2
+  ExhaustElectric
+  ExhaustSmokeElectric
+  ExhaustSmokeElectricSmall
+  ExhaustFire
+  ExhaustFireSmall
+ -->
+<Weapons>
+
+  <Weapon>
+    <Id>
+      <TypeId>WeaponDefinition</TypeId>
+      <SubtypeId>PhotonCannon</SubtypeId>
+    </Id>
+    <ProjectileAmmoData RateOfFire="600" ShootSoundName="WepShipSmallMissileShot" />
+    <DeviateShotAngle>0.3</DeviateShotAngle>
+    <MuzzleFlashLifeSpan>30</MuzzleFlashLifeSpan>
+    <AmmoMagazines>
+      <AmmoMagazine Subtype="PhotonRounds" />
+    </AmmoMagazines>
+  </Weapon>
+
+  <Weapon>
+    <Id>
+      <TypeId>WeaponDefinition</TypeId>
+      <SubtypeId>PrismaticBeam</SubtypeId>
+    </Id>
+    <ProjectileAmmoData RateOfFire="200" ShootSoundName="WepShipSmallMissileShot" />
+    <NoAmmoSoundName>WepPlayRifleNoAmmo</NoAmmoSoundName>
+    <DeviateShotAngle>0</DeviateShotAngle>
+    <ReleaseTimeAfterFire>100</ReleaseTimeAfterFire>
+    <MuzzleFlashLifeSpan>40</MuzzleFlashLifeSpan>
+    <UseDefaultMuzzleFlash>false</UseDefaultMuzzleFlash>
+    <UseRandomizedRange>false</UseRandomizedRange>
+    <Effects>
+      <Effect Action="Shoot" Dummy="muzzle_projectile" Particle="ExhaustSmokeElectric" InstantStop="false"/>
+    </Effects>
+    <AmmoMagazines>
+	     <AmmoMagazine Subtype="PhotonRounds" />
+    </AmmoMagazines>
+  </Weapon>
+
+  <Weapon>
+    <Id>
+      <TypeId>WeaponDefinition</TypeId>
+      <SubtypeId>PhotonRifle</SubtypeId>
+    </Id>
+    <ProjectileAmmoData RateOfFire="600" ShootSoundName="WepShipSmallMissileShot" />
+    <!--    <MissileAmmoData RateOfFire="60" ShootSoundName="WepShipSmallMissileShot" /> -->
+    <NoAmmoSoundName>WepPlayRifleNoAmmo</NoAmmoSoundName>
+    <DeviateShotAngle>0.3</DeviateShotAngle>
+    <ReleaseTimeAfterFire>100</ReleaseTimeAfterFire>
+    <MuzzleFlashLifeSpan>40</MuzzleFlashLifeSpan>
+    <UseDefaultMuzzleFlash>false</UseDefaultMuzzleFlash>
+    <RangeMultiplier>0.5</RangeMultiplier>
+    <UseRandomizedRange>false</UseRandomizedRange>
+    <Effects>
+      <Effect Action="Shoot" Dummy="muzzle_projectile" Particle="Muzzle_Flash" Loop="true" InstantStop="true"/>
+      <Effect Action="Shoot" Dummy="Shell_Casings" Particle="Shell_Casings" InstantStop="false"/>
+    </Effects>
+    <AmmoMagazines>
+	     <AmmoMagazine Subtype="PhotonRounds" />
+    </AmmoMagazines>
+  </Weapon>
+
+</Weapons>
+</Definitions>

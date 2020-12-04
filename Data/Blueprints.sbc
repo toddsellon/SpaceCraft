@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Blueprints>
+
     <Blueprint>
         <Id>
             <TypeId>BlueprintDefinition</TypeId>
@@ -9,10 +10,12 @@
         <DisplayName>Khaydarin Crystal</DisplayName>
         <Icon>Textures\GUI\Icons\Items\ZoneChip_Item.dds</Icon>
         <Prerequisites>
-            <Item Amount="1" TypeId="Component" SubtypeId="Crystal" />
+          <Item Amount="10" TypeId="Ingot" SubtypeId="Iron" />
+          <Item Amount="1" TypeId="Ingot" SubtypeId="Silicon" />
+          <Item Amount="2" TypeId="Ingot" SubtypeId="Nickel" />
         </Prerequisites>
         <Result Amount="1" TypeId="Component" SubtypeId="Crystal" />
-        <BaseProductionTimeInSeconds>99999</BaseProductionTimeInSeconds>
+        <BaseProductionTimeInSeconds>1</BaseProductionTimeInSeconds>
     </Blueprint>
 
     <Blueprint>
@@ -28,6 +31,23 @@
         <Result Amount="1" TypeId="Component" SubtypeId="Organic" />
         <BaseProductionTimeInSeconds>0.1</BaseProductionTimeInSeconds>
     </Blueprint>
+
+    <Blueprint>
+      <Id>
+        <TypeId>BlueprintDefinition</TypeId>
+        <SubtypeId>Adanium</SubtypeId>
+      </Id>
+      <DisplayName>Adanium</DisplayName>
+      <Icon>Textures\GUI\Icons\component\steel_plate_component.dds</Icon>
+      <Prerequisites>
+        <Item Amount="21" TypeId="Ingot" SubtypeId="Iron" />
+      </Prerequisites>
+      <Result Amount="1" TypeId="Component" SubtypeId="Adanium" />
+      <BaseProductionTimeInSeconds>1</BaseProductionTimeInSeconds>
+      <IsPrimary>true</IsPrimary>
+    </Blueprint>
+
+
 
     <Blueprint>
       <Id>
@@ -55,7 +75,7 @@
         <Item Amount="10" TypeId="Ingot" SubtypeId="Silicon" />
         <Item Amount="30" TypeId="Ingot" SubtypeId="Nickel" />
       </Prerequisites>
-      <Result Amount="1" TypeId="GasContainerObject" SubtypeId="HydrogenBottle" />
+      <Result Amount="1" TypeId="GasContainerObject" SubtypeId="VespeneBottle" />
       <BaseProductionTimeInSeconds>10</BaseProductionTimeInSeconds>
       <IsPrimary>true</IsPrimary>
     </Blueprint>
@@ -73,6 +93,42 @@
       <Result Amount="0.9" TypeId="Ingot" SubtypeId="Stone" />
       <BaseProductionTimeInSeconds>0.1</BaseProductionTimeInSeconds>
     </Blueprint>
+
+    <Blueprint>
+      <Id>
+        <TypeId>BlueprintDefinition</TypeId>
+        <SubtypeId>PsionicLink</SubtypeId>
+      </Id>
+      <DisplayName>Psionic Link</DisplayName>
+      <Icon>Textures\GUI\Icons\component\medical_components_component.dds</Icon>
+      <Prerequisites>
+        <Item Amount="60" TypeId="Ingot" SubtypeId="Iron" />
+        <Item Amount="70" TypeId="Ingot" SubtypeId="Nickel" />
+        <Item Amount="20" TypeId="Ingot" SubtypeId="Silver" />
+      </Prerequisites>
+      <Result Amount="1" TypeId="Component" SubtypeId="PsionicLink" />
+      <BaseProductionTimeInSeconds>6</BaseProductionTimeInSeconds>
+      <IsPrimary>true</IsPrimary>
+    </Blueprint>
+
+    <!-- <Blueprint>
+      <Id>
+        <TypeId>BlueprintDefinition</TypeId>
+        <SubtypeId>PlasmaRifle</SubtypeId>
+      </Id>
+      <DisplayName>Plasma Rifle</DisplayName>
+      <Icon>Textures\GUI\Icons\WeaponAutomaticRifle.dds</Icon>
+      <Prerequisites>
+        <Item Amount="20" TypeId="Ingot" SubtypeId="Iron" />
+        <Item Amount="10" TypeId="Ingot" SubtypeId="Nickel" />
+        <Item Amount="5" TypeId="Ingot" SubtypeId="Silicon" />
+        <Item Amount="5" TypeId="Ingot" SubtypeId="Gold" />
+        <Item Amount="5" TypeId="Ingot" SubtypeId="Platinum" />
+        <Item Amount="5" TypeId="Ingot" SubtypeId="Uranium" />
+      </Prerequisites>
+      <Result Amount="1" TypeId="PhysicalGunObject" SubtypeId="PhotonRifle" />
+      <BaseProductionTimeInSeconds>1</BaseProductionTimeInSeconds>
+    </Blueprint> -->
 
   </Blueprints>
 

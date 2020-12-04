@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <Definition xsi:type="MyObjectBuilder_FactionTypeDefinition">
+        <Id Type="MyObjectBuilder_FactionTypeDefinition" Subtype="Protoss" />
+
+        <OffersList>
+          <ItemId Type="MyObjectBuilder_Datapad" Subtype="Adanium" />
+            <ItemId Type="MyObjectBuilder_Datapad" Subtype="Crystal" />
+            <ItemId Type="MyObjectBuilder_Component" Subtype="PsionicLink" />
+        </OffersList>
+
+        <OrdersList>
+            <ItemId Type="MyObjectBuilder_Component" Subtype="SteelPlate" />
+            <ItemId Type="MyObjectBuilder_Component" Subtype="PowerCell" />
+            <ItemId Type="MyObjectBuilder_Component" Subtype="MedicalComponent" />
+        </OrdersList>
+
+        <GridsForSale>
+            <PrefabName>Protoss Scout</PrefabName>
+        </GridsForSale>
+
+        <MaxContractCount>15</MaxContractCount>
+
+    </Definition>
+
+</Definitions>

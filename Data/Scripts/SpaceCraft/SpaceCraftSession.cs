@@ -36,6 +36,14 @@ using SpaceCraft.Utils;
 
 namespace SpaceCraft {
 
+	public enum Races {
+		Terran,
+		Zerg,
+		Protoss,
+		Hybrid
+	};
+
+
 	[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
 	public class SpaceCraftSession:MySessionComponentBase {
 
@@ -54,6 +62,7 @@ namespace SpaceCraft {
 		public static long NumPlayers = 0;
 		protected static ConcurrentDictionary<ProtossShield,IMyCubeGrid> ShieldedGrids = new ConcurrentDictionary<ProtossShield,IMyCubeGrid>();
 		protected static List<IMySlimBlock> ZergBlocks = new List<IMySlimBlock>();
+		public static Dictionary<string,MyBlueprintDefinitionBase> Components = new Dictionary<string,MyBlueprintDefinitionBase>();
 
     public override void Init(MyObjectBuilder_SessionComponent session) {
       base.Init(session);
@@ -76,8 +85,26 @@ namespace SpaceCraft {
 				NumPlayers = MyAPIGateway.Players.Count;
 				MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, DamageHandler);
 				MyAPIGateway.Entities.OnEntityAdd += EntityAdded;
+				FindBlueprintDefinitions();
 			}
     }
+
+		// Was having trouble getting MyDefinitionManager to recognize custom BPs so this is the workaround
+		private static void FindBlueprintDefinitions() {
+			string[] names = { "Adanium", "Organic", "Crystal", "PsionicLink" };
+			var bps = MyDefinitionManager.Static.GetBlueprintDefinitions();
+			foreach( MyBlueprintDefinitionBase bp in bps ) {
+				if( Array.IndexOf(names, bp.Id.SubtypeName) >= 0 ) {
+					Components.Add(bp.Id.SubtypeName, bp );
+				}
+			}
+		}
+
+		public static MyBlueprintDefinitionBase GetBlueprintDefinition( string name ) {
+			if( Components.Keys.Contains(name) )
+				return Components[name];
+			return null;
+		}
 
 		public void EntityAdded( IMyEntity entity ) {
 			IMyCubeGrid grid = entity as IMyCubeGrid;
@@ -371,8 +398,14 @@ namespace SpaceCraft {
 					foreach( 	MySpawnGroupDefinition.SpawnGroupPrefab prefab in group.Prefabs ) {
 						if( first == String.Empty ) first = prefab.SubtypeId;
 
-						if( prefab.SubtypeId != "Terran Planet Pod" )
-							Prefab.Add(prefab.SubtypeId, Name);
+						Races race = Races.Terran;
+						if( cmd.Switch("toss") ) race = Races.Protoss;
+						if( cmd.Switch("zerg") ) race = Races.Zerg;
+
+						// if( first == String.Empty && Name != String.Empty ) first = prefab.SubtypeId;
+						// else Prefab.Add(prefab.SubtypeId, Name, race);
+						if( prefab.SubtypeId != "Terran Planet Pod" ) // This needs fixing
+							Prefab.Add(prefab.SubtypeId, Name, race);
 					}
 
           if( !String.IsNullOrWhiteSpace(Name) ) {
@@ -381,6 +414,8 @@ namespace SpaceCraft {
 
 						Faction faction = CreateIfNotExists( Name );
 						faction.CommandLine = cmd;
+						if( cmd.Switch("toss") ) faction.Race = Races.Protoss;
+						if( cmd.Switch("zerg") ) faction.Race = Races.Zerg;
 						if( !String.IsNullOrWhiteSpace(cmd.Argument(2)) ) {
 							string[] colors = cmd.Argument(2).Split(',');
 							faction.Color = new SerializableVector3(float.Parse(colors[0]),float.Parse(colors[1]),float.Parse(colors[2]));
@@ -437,18 +472,6 @@ namespace SpaceCraft {
 
 				}
 			}
-
-
-			// Faction murica = GetFaction("USA");
-			// if( murica != null ) {
-			//
-      //   Vector3D position = Vector3D.Zero;
-			// 	MyPlanet planet = GetClosestPlanet(position);
-			// 	position = planet.GetClosestSurfacePointGlobal(position);
-			// 	planet.CorrectSpawnLocation(ref position,250f);
-			// 	Vector3D up = Vector3D.Normalize(position - planet.WorldMatrix.Translation);
-      //   murica.SpawnPrefab("Terran Battlecruiser", MatrixD.CreateWorld(position) );
-      // }
 
 			Loaded = true;
 

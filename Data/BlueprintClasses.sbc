@@ -1,46 +1,88 @@
 <?xml version="1.0"?>
 <Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <BlueprintClasses>
-        <Class>
-            <Id>
-                <TypeId>BlueprintClassDefinition</TypeId>
-                <SubtypeId>Vespene</SubtypeId>
-            </Id>
-            <DisplayName>Vespene Gas</DisplayName>
-            <Description>Vespene Gas</Description>
-            <Icon>Textures\GUI\Icons\component\gravity_generator_components_component.dds</Icon>
-            <HighlightIcon>Textures\GUI\Icons\buttons\large_block.dds</HighlightIcon>
-            <FocusIcon>Textures\GUI\Icons\buttons\large_block_focus.dds</FocusIcon>
-            <InputConstraintIcon>Textures\GUI\Icons\filter_ore.dds</InputConstraintIcon>
-            <OutputConstraintIcon>Textures\GUI\Icons\filter_ingot.dds</OutputConstraintIcon>
-        </Class>
-        <Class>
-            <Id>
-                <TypeId>BlueprintClassDefinition</TypeId>
-                <SubtypeId>VespeneBottles</SubtypeId>
-            </Id>
-            <DisplayName>Vespene Bottles</DisplayName>
-            <Description>Description_BlueprintClass_HydrogenBottles</Description>
-            <Icon>Textures\GUI\Icons\ore_H2O_ice.dds</Icon>
-            <HighlightIcon>Textures\GUI\Icons\buttons\large_block.dds</HighlightIcon>
-            <FocusIcon>Textures\GUI\Icons\buttons\large_block_focus.dds</FocusIcon>
-            <InputConstraintIcon>Textures\GUI\Icons\filter_ore.dds</InputConstraintIcon>
-            <OutputConstraintIcon>Textures\GUI\Icons\filter_ingot.dds</OutputConstraintIcon>
-        </Class>
-        <Class>
-            <Id>
-                <TypeId>BlueprintClassDefinition</TypeId>
-                <SubtypeId>Organic</SubtypeId>
-            </Id>
-            <DisplayName>Zerg Biomass</DisplayName>
-            <Description>Turn organic compounds into Zerg Biomass</Description>
-            <Icon>Textures\GUI\Icons\ore_biomass.dds</Icon>
-            <HighlightIcon>Textures\GUI\Icons\buttons\large_block.dds</HighlightIcon>
-            <FocusIcon>Textures\GUI\Icons\buttons\large_block_focus.dds</FocusIcon>
-            <InputConstraintIcon>Textures\GUI\Icons\filter_ore.dds</InputConstraintIcon>
-            <OutputConstraintIcon>Textures\GUI\Icons\filter_ingot.dds</OutputConstraintIcon>
-        </Class>
+  <BlueprintClasses>
+    <Class>
+        <Id>
+            <TypeId>BlueprintClassDefinition</TypeId>
+            <SubtypeId>Vespene</SubtypeId>
+        </Id>
+        <DisplayName>Vespene Gas</DisplayName>
+        <Description>Vespene Gas</Description>
+        <Icon>Textures\GUI\Icons\component\gravity_generator_components_component.dds</Icon>
+        <HighlightIcon>Textures\GUI\Icons\buttons\large_block.dds</HighlightIcon>
+        <FocusIcon>Textures\GUI\Icons\buttons\large_block_focus.dds</FocusIcon>
+        <InputConstraintIcon>Textures\GUI\Icons\filter_ore.dds</InputConstraintIcon>
+        <OutputConstraintIcon>Textures\GUI\Icons\filter_ingot.dds</OutputConstraintIcon>
+    </Class>
+    <Class>
+        <Id>
+            <TypeId>BlueprintClassDefinition</TypeId>
+            <SubtypeId>VespeneBottles</SubtypeId>
+        </Id>
+        <DisplayName>Vespene Bottles</DisplayName>
+        <Description>Description_BlueprintClass_HydrogenBottles</Description>
+        <Icon>Textures\GUI\Icons\ore_H2O_ice.dds</Icon>
+        <HighlightIcon>Textures\GUI\Icons\buttons\large_block.dds</HighlightIcon>
+        <FocusIcon>Textures\GUI\Icons\buttons\large_block_focus.dds</FocusIcon>
+        <InputConstraintIcon>Textures\GUI\Icons\filter_ore.dds</InputConstraintIcon>
+        <OutputConstraintIcon>Textures\GUI\Icons\filter_ingot.dds</OutputConstraintIcon>
+    </Class>
+    <Class>
+        <Id>
+            <TypeId>BlueprintClassDefinition</TypeId>
+            <SubtypeId>Organic</SubtypeId>
+        </Id>
+        <DisplayName>Zerg Biomass</DisplayName>
+        <Description>Turn organic compounds into Zerg Biomass</Description>
+        <Icon>Textures\GUI\Icons\ore_biomass.dds</Icon>
+        <HighlightIcon>Textures\GUI\Icons\buttons\large_block.dds</HighlightIcon>
+        <FocusIcon>Textures\GUI\Icons\buttons\large_block_focus.dds</FocusIcon>
+        <InputConstraintIcon>Textures\GUI\Icons\filter_ore.dds</InputConstraintIcon>
+        <OutputConstraintIcon>Textures\GUI\Icons\filter_ingot.dds</OutputConstraintIcon>
+    </Class>
+
+    <Class>
+        <Id>
+            <TypeId>BlueprintClassDefinition</TypeId>
+            <SubtypeId>ProtossComponents</SubtypeId>
+        </Id>
+        <DisplayName>DisplayName_BlueprintClass_BasicComponents</DisplayName>
+        <Description>Description_BlueprintClass_BasicComponents</Description>
+        <Icon>Textures\GUI\Icons\buttons\component.dds</Icon>
+        <HighlightIcon>Textures\GUI\Icons\buttons\component.dds</HighlightIcon>
+        <FocusIcon>Textures\GUI\Icons\buttons\component_focus.dds</FocusIcon>
+        <InputConstraintIcon>Textures\GUI\Icons\filter_ore.dds</InputConstraintIcon>
+    </Class>
+
+    <Class>
+        <Id>
+            <TypeId>BlueprintClassDefinition</TypeId>
+            <SubtypeId>SimpleProtossComponents</SubtypeId>
+        </Id>
+        <DisplayName>DisplayName_BlueprintClass_BasicComponents</DisplayName>
+        <Description>Description_BlueprintClass_BasicComponents</Description>
+        <Icon>Textures\GUI\Icons\buttons\component.dds</Icon>
+        <HighlightIcon>Textures\GUI\Icons\buttons\component.dds</HighlightIcon>
+        <FocusIcon>Textures\GUI\Icons\buttons\component_focus.dds</FocusIcon>
+        <InputConstraintIcon>Textures\GUI\Icons\filter_ore.dds</InputConstraintIcon>
+    </Class>
+
+    <Class>
+        <Id>
+            <TypeId>BlueprintClassDefinition</TypeId>
+            <SubtypeId>BasicProtossComponents</SubtypeId>
+        </Id>
+        <DisplayName>DisplayName_BlueprintClass_BasicComponents</DisplayName>
+        <Description>Description_BlueprintClass_BasicComponents</Description>
+        <Icon>Textures\GUI\Icons\buttons\component.dds</Icon>
+        <HighlightIcon>Textures\GUI\Icons\buttons\component.dds</HighlightIcon>
+        <FocusIcon>Textures\GUI\Icons\buttons\component_focus.dds</FocusIcon>
+        <InputConstraintIcon>Textures\GUI\Icons\filter_ore.dds</InputConstraintIcon>
+    </Class>
+
+
   </BlueprintClasses>
+
   <BlueprintClassEntries>
 
     <!-- <Entry Class="LargeBlocks" BlueprintSubtypeId="OxygenTank/LargeVespeneTank" />
@@ -53,6 +95,70 @@
     <Entry Class="SmallBlocks" BlueprintSubtypeId="OxygenGenerator/VespeneGeneratorSmall" />
     <Entry Class="SmallBlocks" BlueprintSubtypeId="Thrust/SmallBlockLargeHVespeneThrust" />
     <Entry Class="SmallBlocks" BlueprintSubtypeId="Thrust/SmallBlockSmallVespeneThrust" /> -->
+
+
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="ConstructionComponent" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="GirderComponent" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="MetalGrid" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="InteriorPlate" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="Adanium" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="SteelPlate" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="SmallTube" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="LargeTube" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="MotorComponent" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="Display" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="BulletproofGlass" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="ComputerComponent" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="ReactorComponent" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="ThrustComponent" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="GravityGeneratorComponent" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="MedicalComponent" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="PsionicLink" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="RadioCommunicationComponent" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="DetectorComponent" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="ExplosivesComponent" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="NATO_5p56x45mmMagazine" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="NATO_25x184mmMagazine" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="Missile200mm" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="SolarCell" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="Crystal" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="PowerCell" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="Superconductor" />
+    <Entry Class="ProtossComponents" BlueprintSubtypeId="Canvas" />
+
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="ConstructionComponent" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="GirderComponent" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="MetalGrid" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="InteriorPlate" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="SteelPlate" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="SmallTube" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="LargeTube" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="Adanium" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="MotorComponent" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="Display" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="BulletproofGlass" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="ComputerComponent" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="MedicalComponent" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="PsionicLink" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="RadioCommunicationComponent" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="DetectorComponent" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="Crystal" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="PowerCell" />
+    <Entry Class="SimpleProtossComponents" BlueprintSubtypeId="Canvas" />
+
+    <Entry Class="BasicProtossComponents" BlueprintSubtypeId="StoneOreToIngotBasic" />
+    <Entry Class="BasicProtossComponents" BlueprintSubtypeId="Display" />
+    <Entry Class="BasicProtossComponents" BlueprintSubtypeId="SolarCell" />
+    <Entry Class="BasicProtossComponents" BlueprintSubtypeId="SteelPlate" />
+    <Entry Class="BasicProtossComponents" BlueprintSubtypeId="Adanium" />
+    <Entry Class="BasicProtossComponents" BlueprintSubtypeId="InteriorPlate" />
+    <Entry Class="BasicProtossComponents" BlueprintSubtypeId="MotorComponent" />
+    <Entry Class="BasicProtossComponents" BlueprintSubtypeId="GirderComponent" />
+    <Entry Class="BasicProtossComponents" BlueprintSubtypeId="ComputerComponent" />
+    <Entry Class="BasicProtossComponents" BlueprintSubtypeId="ConstructionComponent" />
+
+    <!-- <Entry Class="Ammo" BlueprintSubtypeId="PhotonRounds" />
+    <Entry Class="EliteTools" BlueprintSubtypeId="PhotonRifle" /> -->
 
     <Entry Class="Vespene" BlueprintSubtypeId="RawToVespene" />
     <Entry Class="VespeneBottles" BlueprintSubtypeId="VespeneBottlesRefill" />
