@@ -107,6 +107,15 @@ namespace SpaceCraft.Utils {
       if( Targets.Count > 0 && (Targets[0] == null || Targets[0].MarkedForClose) ) {
         Targets.RemoveAt(0);
       }
+
+      if( MainBase != null && (MainBase.Grid == null || MainBase.Grid.Closed || MainBase.Grid.MarkedForClose) ) {
+        RemapDocking();
+        if( MainBase == null ) {
+          Mulligan();
+          return;
+        }
+      }
+
       AssessGoal();
 
       Controllable remove = null;
@@ -130,6 +139,39 @@ namespace SpaceCraft.Utils {
         }
 
       }
+    }
+
+    private void RemapDocking() {
+      MainBase = null;
+      foreach( Controllable c in Controlled ) {
+        CubeGrid grid = c as CubeGrid;
+        if( grid == null ) continue;
+
+        grid.DockedTo = null;
+        grid.Docked = new List<CubeGrid>();
+
+        if( MainBase != null ) continue;
+
+        if( grid.Grid != null && !grid.Grid.Closed && !grid.Grid.MarkedForClose ) {
+          MainBase = grid;
+        }
+
+      }
+
+      if( MainBase == null ) {
+        Mulligan("No grids remaining");
+        return;
+      }
+
+      foreach( Controllable c in Controlled ) {
+        CubeGrid grid = c as CubeGrid;
+        if( grid == null || grid == MainBase ) continue;
+
+        MainBase.ToggleDocked(grid);
+
+      }
+
+
     }
 
     public void SpawnPrefab(string prefabName, MatrixD position, SpawningOptions options = SpawningOptions.None ) {
@@ -957,13 +999,13 @@ namespace SpaceCraft.Utils {
       return null;
     }
 
-    public void Mulligan( string reason = "No reason specified" ) {
+    public void Mulligan( string reason = "No reason specified", uint attempt = 0 ) {
       if( Convars.Static.Debug )
         MyAPIGateway.Utilities.ShowMessage( "Mulligan", Name + " took a mulligan:" + reason );
-      foreach( Controllable c in Controlled ) {
-        if( c.Entity == null ) continue;
-        MyAPIGateway.Entities.RemoveEntity( c.Entity );
-      }
+      // foreach( Controllable c in Controlled ) {
+      //   if( c.Entity == null ) continue;
+      //   MyAPIGateway.Entities.RemoveEntity( c.Entity );
+      // }
       Controlled = new List<Controllable>();
       Colonized = new List<MyPlanet>();
       Engineers = 0;
@@ -972,8 +1014,11 @@ namespace SpaceCraft.Utils {
       CurrentGoal = new Goal{
         Type = Goals.Stabilize
       };
-      if( !Spawn() ) {
-        Mulligan("Previous mulligan failed");
+      if( !Spawn() && attempt < 5 ) {
+        attempt++;
+        Mulligan("Previous mulligan failed",attempt);
+      } else {
+        MyAPIGateway.Utilities.ShowMessage( Name, "Failed to spawn" );
       }
     }
 

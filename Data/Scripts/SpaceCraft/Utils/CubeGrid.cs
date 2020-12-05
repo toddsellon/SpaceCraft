@@ -397,21 +397,25 @@ namespace SpaceCraft.Utils {
 
 		public List<IMySlimBlock> GetBlocks<t>( List<IMySlimBlock> blocks = null, bool excludeDocked = false ) {
 			List<IMySlimBlock> list = new List<IMySlimBlock>();
+			if( Grid == null || Grid.Closed ) return list;
 			Grid.GetBlocks( list );
 
 
-			if( SuperGrid != null ) {
+			if( SuperGrid != null && !SuperGrid.Closed ) {
 				SuperGrid.GetBlocks( list );
 			}
 
 			foreach( IMyCubeGrid grid in Subgrids ) {
+				if( grid == null ) continue;
 				grid.GetBlocks( list );
 			}
 
 			if( !excludeDocked ) {
 				foreach( CubeGrid grid in Docked ) {
+					if( grid.Grid == null || grid.Grid.Closed ) continue;
 					grid.Grid.GetBlocks( list );
 					foreach( IMyCubeGrid sub in grid.Subgrids ) {
+						if( sub == null || sub.Closed ) continue;
 						sub.GetBlocks( list );
 					}
 				}
@@ -975,24 +979,6 @@ namespace SpaceCraft.Utils {
 
 			return false;
 		}
-
-		// public IMyCubeGrid GetLargeGrid() {
-		// 	if( Grid.GridSizeEnum == MyCubeSize.Large ) {
-		// 		return Grid;
-		// 	} else {
-		// 		if( Grid == null ) return null;
-		// 		List<IMySlimBlock> blocks = new List<IMySlimBlock>();
-		//
-		// 		Grid.GetBlocks( blocks );
-		//
-		// 		foreach( IMySlimBlock block in blocks ) {
-		// 			if( block.CubeGrid.GridSizeEnum == MyCubeSize.Large )
-		// 				return block.CubeGrid;
-		// 		}
-		// 	}
-		//
-		// 	return null;
-		// }
 
 		public IMyAssembler GetAssembler() {
 			List<IMySlimBlock> blocks = GetBlocks<IMyAssembler>();
