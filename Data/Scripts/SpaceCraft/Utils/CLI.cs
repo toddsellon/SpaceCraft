@@ -160,8 +160,12 @@ namespace SpaceCraft.Utils {
         IMyCubeGrid grid = entity as IMyCubeGrid;
         if( grid == null ) continue;
         grid.DisplayName = faction.Name + " " + grid.DisplayName;
-
-        faction.TakeControl( new CubeGrid(grid) );
+        CubeGrid g = new CubeGrid(grid);
+        g.CheckFlags();
+        faction.TakeControl( g );
+        if( faction.MainBase != null ) {
+          faction.MainBase.ToggleDocked(g);
+        }
         Respond("Donated", "Your cube grid has been donated to the cause", message);
 
         return;
