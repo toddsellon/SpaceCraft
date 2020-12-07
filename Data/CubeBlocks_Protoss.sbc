@@ -625,7 +625,7 @@
       <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\SurvivalKit_Construction2.mwm" />
       <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\SurvivalKit_Construction3.mwm" />
   </BuildProgressModels>
-  <BlockPairName>SurvivalKit</BlockPairName>
+  <BlockPairName>ProtossSurvivalKit</BlockPairName>
   <EdgeType>Light</EdgeType>
   <BuildTimeSeconds>30</BuildTimeSeconds>
   <ResourceSinkGroup>Factory</ResourceSinkGroup>
@@ -714,7 +714,7 @@
       <Model BuildPercentUpperBound="0.50" File="Models\Cubes\Small\SurvivalKitConstruction_1.mwm" />
       <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\SurvivalKitConstruction_2.mwm" />
   </BuildProgressModels>
-  <BlockPairName>SurvivalKit</BlockPairName>
+  <BlockPairName>ProtossSurvivalKit</BlockPairName>
   <EdgeType>Light</EdgeType>
   <BuildTimeSeconds>20</BuildTimeSeconds>
   <ResourceSinkGroup>Factory</ResourceSinkGroup>

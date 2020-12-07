@@ -82,18 +82,18 @@ SpaceCraft has a chat-based command interface that allows you to control SpaceCr
 - **gps** 
 	- Adds a GPS marker for each Grid or Engineer controlled by your Faction
 	- /sc gps
-- **attack** [faction]
-	- Orders your faction to attack the specified faction or the nearest enemy if a Faction is not specified (buggy)
-	- /sc attack "HVS"
 - **build** "Prefab Name" [faction]
 	- Orders the specified faction to begin construction of a specific prefab or orders your current faction if one is not specified.
 	- /sc build "Terran SCV"
 - **spawn** "Prefab Name" [faction]
 	- Spawns a completed prefab for specified faction or your faction if one is not specified.
 	- /sc spawn "Terran Battlecruiser" ARC
-- **follow**
-	- Orders your faction to follow your Player Character (buggy)
-	- /sc follow
+- **donate**
+	- Donates the grid you're currently controlling to your faction. Be warned that the grid will count towards your Faction's grid limits and will impact its decision making.
+	- /sc donate
+- **respawn** [faction] [-remove]
+	- Respawns target faction incase they glitched out or were added later into the game. Add the -remove flag to also remove all their entities
+	- /sc respawn ARC -remove
 - **debug**
 	- Toggles debug mode on/off
 	- /sc debug

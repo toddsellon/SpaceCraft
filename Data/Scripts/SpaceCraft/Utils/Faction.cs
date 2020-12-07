@@ -761,8 +761,10 @@ namespace SpaceCraft.Utils {
           goto case Tech.Advanced;
         //case Tech.Established:
         case Tech.Advanced:
-          if( Tier != Tech.Space && CommandLine.Switch("nuclear") )
+          if( Tier != Tech.Space && CommandLine.Switch("nuclear") ) {
             resources.Add("Uranium",(VRage.MyFixedPoint)0.05*Convars.Static.Difficulty);
+            resources.Add("Platinum",(VRage.MyFixedPoint)0.1*Convars.Static.Difficulty);
+          }
           resources.Add("Silver",(VRage.MyFixedPoint)1*Convars.Static.Difficulty);
           resources.Add("Gold",(VRage.MyFixedPoint)0.5*Convars.Static.Difficulty);
           goto default;
@@ -999,13 +1001,14 @@ namespace SpaceCraft.Utils {
       return null;
     }
 
-    public void Mulligan( string reason = "No reason specified", uint attempt = 0 ) {
+    public void Mulligan( string reason = "No reason specified", bool remove = false, uint attempt = 0 ) {
       if( Convars.Static.Debug )
         MyAPIGateway.Utilities.ShowMessage( "Mulligan", Name + " took a mulligan:" + reason );
-      // foreach( Controllable c in Controlled ) {
-      //   if( c.Entity == null ) continue;
-      //   MyAPIGateway.Entities.RemoveEntity( c.Entity );
-      // }
+      if( remove )
+        foreach( Controllable c in Controlled ) {
+          if( c.Entity == null ) continue;
+          MyAPIGateway.Entities.RemoveEntity( c.Entity );
+        }
       Controlled = new List<Controllable>();
       Colonized = new List<MyPlanet>();
       Engineers = 0;
@@ -1014,12 +1017,15 @@ namespace SpaceCraft.Utils {
       CurrentGoal = new Goal{
         Type = Goals.Stabilize
       };
-      if( !Spawn() && attempt < 5 ) {
-        attempt++;
-        Mulligan("Previous mulligan failed",attempt);
-      } else {
-        MyAPIGateway.Utilities.ShowMessage( Name, "Failed to spawn" );
+      if( !Spawn() ) {
+        if( attempt < 5 ) {
+          attempt++;
+          Mulligan("Previous mulligan failed",remove,attempt);
+        } else {
+          MyAPIGateway.Utilities.ShowMessage( Name, "Failed to spawn" );
+        }
       }
+
     }
 
 
@@ -1321,8 +1327,10 @@ namespace SpaceCraft.Utils {
           Tier = Tech.Primitive;
           break;
       }
-      if( CommandLine.Switch("nuclear") && !Resources.Contains("Uranium") )
+      if( CommandLine.Switch("nuclear") && !Resources.Contains("Uranium") ) {
         Resources.Add("Uranium");
+        Resources.Add("Platinum");
+      }
     }
 
     public static bool InSpace( Vector3D pos ) {
@@ -1351,9 +1359,11 @@ namespace SpaceCraft.Utils {
             Tier = Tech.Advanced;
           } else if( Tier == Tech.Advanced && InSpace(block.CubeGrid.WorldMatrix.Translation) ) {
             Tier = Tech.Space;
-            Resources.Add("Platinum");
-            if( !Resources.Contains("Uranium") )
+
+            if( !Resources.Contains("Uranium") ) {
               Resources.Add("Uranium");
+              Resources.Add("Platinum");
+            }
           }
         }
       }

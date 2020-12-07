@@ -23,13 +23,13 @@ namespace SpaceCraft.Utils {
       Server = server;
 
       Actions.Add("get",Get);
-      Actions.Add("attack",Attack);
+      // Actions.Add("attack",Attack);
       Actions.Add("build",Build);
       Actions.Add("set",Set);
       Actions.Add("spawn",Spawn);
       Actions.Add("complete",Complete);
       Actions.Add("pay",Pay);
-      Actions.Add("follow",Follow);
+      // Actions.Add("follow",Follow);
       Actions.Add("war",War);
       Actions.Add("peace",Peace);
       Actions.Add("join",Join);
@@ -37,6 +37,8 @@ namespace SpaceCraft.Utils {
       Actions.Add("gps",GPS);
       Actions.Add("control",Control);
       Actions.Add("release",Release);
+      Actions.Add("respawn",Respawn);
+      Actions.Add("donate",Donate);
 
       MyAPIGateway.Utilities.MessageEntered += MessageEntered;
       MyAPIGateway.Multiplayer.RegisterMessageHandler(Id, MessageHandler);
@@ -113,6 +115,60 @@ namespace SpaceCraft.Utils {
         message.Text = text;
         SendMessageToClient(message);
       }
+    }
+
+    public void Respawn( MyCommandLine cmd, Message message ) {
+      if( message != null ) {
+        Respond("Error", "You do not have permission", message);
+        return;
+      }
+      IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
+      Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(2)) ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(2).ToUpper());
+      if( faction == null ) {
+        Respond("Error", "SpaceCraft faction not found " + cmd.Argument(2), message);
+        return;
+      }
+      faction.Mulligan("User chat command", cmd.Switch("remove") );
+
+      Respond("Respawn", "Attempted to respawn " + faction.Name, message);
+    }
+
+    public void Donate( MyCommandLine cmd, Message message ) {
+
+      IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
+      if( message != null ) {
+        player = SpaceCraftSession.GetPlayer(message.PlayerID);
+      }
+
+      if( player == null ) {
+        Respond("Error", "Player not found", message);
+        return;
+      }
+
+      Faction faction = SpaceCraftSession.GetFactionContaining(player.PlayerID);
+      if( faction == null ) {
+        Respond("Error", "You do not belong to a SpaceCraft faction", message);
+        return;
+      }
+
+      HashSet<IMyEntity> entities = new HashSet<IMyEntity>();
+			MyAPIGateway.Entities.GetEntities(entities);
+
+			foreach( IMyEntity entity in entities ) {
+        IMyPlayer controller = MyAPIGateway.Players.GetPlayerControllingEntity(entity);
+        if( controller == null || player.PlayerID != controller.PlayerID ) continue;
+        IMyCubeGrid grid = entity as IMyCubeGrid;
+        if( grid == null ) continue;
+        grid.DisplayName = faction.Name + " " + grid.DisplayName;
+
+        faction.TakeControl( new CubeGrid(grid) );
+        Respond("Donated", "Your cube grid has been donated to the cause", message);
+
+        return;
+      }
+
+      Respond("Error", "Not controlling a cube grid", message);
+
     }
 
 
