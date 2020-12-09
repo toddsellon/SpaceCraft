@@ -772,7 +772,8 @@ namespace SpaceCraft.Utils {
           resources.Add("Iron",(VRage.MyFixedPoint)2*Convars.Static.Difficulty);
           resources.Add("Nickel",(VRage.MyFixedPoint)0.2*Convars.Static.Difficulty);
           resources.Add("Cobalt",(VRage.MyFixedPoint)0.4*Convars.Static.Difficulty);
-          resources.Add("Ice",(VRage.MyFixedPoint)6*Convars.Static.Difficulty);
+          if( Race == Races.Terran )
+            resources.Add("Ice",(VRage.MyFixedPoint)6*Convars.Static.Difficulty);
           resources.Add("Magnesium",(VRage.MyFixedPoint)1.5*Convars.Static.Difficulty);
           resources.Add("Silicon",(VRage.MyFixedPoint)0.2*Convars.Static.Difficulty);
           //resources.Add("Stone",(VRage.MyFixedPoint)0.05*Convars.Static.Difficulty);
