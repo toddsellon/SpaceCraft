@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using VRageMath;
 using VRage;
@@ -91,6 +92,12 @@ namespace SpaceCraft.Utils {
       "MyObjectBuilder_CubeBlock/SmallHeavyBlockOrganicInvCorner2Tip",
     };
 
+    private static readonly string[] Units = {
+      "Zergling",
+      "Baneling",
+      "Ultralusk"
+    };
+
 
     public List<MyCubeBlockDefinition> Blocks = new List<MyCubeBlockDefinition>();
 
@@ -111,6 +118,10 @@ namespace SpaceCraft.Utils {
 
     public bool IsZerg( IMySlimBlock slim ) {
       return Blocks.Contains(slim.BlockDefinition as MyCubeBlockDefinition);
+    }
+
+    public bool IsZerg( IMyCharacter character ) {
+      return Array.IndexOf(Units, character.DisplayName) >= 0;
     }
 
 

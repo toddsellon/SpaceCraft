@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<SpawnGroups>
+
+<SpawnGroup>
+	<Id>
+		<TypeId>SpawnGroupDefinition</TypeId>
+		<SubtypeId>ZergPrefabs</SubtypeId>
+	</Id>
+	<Description>SpaceCraft -zerg</Description>
+	<Icon>Textures\GUI\Icons\Fake.dds</Icon>
+	<Frequency>1.0</Frequency>
+	<IsPirate>true</IsPirate>
+	<Prefabs>
+
+		<Prefab SubtypeId="Zerg Drop Site">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Zerg Drop Site</BeaconText>
+			<Speed>20.0</Speed>
+		</Prefab>
+
+		<Prefab SubtypeId="Zerg Drone">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Zerg Drone</BeaconText>
+			<Speed>20.0</Speed>
+		</Prefab>
+
+		<Prefab SubtypeId="Zerg Hatchery">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Zerg Hatchery</BeaconText>
+			<Speed>20.0</Speed>
+		</Prefab>
+
+		<Prefab SubtypeId="Zerg Lair">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Zerg Lair</BeaconText>
+			<Speed>20.0</Speed>
+		</Prefab>
+
+		<Prefab SubtypeId="Zerg Mutalusk">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Zerg Mutalusk</BeaconText>
+			<Speed>20.0</Speed>
+		</Prefab>
+
+		<Prefab SubtypeId="Zerg Hive">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Zerg Hive</BeaconText>
+			<Speed>20.0</Speed>
+		</Prefab>
+
+		<Prefab SubtypeId="Zerg Corruptor">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Zerg Corruptor</BeaconText>
+			<Speed>20.0</Speed>
+		</Prefab>
+
+	</Prefabs>
+</SpawnGroup>
+
+</SpawnGroups>
+</Definitions>

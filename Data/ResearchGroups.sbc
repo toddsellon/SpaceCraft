@@ -9,6 +9,7 @@
       </Members>
     </ResearchGroup>
 
+    <!-- Vespene Tech -->
     <ResearchGroup xsi:type="ResearchGroup">
       <Id Type="MyObjectBuilder_ResearchGroupDefinition" Subtype="645" />
       <Members>
@@ -21,6 +22,14 @@
         <BlockId Type="MyObjectBuilder_GasTank" Subtype="SmallVespeneTank" />
         <BlockId Type="MyObjectBuilder_GasTank" Subtype="LargeVespeneTankSmall" />
         <BlockId Type="MyObjectBuilder_GasTank" Subtype="LargeVespeneTank" />
+      </Members>
+    </ResearchGroup>
+
+    <!-- Zerg (Locked) -->
+    <ResearchGroup xsi:type="ResearchGroup">
+      <Id Type="MyObjectBuilder_ResearchGroupDefinition" Subtype="5346" />
+      <Members>
+        <BlockId Type="MyObjectBuilder_BatteryBlock" Subtype="LargeZergHeart" />
       </Members>
     </ResearchGroup>
 

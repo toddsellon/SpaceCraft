@@ -18,7 +18,7 @@
     <Model>Models\Components\SolarCell.mwm</Model>
     <PhysicalMaterial>Glass</PhysicalMaterial>
     <MaxIntegrity>30</MaxIntegrity>
-    <DropProbability>0.5</DropProbability>
+    <DropProbability>0</DropProbability>
     <Health>18</Health>
     <MinimumOfferAmount>1000</MinimumOfferAmount>
     <MaximumOfferAmount>5000</MaximumOfferAmount>
@@ -47,7 +47,123 @@
     <Model>Models\Components\Sphere.mwm</Model>
     <PhysicalMaterial>Stone</PhysicalMaterial>
     <MaxIntegrity>30</MaxIntegrity>
-    <DropProbability>0.5</DropProbability>
+    <DropProbability>0.1</DropProbability>
+    <Health>18</Health>
+    <MinimumOfferAmount>1000</MinimumOfferAmount>
+    <MaximumOfferAmount>5000</MaximumOfferAmount>
+    <MinimumOrderAmount>100</MinimumOrderAmount>
+    <MaximumOrderAmount>1000</MaximumOrderAmount>
+    <CanPlayerOrder>true</CanPlayerOrder>
+
+    <MinimumAcquisitionAmount>100</MinimumAcquisitionAmount>
+    <MaximumAcquisitionAmount>1000</MaximumAcquisitionAmount>
+  </Component>
+
+  <Component>
+    <Id>
+        <TypeId>Component</TypeId>
+        <SubtypeId>ControlUnit</SubtypeId>
+    </Id>
+    <DisplayName>Zerg Control Unit</DisplayName>
+    <Icon>Textures\GUI\Icons\component\computer_component.dds</Icon>
+    <Size>
+        <X>0.2</X>
+        <Y>0.1</Y>
+        <Z>0.1</Z>
+    </Size>
+    <Mass>8</Mass>
+    <Volume>2</Volume>
+    <Model>Models\Components\computer_component.mwm</Model>
+    <PhysicalMaterial>Stone</PhysicalMaterial>
+    <MaxIntegrity>30</MaxIntegrity>
+    <DropProbability>0</DropProbability>
+    <Health>18</Health>
+    <MinimumOfferAmount>1000</MinimumOfferAmount>
+    <MaximumOfferAmount>5000</MaximumOfferAmount>
+    <MinimumOrderAmount>100</MinimumOrderAmount>
+    <MaximumOrderAmount>1000</MaximumOrderAmount>
+    <CanPlayerOrder>true</CanPlayerOrder>
+
+    <MinimumAcquisitionAmount>100</MinimumAcquisitionAmount>
+    <MaximumAcquisitionAmount>1000</MaximumAcquisitionAmount>
+  </Component>
+
+  <Component>
+    <Id>
+        <TypeId>Component</TypeId>
+        <SubtypeId>ZergCarapace</SubtypeId>
+    </Id>
+    <DisplayName>Zerg Carapace</DisplayName>
+    <Icon>Textures\GUI\Icons\Bug.dds</Icon>
+    <Size>
+        <X>0.5</X>
+        <Y>0.5</Y>
+        <Z>0.05</Z>
+    </Size>
+    <Mass>6</Mass>
+    <Volume>15</Volume>
+    <Model>Models\Components\metal_grid_component.mwm</Model>
+    <PhysicalMaterial>Stone</PhysicalMaterial>
+    <MaxIntegrity>30</MaxIntegrity>
+    <DropProbability>0</DropProbability>
+    <Health>69</Health>
+    <MinimumOfferAmount>250</MinimumOfferAmount>
+    <MaximumOfferAmount>1000</MaximumOfferAmount>
+    <MinimumOrderAmount>125</MinimumOrderAmount>
+    <MaximumOrderAmount>1000</MaximumOrderAmount>
+    <CanPlayerOrder>true</CanPlayerOrder>
+
+    <MinimumAcquisitionAmount>125</MinimumAcquisitionAmount>
+    <MaximumAcquisitionAmount>1000</MaximumAcquisitionAmount>
+  </Component>
+
+  <Component>
+    <Id>
+        <TypeId>Component</TypeId>
+        <SubtypeId>VentralSacks</SubtypeId>
+    </Id>
+    <DisplayName>Ventral Sacks</DisplayName>
+    <Icon>Textures\GUI\Icons\Bug.dds</Icon>
+    <Size>
+        <X>0.2</X>
+        <Y>0.1</Y>
+        <Z>0.1</Z>
+    </Size>
+    <Mass>8</Mass>
+    <Volume>2</Volume>
+    <Model>Models\Components\Sphere.mwm</Model>
+    <PhysicalMaterial>Stone</PhysicalMaterial>
+    <MaxIntegrity>30</MaxIntegrity>
+    <DropProbability>0</DropProbability>
+    <Health>18</Health>
+    <MinimumOfferAmount>1000</MinimumOfferAmount>
+    <MaximumOfferAmount>5000</MaximumOfferAmount>
+    <MinimumOrderAmount>100</MinimumOrderAmount>
+    <MaximumOrderAmount>1000</MaximumOrderAmount>
+    <CanPlayerOrder>true</CanPlayerOrder>
+
+    <MinimumAcquisitionAmount>100</MinimumAcquisitionAmount>
+    <MaximumAcquisitionAmount>1000</MaximumAcquisitionAmount>
+  </Component>
+
+  <Component>
+    <Id>
+        <TypeId>Component</TypeId>
+        <SubtypeId>MetabolicGlands</SubtypeId>
+    </Id>
+    <DisplayName>Metabolic Glands</DisplayName>
+    <Icon>Textures\Decals\BulletHoleOnRock_NormalMap.dds</Icon>
+    <Size>
+        <X>0.2</X>
+        <Y>0.1</Y>
+        <Z>0.1</Z>
+    </Size>
+    <Mass>8</Mass>
+    <Volume>2</Volume>
+    <Model>Models\Components\Sphere.mwm</Model>
+    <PhysicalMaterial>Stone</PhysicalMaterial>
+    <MaxIntegrity>30</MaxIntegrity>
+    <DropProbability>0</DropProbability>
     <Health>18</Health>
     <MinimumOfferAmount>1000</MinimumOfferAmount>
     <MaximumOfferAmount>5000</MaximumOfferAmount>
@@ -76,7 +192,7 @@
     <Model>Models\Components\steel_plate_component.mwm</Model>
     <PhysicalMaterial>Metal</PhysicalMaterial>
     <MaxIntegrity>100</MaxIntegrity>
-    <DropProbability>0.9</DropProbability>
+    <DropProbability>0</DropProbability>
     <Health>53</Health>
     <MinimumOfferAmount>250</MinimumOfferAmount>
     <MaximumOfferAmount>2500</MaximumOfferAmount>
@@ -105,7 +221,7 @@
     <Model>Models\Components\medical_components_component.mwm</Model>
     <PhysicalMaterial>Metal</PhysicalMaterial>
     <MaxIntegrity>70</MaxIntegrity>
-    <DropProbability>0.2</DropProbability>
+    <DropProbability>0</DropProbability>
     <Health>12</Health>
     <MinimumOfferAmount>100</MinimumOfferAmount>
     <MaximumOfferAmount>500</MaximumOfferAmount>

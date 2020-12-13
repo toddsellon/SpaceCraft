@@ -63,6 +63,7 @@ namespace SpaceCraft {
 		protected static ConcurrentDictionary<ProtossShield,IMyCubeGrid> ShieldedGrids = new ConcurrentDictionary<ProtossShield,IMyCubeGrid>();
 		protected static List<IMySlimBlock> ZergBlocks = new List<IMySlimBlock>();
 		public static Dictionary<string,MyBlueprintDefinitionBase> Components = new Dictionary<string,MyBlueprintDefinitionBase>();
+		private static Stack<Action<IMyCharacter>> SpawnActions = new Stack<Action<IMyCharacter>>();
 
     public override void Init(MyObjectBuilder_SessionComponent session) {
       base.Init(session);
@@ -91,7 +92,7 @@ namespace SpaceCraft {
 
 		// Was having trouble getting MyDefinitionManager to recognize custom BPs so this is the workaround
 		private static void FindBlueprintDefinitions() {
-			string[] names = { "Adanium", "Organic", "Crystal", "PsionicLink" };
+			string[] names = { "Adanium", "Organic", "Crystal", "PsionicLink", "ControlUnit", "ZergCarapace", "VentralSacks", "MetabolicGlands" };
 			var bps = MyDefinitionManager.Static.GetBlueprintDefinitions();
 			foreach( MyBlueprintDefinitionBase bp in bps ) {
 				if( Array.IndexOf(names, bp.Id.SubtypeName) >= 0 ) {
@@ -108,6 +109,13 @@ namespace SpaceCraft {
 
 		public void EntityAdded( IMyEntity entity ) {
 			IMyCubeGrid grid = entity as IMyCubeGrid;
+			IMyCharacter character = entity as IMyCharacter;
+
+			if( character != null ) {
+				CharacterAdded(character);
+				return;
+			}
+
 			if( grid == null ) return;
 			grid.OnBlockAdded += BlockAdded;
 			// Determine if zerg
@@ -120,6 +128,63 @@ namespace SpaceCraft {
 			}
 		}
 
+		public static void SpawnBot( string subtype, Vector3D position, Action<IMyCharacter> callback ) {
+			SpawnActions.Push(callback);
+			MyVisualScriptLogicProvider.SpawnBot( subtype, position );
+		}
+
+		private void CharacterAdded( IMyCharacter character ) {
+
+			// if( !character.IsBot ) return;
+			// IMyPlayer player = MyAPIGateway.Players.GetPlayerControllingEntity(character);
+			//
+			// if( player != null ) return;
+
+
+			if( SpawnActions.Count == 0 ) return;
+			Action<IMyCharacter> action = SpawnActions.Pop();
+			action(character);
+			// MyObjectBuilder_Character ob = character.GetObjectBuilder() as MyObjectBuilder_Character;
+			//
+			// if( ob == null ) {
+			// 	MyAPIGateway.Utilities.ShowMessage( "CharacterAdded", "ob was null" );
+			// 	return;
+			// }
+			//
+			// if( !ob.EntityDefinitionId.HasValue ) {
+			// 	MyAPIGateway.Utilities.ShowMessage( "CharacterAdded", "id was null" );
+			// 	return;
+			// }
+			//
+			// MyAPIGateway.Utilities.ShowMessage( "SubtypeName", ob.EntityDefinitionId.Value.SubtypeName );
+
+
+
+			// MyAPIGateway.Utilities.ShowMessage( "PlayerSteamId", ob.PlayerSteamId.ToString() );
+			// MyAPIGateway.Utilities.ShowMessage( "PlayerSerialId", ob.PlayerSerialId.ToString() );
+
+			// if( player == null ) {
+			// 	MyAPIGateway.Utilities.ShowMessage( "CharacterAdded", "Player was null" );
+			// 	return; // Not much we can do...
+			// }
+			// List<IMyIdentity> identities = new List<IMyIdentity>();
+			// MyAPIGateway.Players.GetAllIdentites(identities);
+			// foreach(IMyIdentity identity in identities) {
+			//
+			// }
+
+			// MyAPIGateway.Utilities.ShowMessage( "CharacterAdded", player.PlayerID.ToString() );
+			// IMyFaction faction = 	MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.PlayerID);
+			// if( faction == null ) {
+			// 	MyAPIGateway.Utilities.ShowMessage( "CharacterAdded", "Faction was null" );
+			// 	return;
+			// }
+			// Faction scFaction = GetFaction(faction.Tag);
+			// if( scFaction == null ) return; // Not our bot
+			// MyAPIGateway.Utilities.ShowMessage( "CharacterAdded", scFaction.Name + " used a bot" );
+			// scFaction.Bots.Add(character);
+		}
+
 		public void BlockAdded( IMySlimBlock block ) {
 			if( Zerg.Static.IsZerg(block) )
 				ZergBlocks.Add(block);
@@ -127,6 +192,17 @@ namespace SpaceCraft {
 
 		protected static void DamageHandler(object target, ref MyDamageInformation info) {
 			IMySlimBlock slim = target as IMySlimBlock;
+			// IMyCharacter character = target as IMyCharacter;
+			//
+			// if( character != null ) {
+			// 	MyObjectBuilder_Character ob = character.GetObjectBuilder() as MyObjectBuilder_Character;
+			// 	if( ob != null && ob.AIMode )
+			// 		info.Amount *= 0;
+			// 	else
+			// 		MyAPIGateway.Utilities.ShowMessage( "DamageHandler", ob == null ? "ob was null" :  character.ToString() + " took damage" );
+			// 	return;
+			// }
+
 			if( slim == null || slim.FatBlock == null ) return;
 			IMyCubeGrid grid = slim.FatBlock.CubeGrid;
 
@@ -157,7 +233,7 @@ namespace SpaceCraft {
 
 		public static void HealZergBlocks() {
 			foreach( IMySlimBlock block in ZergBlocks.ToList() ) {
-				if( block == null ) {
+				if( block == null || block.FatBlock == null || block.FatBlock.Closed ) {
 					ZergBlocks.Remove(block);
 					continue;
 				}
@@ -169,7 +245,8 @@ namespace SpaceCraft {
 				// block.MoveItemsToConstructionStockpile(null);
 				// block.ClearConstructionStockpile(null);
         // block.SpawnConstructionStockpile();
-				block.IncreaseMountLevel(2.5f,block.FatBlock == null ? 0 : block.FatBlock.OwnerId);
+				//block.IncreaseMountLevel(2f,block.FatBlock == null ? 0 : block.FatBlock.OwnerId);
+				block.IncreaseMountLevel(2f,block.FatBlock.OwnerId);
 			}
 		}
 
@@ -331,7 +408,23 @@ namespace SpaceCraft {
 					// }
 
 
+
 					IMyCubeGrid grid = entity as IMyCubeGrid;
+
+					List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+					grid.GetBlocks(blocks);
+					foreach( IMySlimBlock block in blocks ) {
+						if( Zerg.Static.IsZerg(block) ) {
+							ZergBlocks.Add(block);
+							// if( !block.IsFullIntegrity ) {
+							// 	// block.ApplyAccumulatedDamage();
+							// 	// block.SetToConstructionSite();
+							// 	block.DecreaseMountLevel(0f,null);
+							// 	block.IncreaseMountLevel(0f,block.FatBlock == null ? 0 : block.FatBlock.OwnerId);
+							// }
+						}
+					}
+
 					//List<long> owners = grid.GridSizeEnum == MyCubeSize.Large ? grid.BigOwners : grid.SmallOwners;
 					//foreach(long owner in owners) {
 						//Faction faction = GetFaction( owner ); // This should have worked but didn't, assuming the NPC owner ids get jumbled?
@@ -372,6 +465,9 @@ namespace SpaceCraft {
 				// 	}
 				// }
 			}
+
+			// HealZergBlocks();
+
 		}
 
 		public void CheckMods() {
@@ -405,23 +501,15 @@ namespace SpaceCraft {
 						// if( first == String.Empty && Name != String.Empty ) first = prefab.SubtypeId;
 						// else Prefab.Add(prefab.SubtypeId, Name, race);
 						if( prefab.SubtypeId != "Terran Planet Pod" ) // This needs fixing
-							Prefab.Add(prefab.SubtypeId, Name, race);
+							Prefab.Add(prefab.SubtypeId, race, Name);
 					}
 
           if( !String.IsNullOrWhiteSpace(Name) ) {
 
 						Name = Name.ToUpper();
 
-						Faction faction = CreateIfNotExists( Name );
-						faction.CommandLine = cmd;
-						if( cmd.Switch("toss") ) faction.Race = Races.Protoss;
-						if( cmd.Switch("zerg") ) faction.Race = Races.Zerg;
-						if( !String.IsNullOrWhiteSpace(cmd.Argument(2)) ) {
-							string[] colors = cmd.Argument(2).Split(',');
-							faction.Color = new SerializableVector3(float.Parse(colors[0]),float.Parse(colors[1]),float.Parse(colors[2]));
-								//RequestNewPlayer (int serialNumber, string playerName, string characterModel)
-								//LoadIdentities (List< MyObjectBuilder_Identity > list)
-						}
+						Faction faction = CreateIfNotExists( Name, cmd );
+
 						faction.Groups.Add( group );
 						faction.StartingPrefab = first;
 
@@ -447,6 +535,23 @@ namespace SpaceCraft {
 						//identity.ColorMask = faction.Color;
 						break;
 					}
+				}
+			}
+
+
+			foreach(MyBotDefinition bot in MyDefinitionManager.Static.GetBotDefinitions()) {
+				MyAnimalBotDefinition animal = bot as MyAnimalBotDefinition;
+				if( animal == null ) continue;
+				Faction faction = GetFaction(animal.FactionTag);
+				if( faction != null ) {
+					Prefab prefab = new Prefab {
+						SubtypeId = animal.Id.SubtypeName,
+						Bot = true,
+						BotDefinition = animal,
+						Faction = animal.FactionTag
+					};
+
+					prefab.Init();
 				}
 			}
 
@@ -507,14 +612,28 @@ namespace SpaceCraft {
 			return null;
 		}
 
-		public Faction CreateIfNotExists( string tag ) {
+		public Faction CreateIfNotExists( string tag, MyCommandLine cmd ) {
 			Faction faction = GetFaction(tag);
 			if( faction != null ) return faction;
 
 			faction = new Faction{
 				Name = tag,
-				MyFaction = MyAPIGateway.Session.Factions.TryGetFactionByTag(tag)
+				MyFaction = MyAPIGateway.Session.Factions.TryGetFactionByTag(tag),
+				CommandLine = cmd
 			};
+
+			if( cmd.Switch("toss") ) faction.Race = Races.Protoss;
+			if( cmd.Switch("zerg") ) {
+				faction.Race = Races.Zerg;
+				if( !faction.Resources.Contains("Organic") )
+					faction.Resources.Add("Organic");
+			}
+			if( !String.IsNullOrWhiteSpace(cmd.Argument(2)) ) {
+				string[] colors = cmd.Argument(2).Split(',');
+				faction.Color = new SerializableVector3(float.Parse(colors[0]),float.Parse(colors[1]),float.Parse(colors[2]));
+					//RequestNewPlayer (int serialNumber, string playerName, string characterModel)
+					//LoadIdentities (List< MyObjectBuilder_Identity > list)
+			}
 
 			Factions.Add(faction);
 

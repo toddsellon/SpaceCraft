@@ -139,7 +139,7 @@ namespace SpaceCraft.Utils {
 			Animation = Character.Components.Get<MyAnimationControllerComponent>();
 			//MyAPIGateway.Players.SetControlledEntity(MyAPIGateway.Session.Player.SteamUserId, Character as IMyEntity);
 
-			Character.DoDamage(0.0f, MyStringHash.Get(string.Empty), true); // Hack to property init Physics
+			Character.DoDamage(0.0f, MyStringHash.Get(string.Empty), true); // Hack to properly init Physics
 
 			if( !Character.EnabledDamping ) {
 				Character.SwitchDamping();
@@ -380,7 +380,7 @@ namespace SpaceCraft.Utils {
 			if( matrix == null ) return null;
 
 			MyObjectBuilder_Character character = new MyObjectBuilder_Character(){
-        CharacterModel = "Astronaut",
+        CharacterModel = Owner == null ? "Astronaut" : Owner.GetCharacterModel(),
         AIMode = true,
         //BotDefId = SerializableDefinitionId(MyObjectBuilderType.Parse("MyObjectBuilder_Character"), "MyObjectBuilder_BarbarianBot"),
         JetpackEnabled = true,

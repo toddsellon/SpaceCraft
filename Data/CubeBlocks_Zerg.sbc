@@ -1,6 +1,1518 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <CubeBlocks>
+
+    <Definition xsi:type="MyObjectBuilder_BatteryBlockDefinition">
+      <Id>
+          <TypeId>BatteryBlock</TypeId>
+          <SubtypeId>ZergHeart</SubtypeId>
+      </Id>
+      <DisplayName>Zerg Heart</DisplayName>
+      <Icon>Textures\GUI\Icons\Cubes\ArtificialMass.dds</Icon>
+      <Description>Description_Battery</Description>
+      <CubeSize>Large</CubeSize>
+      <BlockTopology>TriangleMesh</BlockTopology>
+      <Size x="1" y="1" z="1" />
+      <ModelOffset x="0" y="0" z="0" />
+      <Model>Models\Cubes\Large\VirtualMassBlock.mwm</Model>
+      <Components>
+        <Component Subtype="Organic" Count="70" />
+        <Component Subtype="ControlUnit" Count="80">
+          <DeconstructId>
+              <TypeId>Component</TypeId>
+              <SubtypeId>Organic</SubtypeId>
+          </DeconstructId>
+        </Component>
+        <Component Subtype="Organic" Count="70" />
+      </Components>
+      <CriticalComponent Subtype="ControlUnit" Index="0" />
+      <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\VirtualMassBlockConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\VirtualMassBlockConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\VirtualMassBlockConstruction_3.mwm" />
+      </BuildProgressModels>
+      <BlockPairName>ZergHeart</BlockPairName>
+      <EdgeType>Light</EdgeType>
+      <BuildTimeSeconds>40</BuildTimeSeconds>
+
+      <ResourceSourceGroup>Battery</ResourceSourceGroup>
+      <MaxPowerOutput>12</MaxPowerOutput>
+
+      <ResourceSinkGroup>BatteryBlock</ResourceSinkGroup>
+      <RequiredPowerInput>12</RequiredPowerInput>
+      <AdaptibleInput>true</AdaptibleInput>
+      <MaxStoredPower>3</MaxStoredPower>
+      <InitialStoredPowerRatio>0.3</InitialStoredPowerRatio>
+
+      <InventorySize>
+          <X>1</X>
+          <Y>1</Y>
+          <Z>1</Z>
+      </InventorySize>
+      <Public>true</Public>
+      <DamageEffectName>Damage_Electrical_Damaged</DamageEffectName>
+      <DamagedSound>ParticleElectrical</DamagedSound>
+      <EmissiveColorPreset>Extended</EmissiveColorPreset>
+      <DestroyEffect>BlockDestroyedExplosion_Large</DestroyEffect>
+      <DestroySound>WepSmallWarheadExpl</DestroySound>
+      <PCU>15</PCU>
+      <IsAirTight>true</IsAirTight>
+      <MirroringZ>Y</MirroringZ>
+      <MirroringY>Z</MirroringY>
+  </Definition>
+
+  <Definition xsi:type="MyObjectBuilder_BatteryBlockDefinition">
+    <Id>
+        <TypeId>BatteryBlock</TypeId>
+        <SubtypeId>SmallZergHeart</SubtypeId>
+    </Id>
+    <DisplayName>Zerg Heart</DisplayName>
+    <Icon>Textures\GUI\Icons\Cubes\ArtificialMass.dds</Icon>
+    <Description>Description_Battery</Description>
+    <CubeSize>Small</CubeSize>
+    <GuiVisible>false</GuiVisible>
+    <BlockTopology>TriangleMesh</BlockTopology>
+    <Size x="1" y="1" z="1" />
+    <ModelOffset x="0" y="0" z="0" />
+    <Model>Models\Cubes\Small\VirtualMassBlock.mwm</Model>
+    <Components>
+        <Component Subtype="Organic" Count="5" />
+        <Component Subtype="ControlUnit" Count="3">
+          <DeconstructId>
+              <TypeId>Component</TypeId>
+              <SubtypeId>Organic</SubtypeId>
+          </DeconstructId>
+        </Component>
+        <Component Subtype="Organic" Count="5" />
+    </Components>
+    <CriticalComponent Subtype="ControlUnit" Index="0" />
+    <BuildProgressModels>
+      <Model BuildPercentUpperBound="0.55" File="Models\Cubes\Small\VirtualMassBlockConstruction_1.mwm" />
+      <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\VirtualMassBlockConstruction_2.mwm" />
+    </BuildProgressModels>
+    <BlockPairName>ZergHeart</BlockPairName>
+    <EdgeType>Light</EdgeType>
+    <BuildTimeSeconds>8</BuildTimeSeconds>
+
+    <ResourceSourceGroup>Battery</ResourceSourceGroup>
+    <MaxPowerOutput>0.2</MaxPowerOutput>
+
+    <ResourceSinkGroup>BatteryBlock</ResourceSinkGroup>
+    <RequiredPowerInput>0.2</RequiredPowerInput>
+    <MaxStoredPower>0.05</MaxStoredPower>
+    <InitialStoredPowerRatio>0.05</InitialStoredPowerRatio>
+
+    <InventorySize>
+        <X>1</X>
+        <Y>1</Y>
+        <Z>1</Z>
+    </InventorySize>
+    <Public>true</Public>
+    <DamageEffectName>Damage_Electrical_Damaged</DamageEffectName>
+    <DestroyEffect>BlockDestroyedExplosion_Small</DestroyEffect>
+    <DamagedSound>ParticleElectrical</DamagedSound>
+    <DestroySound>WepSmallWarheadExpl</DestroySound>
+    <EmissiveColorPreset>Extended</EmissiveColorPreset>
+    <IsAirTight>true</IsAirTight>
+    <PCU>15</PCU>
+</Definition>
+
+
+  <Definition xsi:type="MyObjectBuilder_SurvivalKitDefinition">
+    <Id>
+        <TypeId>SurvivalKit</TypeId>
+        <SubtypeId>ZergSurvivalKit</SubtypeId>
+    </Id>
+    <DisplayName>Zerg Survival Kit</DisplayName>
+    <Description>Description_SurvivalKit</Description>
+    <Icon>Textures\GUI\Icons\Cubes\SurvivalKitLarge.dds</Icon>
+    <CubeSize>Large</CubeSize>
+    <ResearchGroup>Tier00Basics</ResearchGroup>
+    <ResearchCost>5</ResearchCost>
+    <BlockTopology>TriangleMesh</BlockTopology>
+    <Size x="1" y="1" z="1" />
+    <ModelOffset x="0" y="0" z="0" />
+    <Model>Models\Cubes\Large\SurvivalKit.mwm</Model>
+    <Components>
+      <Component Subtype="Organic" Count="50" />
+      <Component Subtype="ControlUnit" Count="5">
+          <DeconstructId>
+              <TypeId>Component</TypeId>
+              <SubtypeId>Organic</SubtypeId>
+          </DeconstructId>
+      </Component>
+      <Component Subtype="VentralSacks" Count="5">
+          <DeconstructId>
+              <TypeId>Component</TypeId>
+              <SubtypeId>Organic</SubtypeId>
+          </DeconstructId>
+      </Component>
+      <Component Subtype="Organic" Count="50" />
+    </Components>
+    <CriticalComponent Subtype="ControlUnit" Index="0" />
+    <MountPoints>
+        <MountPoint Side="Left" StartX="0.1" StartY="0" EndX="0.9" EndY="0.9" />
+        <MountPoint Side="Right" StartX="0.1" StartY="0" EndX="0.9" EndY="0.9" />
+        <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="1" EndY="1" Default="true" />
+    </MountPoints>
+    <MirroringZ>Y</MirroringZ>
+    <MirroringY>Z</MirroringY>
+    <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\SurvivalKit_Construction1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\SurvivalKit_Construction2.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\SurvivalKit_Construction3.mwm" />
+    </BuildProgressModels>
+    <BlockPairName>ZergSurvivalKit</BlockPairName>
+    <EdgeType>Light</EdgeType>
+    <BuildTimeSeconds>30</BuildTimeSeconds>
+    <ResourceSinkGroup>Factory</ResourceSinkGroup>
+    <ScreenAreas>
+        <ScreenArea Name="CockpitScreen_01" DisplayName="Top panel" />
+        <ScreenArea Name="CockpitScreen_02" DisplayName="Bottom panel" />
+    </ScreenAreas>
+    <BlueprintClasses>
+      <Class>BasicZergComponents</Class>
+    </BlueprintClasses>
+    <AssemblySpeed>0.5</AssemblySpeed>
+
+    <StandbyPowerConsumption>0.015</StandbyPowerConsumption>
+    <OperationalPowerConsumption>0.2</OperationalPowerConsumption>
+
+    <InventoryMaxVolume>2</InventoryMaxVolume>
+    <InventorySize>
+        <X>2</X>
+        <Y>2</Y>
+        <Z>2</Z>
+    </InventorySize>
+    <DamageEffectName>Damage_WeapExpl_Damaged</DamageEffectName>
+    <DamagedSound>ParticleWeapExpl</DamagedSound>
+    <DestroyEffect>BlockDestroyedExplosion_Large</DestroyEffect>
+    <DestroySound>WepSmallWarheadExpl</DestroySound>
+    <PrimarySound>BlockAssembler</PrimarySound>
+    <ActionSound>BlockAssemblerProcess</ActionSound>
+    <ProgressSound>BlockMedicalProgress</ProgressSound>
+    <PCU>140</PCU>
+    <TieredUpdateTimes>
+        <unsignedInt>60</unsignedInt>
+        <unsignedInt>120</unsignedInt>
+        <unsignedInt>240</unsignedInt>
+    </TieredUpdateTimes>
+  </Definition>
+
+  <Definition xsi:type="MyObjectBuilder_AssemblerDefinition">
+    <Id>
+        <TypeId>Assembler</TypeId>
+        <SubtypeId>ZergAssembler</SubtypeId>
+    </Id>
+    <DisplayName>Zerg Spawning Cell</DisplayName>
+    <Icon>Textures\GUI\Icons\Cubes\basicAssembler.dds</Icon>
+    <Description>Mutates organic compounds into zerg compounds</Description>
+    <CubeSize>Large</CubeSize>
+    <GuiVisible>false</GuiVisible>
+    <BlockTopology>TriangleMesh</BlockTopology>
+    <Size x="1" y="1" z="1" />
+    <ModelOffset x="0" y="0" z="0" />
+    <Model>Models\Cubes\Large\BasicAssembler.mwm</Model>
+    <Components>
+        <Component Subtype="Organic" Count="80" />
+        <Component Subtype="ControlUnit" Count="50">
+            <DeconstructId>
+                <TypeId>Component</TypeId>
+                <SubtypeId>Organic</SubtypeId>
+            </DeconstructId>
+        </Component>
+        <Component Subtype="Organic" Count="80" />
+    </Components>
+    <CriticalComponent Subtype="ControlUnit" Index="0" />
+    <MountPoints>
+        <MountPoint Side="Front" StartX="0" StartY="0" EndX="1" EndY="1" />
+        <MountPoint Side="Back" StartX="0" StartY="0" EndX="1" EndY="1" />
+        <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="1" EndY="1" Default="true" />
+        <MountPoint Side="Top" StartX="0" StartY="0" EndX="1" EndY="1" />
+        <MountPoint Side="Left" StartX="0" StartY="0" EndX="1" EndY="1" />
+        <MountPoint Side="Right" StartX="0" StartY="0" EndX="1" EndY="1" />
+    </MountPoints>
+    <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\BasicAssembler_Construction1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\BasicAssembler_Construction2.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\BasicAssembler_Construction3.mwm" />
+    </BuildProgressModels>
+    <BlockPairName>ZergAssembler</BlockPairName>
+    <EdgeType>Light</EdgeType>
+    <BuildTimeSeconds>40</BuildTimeSeconds>
+    <ResourceSinkGroup>Factory</ResourceSinkGroup>
+    <InventoryMaxVolume>2</InventoryMaxVolume>
+    <InventorySize>
+        <X>1</X>
+        <Y>1</Y>
+        <Z>1</Z>
+    </InventorySize>
+    <StandbyPowerConsumption>0.001</StandbyPowerConsumption>
+    <OperationalPowerConsumption>0.28</OperationalPowerConsumption>
+    <BlueprintClasses>
+        <Class>SimpleZergComponents</Class>
+    </BlueprintClasses>
+    <AssemblySpeed>0.7</AssemblySpeed>
+    <DamageEffectName>Damage_HeavyMech_Damaged</DamageEffectName>
+    <DamagedSound>ParticleHeavyMech</DamagedSound>
+    <PrimarySound>BlockAssembler</PrimarySound>
+    <ActionSound>BlockAssemblerProcess</ActionSound>
+    <DestroyEffect>Explosion_Missile</DestroyEffect>
+    <DestroySound>WepSmallMissileExpl</DestroySound>
+    <PCU>40</PCU>
+    <IsAirTight>true</IsAirTight>
+    <TieredUpdateTimes>
+        <unsignedInt>60</unsignedInt>
+        <unsignedInt>120</unsignedInt>
+        <unsignedInt>240</unsignedInt>
+    </TieredUpdateTimes>
+</Definition>
+
+<Definition xsi:type="MyObjectBuilder_AssemblerDefinition">
+    <Id>
+        <TypeId>Assembler</TypeId>
+        <SubtypeId>LargeZergAssembler</SubtypeId>
+    </Id>
+    <DisplayName>Zerg Spawning Pool</DisplayName>
+    <Icon>Textures\GUI\Icons\Cubes\JumpDrive.dds</Icon>
+    <Description>Description_Assembler</Description>
+    <CubeSize>Large</CubeSize>
+    <GuiVisible>false</GuiVisible>
+    <BlockTopology>TriangleMesh</BlockTopology>
+    <Size x="3" y="3" z="2" />
+    <ModelOffset x="0" y="0" z="0" />
+    <Model>Models\Cubes\Large\JumpDrive.mwm</Model>
+    <Components>
+        <Component Subtype="Organic" Count="180" />
+        <Component Subtype="ControlUnit" Count="80">
+            <DeconstructId>
+                <TypeId>Component</TypeId>
+                <SubtypeId>Organic</SubtypeId>
+            </DeconstructId>
+        </Component>
+        <Component Subtype="ZergCarapace" Count="10" />
+        <Component Subtype="Organic" Count="180" />
+    </Components>
+    <CriticalComponent Subtype="ControlUnit" Index="0" />
+    <MountPoints>
+        <MountPoint Side="Front" StartX="0" StartY="0" EndX="1" EndY="1" />
+        <MountPoint Side="Back" StartX="0" StartY="0" EndX="1" EndY="1" />
+        <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="1" EndY="2" Default="true" />
+        <MountPoint Side="Top" StartX="0" StartY="0" EndX="1" EndY="2" />
+        <MountPoint Side="Left" StartX="0" StartY="0" EndX="2" EndY="1" />
+        <MountPoint Side="Right" StartX="0" StartY="0" EndX="2" EndY="1" />
+    </MountPoints>
+    <BuildProgressModels>
+      <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\JumpDriveConstruction_1.mwm" />
+      <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\JumpDriveConstruction_2.mwm" />
+      <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\JumpDriveConstruction_3.mwm" />
+    </BuildProgressModels>
+    <BlockPairName>LargeZergAssembler</BlockPairName>
+    <EdgeType>Light</EdgeType>
+    <BuildTimeSeconds>80</BuildTimeSeconds>
+    <ResourceSinkGroup>Factory</ResourceSinkGroup>
+    <InventoryMaxVolume>4</InventoryMaxVolume>
+    <InventorySize>
+        <X>1</X>
+        <Y>1</Y>
+        <Z>1</Z>
+    </InventorySize>
+    <StandbyPowerConsumption>0.001</StandbyPowerConsumption>
+    <OperationalPowerConsumption>0.56</OperationalPowerConsumption>
+    <BlueprintClasses>
+        <Class>ZergComponents</Class>
+    </BlueprintClasses>
+    <DamageEffectName>Damage_HeavyMech_Damaged</DamageEffectName>
+    <DamagedSound>ParticleHeavyMech</DamagedSound>
+    <PrimarySound>BlockAssembler</PrimarySound>
+    <ActionSound>BlockAssemblerProcess</ActionSound>
+    <DestroyEffect>Explosion_Missile</DestroyEffect>
+    <DestroySound>WepSmallMissileExpl</DestroySound>
+    <PCU>40</PCU>
+    <IsAirTight>true</IsAirTight>
+    <TieredUpdateTimes>
+        <unsignedInt>60</unsignedInt>
+        <unsignedInt>120</unsignedInt>
+        <unsignedInt>240</unsignedInt>
+    </TieredUpdateTimes>
+</Definition>
+
+<Definition xsi:type="MyObjectBuilder_RefineryDefinition">
+  <Id>
+      <TypeId>Refinery</TypeId>
+      <SubtypeId>LargeZergRefinery</SubtypeId>
+  </Id>
+  <DisplayName>Zerg Infestation Pit</DisplayName>
+  <Icon>Textures\GUI\Icons\Cubes\nuclear_reactor_large.dds</Icon>
+  <Description>Description_Refinery</Description>
+  <CubeSize>Large</CubeSize>
+  <BlockTopology>TriangleMesh</BlockTopology>
+  <Size x="3" y="3" z="3" />
+  <ModelOffset x="0" y="0" z="0" />
+  <Model>Models\Cubes\Large\GeneratorLarge.mwm</Model>
+  <Components>
+      <Component Subtype="Organic" Count="600" />
+      <Component Subtype="ZergCarapace" Count="20" />
+      <Component Subtype="ControlUnit" Count="20">
+          <DeconstructId>
+              <TypeId>Component</TypeId>
+              <SubtypeId>Organic</SubtypeId>
+          </DeconstructId>
+      </Component>
+      <Component Subtype="ZergCarapace" Count="20" />
+      <Component Subtype="Organic" Count="600" />
+  </Components>
+  <CriticalComponent Subtype="ControlUnit" Index="0" />
+  <!-- <Center x="1" y="0" z="1" /> -->
+  <MountPoints>
+    <MountPoint Side="Right" StartX="1" StartY="1" EndX="2" EndY="2" />
+    <MountPoint Side="Left" StartX="1" StartY="1" EndX="2" EndY="2" />
+    <MountPoint Side="Top" StartX="1" StartY="1" EndX="2" EndY="2" />
+    <MountPoint Side="Bottom" StartX="1" StartY="1" EndX="2" EndY="2" Default="true" />
+    <MountPoint Side="Front" StartX="1" StartY="1" EndX="2" EndY="2" />
+    <MountPoint Side="Back" StartX="1" StartY="1" EndX="2" EndY="2" />
+  </MountPoints>
+  <BuildProgressModels>
+    <Model BuildPercentUpperBound="0.16" File="Models\Cubes\Large\GeneratorLargeConstruction_1.mwm" />
+    <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\GeneratorLargeConstruction_2.mwm" />
+    <Model BuildPercentUpperBound="0.50" File="Models\Cubes\Large\GeneratorLargeConstruction_3.mwm" />
+    <Model BuildPercentUpperBound="0.83" File="Models\Cubes\Large\GeneratorLargeConstruction_4.mwm" />
+    <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\GeneratorLargeConstruction_5.mwm" />
+  </BuildProgressModels>
+  <BlockPairName>LargeZergRefinery</BlockPairName>
+  <EdgeType>Light</EdgeType>
+  <BuildTimeSeconds>90</BuildTimeSeconds>
+  <ResourceSinkGroup>Factory</ResourceSinkGroup>
+  <InventoryMaxVolume>7.5</InventoryMaxVolume>
+  <InventorySize>
+      <X>2.5</X>
+      <Y>2.5</Y>
+      <Z>2.5</Z>
+  </InventorySize>
+
+  <InventoryFillFactorMin>0.3</InventoryFillFactorMin>
+  <InventoryFillFactorMax>0.6</InventoryFillFactorMax>
+
+  <StandbyPowerConsumption>0.001</StandbyPowerConsumption>
+  <OperationalPowerConsumption>0.56</OperationalPowerConsumption>
+  <BlueprintClasses>
+      <Class>ZergIngots</Class>
+  </BlueprintClasses>
+  <RefineSpeed>1.3</RefineSpeed>
+  <MaterialEfficiency>1.0</MaterialEfficiency>
+  <OreAmountPerPullRequest>2000</OreAmountPerPullRequest>
+  <DamageEffectName>Damage_HeavyMech_Damaged</DamageEffectName>
+  <Center x="1" y="0" z="0" />
+  <DamagedSound>ParticleHeavyMech</DamagedSound>
+  <PrimarySound>BlockRafinery</PrimarySound>
+  <ActionSound>BlockRafineryProcess</ActionSound>
+  <EmissiveColorPreset>Default</EmissiveColorPreset>
+  <DestroyEffect>BlockDestroyedExplosion_Large</DestroyEffect>
+  <DestroySound>WepSmallWarheadExpl</DestroySound>
+  <PCU>90</PCU>
+  <TieredUpdateTimes>
+      <unsignedInt>60</unsignedInt>
+      <unsignedInt>120</unsignedInt>
+      <unsignedInt>240</unsignedInt>
+  </TieredUpdateTimes>
+</Definition>
+
+  <Definition xsi:type="MyObjectBuilder_RefineryDefinition">
+    <Id>
+        <TypeId>Refinery</TypeId>
+        <SubtypeId>EvolutionChamber</SubtypeId>
+    </Id>
+    <DisplayName>Zerg Evolution Chamber</DisplayName>
+    <Icon>Textures\GUI\Icons\Cubes\SolarHydroponics.dds</Icon>
+    <Description>Description_RefineryBasic</Description>
+    <CubeSize>Large</CubeSize>
+    <GuiVisible>false</GuiVisible>
+    <BlockTopology>TriangleMesh</BlockTopology>
+    <Size x="3" y="1" z="1" />
+    <ModelOffset x="0" y="0" z="0" />
+    <Model>Models\Cubes\Large\SolarHydroponics.mwm</Model>
+    <Components>
+        <Component Subtype="Organic" Count="50" />
+        <Component Subtype="ControlUnit" Count="20">
+            <DeconstructId>
+                <TypeId>Component</TypeId>
+                <SubtypeId>Organic</SubtypeId>
+            </DeconstructId>
+        </Component>
+        <Component Subtype="Organic" Count="50" />
+    </Components>
+    <CriticalComponent Subtype="ControlUnit" Index="0" />
+    <MirroringZ>Y</MirroringZ>
+    <MirroringY>Z</MirroringY>
+    <MountPoints>
+      <MountPoint Side="Left" StartX="0" StartY="0" EndX="1" EndY="1" Default="true" />
+      <MountPoint Side="Right" StartX="0.2" StartY="0.2" EndX="0.8" EndY="0.8" />
+      <MountPoint Side="Bottom" StartX="0" StartY="0.25" EndX="3" EndY="0.75" />
+      <MountPoint Side="Top" StartX="0" StartY="0.25" EndX="3" EndY="0.75" />
+      <MountPoint Side="Back" StartX="0" StartY="0.375" EndX="1" EndY="0.625" />
+      <MountPoint Side="Front" StartX="2" StartY="0.375" EndX="3" EndY="0.625" />
+    </MountPoints>
+    <BuildProgressModels>
+      <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\SolarHydroponicsConstruction_1.mwm" />
+              <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\SolarHydroponicsConstruction_2.mwm" />
+              <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\SolarHydroponicsConstruction_3.mwm" />
+    </BuildProgressModels>
+    <BlockPairName>ZergRefinery</BlockPairName>
+    <EdgeType>Light</EdgeType>
+    <BuildTimeSeconds>40</BuildTimeSeconds>
+    <ResourceSinkGroup>Factory</ResourceSinkGroup>
+    <InventoryMaxVolume>4</InventoryMaxVolume>
+    <InventorySize>
+        <X>2</X>
+        <Y>2</Y>
+        <Z>2</Z>
+    </InventorySize>
+
+    <InventoryFillFactorMin>0.3</InventoryFillFactorMin>
+    <InventoryFillFactorMax>0.6</InventoryFillFactorMax>
+
+    <StandbyPowerConsumption>0.001</StandbyPowerConsumption>
+    <OperationalPowerConsumption>0.33</OperationalPowerConsumption>
+    <BlueprintClasses>
+        <Class>CommonZergMetals</Class>
+    </BlueprintClasses>
+    <RefineSpeed>0.65</RefineSpeed>
+    <MaterialEfficiency>0.7</MaterialEfficiency>
+    <DamageEffectName>Damage_HeavyMech_Damaged</DamageEffectName>
+    <DamagedSound>ParticleHeavyMech</DamagedSound>
+    <PrimarySound>BlockRafinery</PrimarySound>
+    <ActionSound>BlockRafineryProcess</ActionSound>
+    <EmissiveColorPreset>Default</EmissiveColorPreset>
+    <DestroyEffect>BlockDestroyedExplosion_Large</DestroyEffect>
+    <DestroySound>WepSmallWarheadExpl</DestroySound>
+    <OreAmountPerPullRequest>2000</OreAmountPerPullRequest>
+    <PCU>75</PCU>
+    <TieredUpdateTimes>
+        <unsignedInt>60</unsignedInt>
+        <unsignedInt>120</unsignedInt>
+        <unsignedInt>240</unsignedInt>
+    </TieredUpdateTimes>
+</Definition>
+
+<!-- Weapons -->
+
+<Definition xsi:type="MyObjectBuilder_LargeTurretBaseDefinition">
+  <Id>
+    <TypeId>LargeGatlingTurret</TypeId>
+    <SubtypeId>SporeColony</SubtypeId>
+  </Id>
+  <DisplayName>Spore Colony</DisplayName>
+  <Icon>Textures\GUI\Icons\Cubes\gatling_turret.dds</Icon>
+  <Description>Description_GatlingTurret</Description>
+  <CubeSize>Large</CubeSize>
+  <PlaceDecals>false</PlaceDecals>
+  <BlockTopology>TriangleMesh</BlockTopology>
+  <Size x="3" y="3" z="3" />
+  <ModelOffset x="0" y="0" z="0" />
+  <Model>Models\Cubes\Large\GatlingTurret.mwm</Model>
+  <UseModelIntersection>true</UseModelIntersection>
+  <Components>
+      <Component Subtype="Organic" Count="50" />
+      <Component Subtype="ControlUnit" Count="20">
+          <DeconstructId>
+              <TypeId>Component</TypeId>
+              <SubtypeId>Organic</SubtypeId>
+          </DeconstructId>
+      </Component>
+      <Component Subtype="ZergCarapace" Count="20" />
+      <Component Subtype="Organic" Count="50" />
+  </Components>
+  <CriticalComponent Subtype="ControlUnit" Index="0" />
+  <MountPoints>
+    <MountPoint Side="Bottom" StartX="1" StartY="1" EndX="2" EndY="2" />
+  </MountPoints>
+  <BuildProgressModels>
+    <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\GatlingTurretConstruction_1.mwm" />
+    <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\GatlingTurretConstruction_2.mwm" />
+    <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\GatlingTurretConstruction_3.mwm" />
+  </BuildProgressModels>
+  <VoxelPlacement>
+    <!--Possible settings Both,InVoxel,OutsideVoxel,Volumetric. If volumetric set than MaxAllowed and MinAllowed will be used.-->
+    <StaticMode>
+      <PlacementMode>OutsideVoxel</PlacementMode>
+      <MaxAllowed>0.2</MaxAllowed>
+      <MinAllowed>0</MinAllowed>
+    </StaticMode>
+    <DynamicMode>
+      <PlacementMode>OutsideVoxel</PlacementMode>
+      <MaxAllowed>0.2</MaxAllowed>
+      <MinAllowed>0.01</MinAllowed>
+    </DynamicMode>
+  </VoxelPlacement>
+  <BlockPairName>SporeColony</BlockPairName>
+  <MirroringY>Z</MirroringY>
+  <MirroringZ>Y</MirroringZ>
+  <EdgeType>Light</EdgeType>
+  <BuildTimeSeconds>30</BuildTimeSeconds>
+  <OverlayTexture>Textures\GUI\Screens\turret_overlay.dds</OverlayTexture>
+  <WeaponDefinitionId Subtype="SporeColony" />
+  <InventoryMaxVolume>0.384</InventoryMaxVolume>
+  <DamageEffectName>Damage_WeapExpl_Damaged</DamageEffectName>
+  <DamagedSound>ParticleWeapExpl</DamagedSound>
+  <ResourceSinkGroup>Defense</ResourceSinkGroup>
+  <MinElevationDegrees>-43</MinElevationDegrees>
+  <MaxElevationDegrees>90</MaxElevationDegrees>
+  <MinAzimuthDegrees>-180</MinAzimuthDegrees>
+  <MaxAzimuthDegrees>180</MaxAzimuthDegrees>
+  <RotationSpeed>0.002</RotationSpeed>
+  <ElevationSpeed>0.002 </ElevationSpeed>
+  <IdleRotation>true</IdleRotation>
+  <MaxRangeMeters>800</MaxRangeMeters>
+  <MinFov>0.1</MinFov>
+  <MaxFov>1.04719755</MaxFov>
+  <EmissiveColorPreset>Default</EmissiveColorPreset>
+  <DestroyEffect>BlockDestroyedExplosion_Large</DestroyEffect>
+  <DestroySound>WepSmallWarheadExpl</DestroySound>
+  <PCU>225</PCU>
+  <IsAirTight>false</IsAirTight>
+  <AmmoPullAmountPerTick>3</AmmoPullAmountPerTick>
+  <InventoryFillFactorMin>.25</InventoryFillFactorMin>
+  <InventoryFillFactorMax>.5</InventoryFillFactorMax>
+    <TieredUpdateTimes>
+        <unsignedInt>10</unsignedInt>
+        <unsignedInt>0</unsignedInt>
+    </TieredUpdateTimes>
+</Definition>
+
+<Definition xsi:type="MyObjectBuilder_LargeTurretBaseDefinition">
+  <Id>
+    <TypeId>LargeGatlingTurret</TypeId>
+    <SubtypeId>SmallSporeColony</SubtypeId>
+  </Id>
+  <DisplayName>Spore Colony</DisplayName>
+  <Icon>Textures\GUI\Icons\Cubes\gatling_turret.dds</Icon>
+  <Description>Description_GatlingTurret</Description>
+  <CubeSize>Small</CubeSize>
+  <PlaceDecals>false</PlaceDecals>
+  <BlockTopology>TriangleMesh</BlockTopology>
+  <Size x="5" y="5" z="5" />
+  <ModelOffset x="0" y="0" z="0" />
+  <Model>Models\Cubes\Small\GatlingTurret.mwm</Model>
+  <UseModelIntersection>true</UseModelIntersection>
+  <Components>
+      <Component Subtype="Organic" Count="50" />
+      <Component Subtype="ControlUnit" Count="20">
+          <DeconstructId>
+              <TypeId>Component</TypeId>
+              <SubtypeId>Organic</SubtypeId>
+          </DeconstructId>
+      </Component>
+      <Component Subtype="ZergCarapace" Count="20" />
+      <Component Subtype="Organic" Count="50" />
+
+  </Components>
+  <CriticalComponent Subtype="ControlUnit" Index="0" />
+  <MountPoints>
+    <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="5" EndY="5" Default="true" />
+    <MountPoint Side="Right" StartX="1" StartY="0" EndX="4" EndY="1" />
+    <MountPoint Side="Back" StartX="1" StartY="0" EndX="4" EndY="1" />
+    <MountPoint Side="Left" StartX="1" StartY="0" EndX="4" EndY="1" />
+    <MountPoint Side="Front" StartX="1" StartY="0" EndX="4" EndY="1" />
+  </MountPoints>
+  <BuildProgressModels>
+    <Model BuildPercentUpperBound="0.43" File="Models\Cubes\Small\GatlingTurretConstruction_1.mwm" />
+    <Model BuildPercentUpperBound="1.0" File="Models\Cubes\Small\GatlingTurretConstruction_2.mwm" />
+  </BuildProgressModels>
+  <VoxelPlacement>
+    <!--Possible settings Both,InVoxel,OutsideVoxel,Volumetric. If volumetric set than MaxAllowed and MinAllowed will be used.-->
+    <StaticMode>
+      <PlacementMode>OutsideVoxel</PlacementMode>
+      <MaxAllowed>0.2</MaxAllowed>
+      <MinAllowed>0</MinAllowed>
+    </StaticMode>
+    <DynamicMode>
+      <PlacementMode>OutsideVoxel</PlacementMode>
+      <MaxAllowed>0.2</MaxAllowed>
+      <MinAllowed>0.01</MinAllowed>
+    </DynamicMode>
+  </VoxelPlacement>
+  <BlockPairName>SporeColony</BlockPairName>
+  <MirroringY>Z</MirroringY>
+  <MirroringZ>Y</MirroringZ>
+  <EdgeType>Light</EdgeType>
+  <BuildTimeSeconds>20</BuildTimeSeconds>
+  <OverlayTexture>Textures\GUI\Screens\turret_overlay.dds</OverlayTexture>
+  <WeaponDefinitionId Subtype="SmallSporeColony" />
+  <InventoryMaxVolume>0.084</InventoryMaxVolume>
+  <DamageEffectName>Damage_WeapExpl_Damaged</DamageEffectName>
+  <DamagedSound>ParticleWeapExpl</DamagedSound>
+  <ResourceSinkGroup>Defense</ResourceSinkGroup>
+  <MinElevationDegrees>-10</MinElevationDegrees>
+  <MaxElevationDegrees>180</MaxElevationDegrees>
+  <MinAzimuthDegrees>-180</MinAzimuthDegrees>
+  <MaxAzimuthDegrees>180</MaxAzimuthDegrees>
+  <RotationSpeed>0.001</RotationSpeed>
+  <ElevationSpeed>0.001 </ElevationSpeed>
+  <IdleRotation>true</IdleRotation>
+  <MaxRangeMeters>600</MaxRangeMeters>
+  <MinFov>0.1</MinFov>
+  <MaxFov>1.04719755</MaxFov>
+  <EmissiveColorPreset>Default</EmissiveColorPreset>
+  <DestroyEffect>BlockDestroyedExplosion_Small</DestroyEffect>
+  <DestroySound>WepSmallWarheadExpl</DestroySound>
+  <PCU>225</PCU>
+  <AmmoPullAmountPerTick>3</AmmoPullAmountPerTick>
+    <InventoryFillFactorMin>.25</InventoryFillFactorMin>
+    <InventoryFillFactorMax>.5</InventoryFillFactorMax>
+    <TieredUpdateTimes>
+        <unsignedInt>10</unsignedInt>
+        <unsignedInt>0</unsignedInt>
+    </TieredUpdateTimes>
+</Definition>
+
+<Definition xsi:type="MyObjectBuilder_LargeTurretBaseDefinition">
+  <Id>
+    <TypeId>LargeMissileTurret</TypeId>
+    <SubtypeId>SunkenColony</SubtypeId>
+  </Id>
+  <DisplayName>Sunken Colony</DisplayName>
+  <Icon>Textures\GUI\Icons\Cubes\missile_turret.dds</Icon>
+  <Description>Description_MissileTurret</Description>
+  <CubeSize>Large</CubeSize>
+    <GuiVisible>false</GuiVisible>
+  <PlaceDecals>false</PlaceDecals>
+  <BlockTopology>TriangleMesh</BlockTopology>
+  <Size x="3" y="3" z="3" />
+  <ModelOffset x="0" y="0" z="0" />
+  <Model>Models\Cubes\Large\MissileTurret.mwm</Model>
+  <UseModelIntersection>true</UseModelIntersection>
+  <Components>
+    <Component Subtype="Organic" Count="30" />
+    <Component Subtype="ZergCarapace" Count="5" />
+    <Component Subtype="MetabolicGlands" Count="15" />
+    <Component Subtype="ControlUnit" Count="12" />
+    <Component Subtype="ZergCarapace" Count="5" />
+    <Component Subtype="Organic" Count="10" />
+  </Components>
+  <CriticalComponent Subtype="ControlUnit" Index="0" />
+  <MountPoints>
+    <MountPoint Side="Bottom" StartX="1" StartY="1" EndX="2" EndY="2" />
+  </MountPoints>
+  <BuildProgressModels>
+    <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\MissileTurretConstruction_1.mwm" />
+    <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\MissileTurretConstruction_2.mwm" />
+    <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\MissileTurretConstruction_3.mwm" />
+  </BuildProgressModels>
+  <VoxelPlacement>
+    <!--Possible settings Both,InVoxel,OutsideVoxel,Volumetric. If volumetric set than MaxAllowed and MinAllowed will be used.-->
+    <StaticMode>
+      <PlacementMode>OutsideVoxel</PlacementMode>
+      <MaxAllowed>0.2</MaxAllowed>
+      <MinAllowed>0</MinAllowed>
+    </StaticMode>
+    <DynamicMode>
+      <PlacementMode>OutsideVoxel</PlacementMode>
+      <MaxAllowed>0.2</MaxAllowed>
+      <MinAllowed>0.01</MinAllowed>
+    </DynamicMode>
+  </VoxelPlacement>
+  <BlockPairName>ZergMissileTurret</BlockPairName>
+  <MirroringY>Z</MirroringY>
+  <MirroringZ>Y</MirroringZ>
+  <EdgeType>Light</EdgeType>
+  <BuildTimeSeconds>40</BuildTimeSeconds>
+  <OverlayTexture>Textures\GUI\Screens\turret_overlay.dds</OverlayTexture>
+  <WeaponDefinitionId Subtype="LargeMissileTurret" />
+  <InventoryMaxVolume>0.384</InventoryMaxVolume>
+  <DamageEffectName>Damage_WeapExpl_Damaged</DamageEffectName>
+  <DamagedSound>ParticleWeapExpl</DamagedSound>
+  <ResourceSinkGroup>Defense</ResourceSinkGroup>
+  <MinElevationDegrees>-58</MinElevationDegrees>
+  <MaxElevationDegrees>90</MaxElevationDegrees>
+  <MinAzimuthDegrees>-180</MinAzimuthDegrees>
+  <MaxAzimuthDegrees>180</MaxAzimuthDegrees>
+  <IdleRotation>true</IdleRotation>
+  <MaxRangeMeters>800</MaxRangeMeters>
+  <RotationSpeed>0.002</RotationSpeed>
+  <ElevationSpeed>0.002 </ElevationSpeed>
+  <EmissiveColorPreset>Default</EmissiveColorPreset>
+  <MinFov>0.1</MinFov>
+  <MaxFov>1.04719755</MaxFov>
+  <DestroyEffect>BlockDestroyedExplosion_Large</DestroyEffect>
+  <DestroySound>WepSmallWarheadExpl</DestroySound>
+  <PCU>275</PCU>
+  <IsAirTight>false</IsAirTight>
+  <AmmoPullAmountPerTick>3</AmmoPullAmountPerTick>
+    <InventoryFillFactorMin>.25</InventoryFillFactorMin>
+    <InventoryFillFactorMax>.5</InventoryFillFactorMax>
+    <TieredUpdateTimes>
+        <unsignedInt>10</unsignedInt>
+        <unsignedInt>0</unsignedInt>
+    </TieredUpdateTimes>
+</Definition>
+
+<!-- End of Weapons -->
+
+<!-- Drills -->
+
+<Definition xsi:type="MyObjectBuilder_ShipDrillDefinition">
+  <Id>
+    <TypeId>Drill</TypeId>
+    <SubtypeId>SmallDrillingClaws</SubtypeId>
+  </Id>
+  <DisplayName>Drilling Claws</DisplayName>
+  <Icon>Textures\GUI\Icons\Cubes\drill.dds</Icon>
+  <Description>Description_Drill</Description>
+  <CubeSize>Small</CubeSize>
+    <GuiVisible>false</GuiVisible>
+  <BlockTopology>TriangleMesh</BlockTopology>
+  <Size x="1" y="1" z="1" />
+  <ModelOffset x="0" y="0" z="0" />
+  <Model>Models\Cubes\Small\Camera.mwm</Model>
+  <PlaceDecals>false</PlaceDecals>
+  <UseModelIntersection>true</UseModelIntersection>
+  <Components>
+    <Component Subtype="ControlUnit" Count="5">
+        <DeconstructId>
+            <TypeId>Component</TypeId>
+            <SubtypeId>Organic</SubtypeId>
+        </DeconstructId>
+    </Component>
+    <Component Subtype="Organic" Count="12" />
+  </Components>
+  <CriticalComponent Subtype="ControlUnit" Index="0" />
+  <!-- <Center x="1" y="1" z="5" /> -->
+  <MountPoints>
+    <MountPoint Side="Back" ExclusionMask="3" PropertiesMask="3" StartX="0.4" StartY="0.44" EndX="0.6" EndY="0.55" />
+  </MountPoints>
+  <BuildProgressModels>
+    <Model BuildPercentUpperBound="0.50" File="Models\Cubes\Small\CameraConstruction_1.mwm" />
+    <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\CameraConstruction_2.mwm" />
+  </BuildProgressModels>
+  <VoxelPlacement>
+    <!--Possible settings Both,InVoxel,OutsideVoxel,Volumetric. If volumetric set than MaxAllowed and MinAllowed will be used.-->
+    <StaticMode>
+      <PlacementMode>OutsideVoxel</PlacementMode>
+      <MaxAllowed>0.4</MaxAllowed>
+      <MinAllowed>0</MinAllowed>
+    </StaticMode>
+    <DynamicMode>
+      <PlacementMode>OutsideVoxel</PlacementMode>
+      <MaxAllowed>0.4</MaxAllowed>
+      <MinAllowed>0.01</MinAllowed>
+    </DynamicMode>
+  </VoxelPlacement>
+  <BlockPairName>DrillingClaws</BlockPairName>
+  <MirroringY>Z</MirroringY>
+  <MirroringZ>Y</MirroringZ>
+  <EdgeType>Light</EdgeType>
+  <BuildTimeSeconds>20</BuildTimeSeconds>
+
+  <ResourceSinkGroup>Defense</ResourceSinkGroup>
+  <SensorRadius>1.3</SensorRadius>
+  <SensorOffset>0.8</SensorOffset>
+  <CutOutRadius>1.3</CutOutRadius>
+  <CutOutOffset>0.6</CutOutOffset>
+  <ParticleOffset>
+    <X>0</X>
+    <Y>0</Y>
+    <Z>-1.45</Z>
+  </ParticleOffset>
+
+  <DeformationRatio>0.2</DeformationRatio>
+  <UsesDeformation>false</UsesDeformation>
+  <DamageEffectName>Damage_HeavyMech_Damaged</DamageEffectName>
+  <DamagedSound>ParticleHeavyMech</DamagedSound>
+  <PrimarySound>ToolShipDrillIdle</PrimarySound>
+  <DestroyEffect>BlockDestroyedExplosion_Small</DestroyEffect>
+  <DestroySound>WepSmallWarheadExpl</DestroySound>
+  <PCU>190</PCU>
+</Definition>
+<Definition xsi:type="MyObjectBuilder_ShipDrillDefinition">
+  <Id>
+    <TypeId>Drill</TypeId>
+    <SubtypeId>LargeDrillingClaws</SubtypeId>
+  </Id>
+  <DisplayName>Zerg Drilling Claws</DisplayName>
+  <Icon>Textures\GUI\Icons\Cubes\drill.dds</Icon>
+  <Description>Description_Drill</Description>
+  <CubeSize>Large</CubeSize>
+    <GuiVisible>false</GuiVisible>
+  <BlockTopology>TriangleMesh</BlockTopology>
+  <Size x="1" y="1" z="1" />
+  <ModelOffset x="0" y="0" z="0" />
+  <Model>Models\Cubes\Large\Camera.mwm</Model>
+  <PlaceDecals>false</PlaceDecals>
+  <UseModelIntersection>true</UseModelIntersection>
+  <UsesDeformation>false</UsesDeformation>
+  <Components>
+    <Component Subtype="ControlUnit" Count="20">
+        <DeconstructId>
+            <TypeId>Component</TypeId>
+            <SubtypeId>Organic</SubtypeId>
+        </DeconstructId>
+    </Component>
+    <Component Subtype="Organic" Count="300" />
+  </Components>
+  <CriticalComponent Subtype="ControlUnit" Index="0" />
+  <MountPoints>
+    <MountPoint Side="Back" ExclusionMask="3" PropertiesMask="3" StartX="0.4" StartY="0.44" EndX="0.6" EndY="0.55" />
+  </MountPoints>
+  <BuildProgressModels>
+    <Model BuildPercentUpperBound="0.50" File="Models\Cubes\Large\CameraConstruction_1.mwm" />
+    <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\CameraConstruction_2.mwm" />
+  </BuildProgressModels>
+  <!-- <VoxelPlacement>
+    <StaticMode>
+      <PlacementMode>OutsideVoxel</PlacementMode>
+      <MaxAllowed>0.2</MaxAllowed>
+      <MinAllowed>0</MinAllowed>
+    </StaticMode>
+    <DynamicMode>
+      <PlacementMode>OutsideVoxel</PlacementMode>
+      <MaxAllowed>0.2</MaxAllowed>
+      <MinAllowed>0.01</MinAllowed>
+    </DynamicMode>
+  </VoxelPlacement> -->
+  <BlockPairName>DrillingClaws</BlockPairName>
+  <MirroringY>Z</MirroringY>
+  <MirroringZ>Y</MirroringZ>
+  <EdgeType>Light</EdgeType>
+  <BuildTimeSeconds>30</BuildTimeSeconds>
+  <!-- <Center x="0" y="0" z="2" /> -->
+
+  <ResourceSinkGroup>Defense</ResourceSinkGroup>
+  <SensorRadius>1.9</SensorRadius>
+  <SensorOffset>2.8</SensorOffset>
+  <CutOutRadius>1.9</CutOutRadius>
+  <CutOutOffset>2.8</CutOutOffset>
+  <ParticleOffset>
+    <X>0</X>
+    <Y>0</Y>
+    <Z>-3.6</Z>
+  </ParticleOffset>
+
+  <DeformationRatio>0.2</DeformationRatio>
+  <DamageEffectName>Damage_HeavyMech_Damaged</DamageEffectName>
+  <DamagedSound>ParticleHeavyMech</DamagedSound>
+  <PrimarySound>ToolShipDrillIdle</PrimarySound>
+  <DestroyEffect>BlockDestroyedExplosion_Large</DestroyEffect>
+  <DestroySound>WepSmallWarheadExpl</DestroySound>
+  <PCU>190</PCU>
+</Definition>
+
+<!-- End Drills -->
+
+<!-- Remote controls -->
+
+<Definition xsi:type="MyObjectBuilder_RemoteControlDefinition">
+  <Id>
+    <TypeId>RemoteControl</TypeId>
+    <SubtypeId>LargeZergRemoteControl</SubtypeId>
+  </Id>
+  <DisplayName>Zerg Remote Control</DisplayName>
+  <Icon>Textures\GUI\Icons\Cubes\RemoteControl.dds</Icon>
+  <Description>Description_RemoteControl</Description>
+  <CubeSize>Large</CubeSize>
+  <BlockTopology>TriangleMesh</BlockTopology>
+  <Size x="1" y="1" z="1" />
+  <ModelOffset x="0" y="0" z="0" />
+  <Model>Models\Cubes\Large\RemoteControl.mwm</Model>
+  <Components>
+    <Component Subtype="Organic" Count="25" />
+    <Component Subtype="ControlUnit" Count="5">
+        <DeconstructId>
+            <TypeId>Component</TypeId>
+            <SubtypeId>Organic</SubtypeId>
+        </DeconstructId>
+    </Component>
+    <Component Subtype="Organic" Count="25" />
+  </Components>
+  <CriticalComponent Subtype="ControlUnit" Index="0" />
+  <MountPoints>
+    <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="1" EndY="1" Default="true" />
+    <MountPoint Side="Back" StartX="0" StartY="0" EndX="1" EndY="1" />
+    <MountPoint Side="Front" StartX="0" StartY="0" EndX="1" EndY="0.7" />
+    <MountPoint Side="Left" StartX="0" StartY="0" EndX="0.3" EndY="0.7" />
+    <MountPoint Side="Left" StartX="0.3" StartY="0" EndX="1" EndY="1" />
+    <MountPoint Side="Right" StartX="0" StartY="0" EndX="0.7" EndY="1" />
+    <MountPoint Side="Right" StartX="0.7" StartY="0" EndX="1" EndY="0.7" />
+    <MountPoint Side="Top" StartX="0" StartY="0" EndX="1" EndY="0.7" />
+  </MountPoints>
+  <BuildProgressModels>
+    <Model BuildPercentUpperBound="0.50" File="Models\Cubes\Large\RemoteControlConstruction_1.mwm" />
+    <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\RemoteControlConstruction_2.mwm" />
+  </BuildProgressModels>
+  <BlockPairName>ZergRemoteControl</BlockPairName>
+  <EdgeType>Light</EdgeType>
+  <BuildTimeSeconds>30</BuildTimeSeconds>
+  <MirroringY>Z</MirroringY>
+  <ResourceSinkGroup>Utility</ResourceSinkGroup>
+  <RequiredPowerInput>0.01</RequiredPowerInput>
+  <EnableFirstPerson>false</EnableFirstPerson>
+  <EnableShipControl>true</EnableShipControl>
+  <EnableBuilderCockpit>false</EnableBuilderCockpit>
+  <Public>true</Public>
+  <DamageEffectName>Damage_Electrical_Damaged</DamageEffectName>
+  <DamagedSound>ParticleElectrical</DamagedSound>
+  <EmissiveColorPreset>Extended</EmissiveColorPreset>
+  <DestroyEffect>BlockDestroyedExplosion_Large</DestroyEffect>
+  <DestroySound>WepSmallWarheadExpl</DestroySound>
+  <PCU>25</PCU>
+</Definition>
+<Definition xsi:type="MyObjectBuilder_RemoteControlDefinition">
+  <Id>
+    <TypeId>RemoteControl</TypeId>
+    <SubtypeId>SmallZergRemoteControl</SubtypeId>
+  </Id>
+  <DisplayName>Zerg Remote Control</DisplayName>
+  <Icon>Textures\GUI\Icons\Cubes\RemoteControl.dds</Icon>
+  <Description>Description_RemoteControl</Description>
+  <CubeSize>Small</CubeSize>
+  <BlockTopology>TriangleMesh</BlockTopology>
+  <Size x="1" y="1" z="1" />
+  <ModelOffset x="0" y="0" z="0" />
+  <Model>Models\Cubes\Small\RemoteControl.mwm</Model>
+  <Components>
+    <Component Subtype="Organic" Count="5" />
+    <Component Subtype="ControlUnit" Count="3">
+        <DeconstructId>
+            <TypeId>Component</TypeId>
+            <SubtypeId>Organic</SubtypeId>
+        </DeconstructId>
+    </Component>
+    <Component Subtype="Organic" Count="5" />
+  </Components>
+  <CriticalComponent Subtype="ControlUnit" Index="0" />
+  <MountPoints>
+    <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="1" EndY="1" Default="true" />
+    <MountPoint Side="Back" StartX="0" StartY="0" EndX="1" EndY="1" />
+    <MountPoint Side="Front" StartX="0" StartY="0" EndX="1" EndY="1" />
+    <MountPoint Side="Left" StartX="0" StartY="0" EndX="1" EndY="1" />
+    <MountPoint Side="Right" StartX="0" StartY="0" EndX="1" EndY="1" />
+    <MountPoint Side="Top" StartX="0" StartY="0" EndX="1" EndY="1" />
+  </MountPoints>
+  <BuildProgressModels>
+    <Model BuildPercentUpperBound="0.50" File="Models\Cubes\Small\RemoteControlConstruction_1.mwm" />
+    <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\RemoteControlConstruction_2.mwm" />
+  </BuildProgressModels>
+  <BlockPairName>ZergRemoteControl</BlockPairName>
+  <MirroringY>Z</MirroringY>
+  <MirroringZ>Y</MirroringZ>
+  <EdgeType>Light</EdgeType>
+  <BuildTimeSeconds>14</BuildTimeSeconds>
+  <ResourceSinkGroup>Utility</ResourceSinkGroup>
+  <RequiredPowerInput>0.01</RequiredPowerInput>
+  <EnableFirstPerson>false</EnableFirstPerson>
+  <EnableShipControl>true</EnableShipControl>
+  <EnableBuilderCockpit>false</EnableBuilderCockpit>
+  <Public>true</Public>
+  <DamageEffectName>Damage_Electrical_Damaged</DamageEffectName>
+  <DamagedSound>ParticleElectrical</DamagedSound>
+  <EmissiveColorPreset>Extended</EmissiveColorPreset>
+  <DestroyEffect>BlockDestroyedExplosion_Small</DestroyEffect>
+  <DestroySound>WepSmallWarheadExpl</DestroySound>
+  <PCU>25</PCU>
+  <IsAirTight>false</IsAirTight>
+</Definition>
+
+<!-- End remote controls -->
+
+
+<!-- Zerg Thrusters -->
+<Definition xsi:type="MyObjectBuilder_ThrustDefinition">
+  <Id>
+    <TypeId>Thrust</TypeId>
+    <SubtypeId>SmallBlockSmallZergThrust</SubtypeId>
+  </Id>
+  <DisplayName>Small Zerg Thrust</DisplayName>
+  <Icon>Textures\GUI\Icons\Cubes\thrust.dds</Icon>
+  <Description>Description_IonThrust</Description>
+  <CubeSize>Small</CubeSize>
+    <GuiVisible>false</GuiVisible>
+  <BlockTopology>TriangleMesh</BlockTopology>
+  <Size x="1" y="1" z="1" />
+  <ModelOffset x="0" y="0" z="0" />
+  <Model>Models\Cubes\Small\Camera.mwm</Model>
+  <ThrusterType>Ion</ThrusterType>
+  <SilenceableByShipSoundSystem>true</SilenceableByShipSoundSystem>
+  <Components>
+    <Component Subtype="Organic" Count="5" />
+    <Component Subtype="ControlUnit" Count="5">
+        <DeconstructId>
+            <TypeId>Component</TypeId>
+            <SubtypeId>Organic</SubtypeId>
+        </DeconstructId>
+    </Component>
+    <Component Subtype="Organic" Count="5" />
+  </Components>
+  <CriticalComponent Subtype="ControlUnit" Index="0" />
+  <MountPoints>
+    <MountPoint Side="Back" ExclusionMask="3" PropertiesMask="3" StartX="0.4" StartY="0.44" EndX="0.6" EndY="0.55" />
+  </MountPoints>
+  <BuildProgressModels>
+    <Model BuildPercentUpperBound="0.50" File="Models\Cubes\Small\CameraConstruction_1.mwm" />
+    <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\CameraConstruction_2.mwm" />
+  </BuildProgressModels>
+  <VoxelPlacement>
+    <!--Possible settings Both,InVoxel,OutsideVoxel,Volumetric. If volumetric set than MaxAllowed and MinAllowed will be used.-->
+    <StaticMode>
+      <PlacementMode>OutsideVoxel</PlacementMode>
+      <MaxAllowed>0.4</MaxAllowed>
+      <MinAllowed>0</MinAllowed>
+    </StaticMode>
+    <DynamicMode>
+      <PlacementMode>OutsideVoxel</PlacementMode>
+      <MaxAllowed>0.4</MaxAllowed>
+      <MinAllowed>0.01</MinAllowed>
+    </DynamicMode>
+  </VoxelPlacement>
+  <BlockPairName>SmallZergThrust</BlockPairName>
+  <!-- <Center x="0" y="0" z="1" /> -->
+  <MirroringZ>Y</MirroringZ>
+  <BuildTimeSeconds>10</BuildTimeSeconds>
+  <EdgeType>Light</EdgeType>
+
+  <ResourceSinkGroup>Thrust</ResourceSinkGroup>
+  <ForceMagnitude>72000</ForceMagnitude>
+  <MaxPowerConsumption>0.000002</MaxPowerConsumption>
+  <MinPowerConsumption>0.000002</MinPowerConsumption>
+  <SlowdownFactor>1</SlowdownFactor>
+
+  <MinPlanetaryInfluence>1</MinPlanetaryInfluence>
+  <MaxPlanetaryInfluence>1</MaxPlanetaryInfluence>
+  <EffectivenessAtMinInfluence>1</EffectivenessAtMinInfluence>
+  <EffectivenessAtMaxInfluence>1</EffectivenessAtMaxInfluence>
+
+  <FlameDamageLengthScale>0</FlameDamageLengthScale>
+  <FlameDamage>0</FlameDamage>
+  <FlameLengthScale>0</FlameLengthScale>
+  <FlameIdleColor>
+    <X>0.2745098</X>
+    <Y>0.4090196</Y>
+    <Z>0.6505882</Z>
+    <W>0.75</W>
+  </FlameIdleColor>
+  <FlameFullColor>
+    <X>0.2745098</X>
+    <Y>0.4090196</Y>
+    <Z>0.6505882</Z>
+    <W>0.75</W>
+  </FlameFullColor>
+  <FlamePointMaterial>EngineThrustMiddle</FlamePointMaterial>
+  <FlameLengthMaterial>EngineThrustMiddle</FlameLengthMaterial>
+  <FlameFlare>SmallGridSmallThruster</FlameFlare>
+  <FlameVisibilityDistance>200</FlameVisibilityDistance>
+  <FlameGlareQuerySize>0.5</FlameGlareQuerySize>
+  <PrimarySound>SmShipSmJet</PrimarySound>
+  <DamageEffectName>Damage_WeapExpl_Damaged</DamageEffectName>
+  <DamagedSound>ParticleWeapExpl</DamagedSound>
+  <DestroyEffect>BlockDestroyedExplosion_Small</DestroyEffect>
+  <DestroySound>WepSmallWarheadExpl</DestroySound>
+  <PCU>15</PCU>
+    <TieredUpdateTimes>
+        <unsignedInt>100</unsignedInt>
+        <unsignedInt>3600</unsignedInt>
+        <unsignedInt>0</unsignedInt>
+    </TieredUpdateTimes>
+</Definition>
+<!-- <Definition xsi:type="MyObjectBuilder_ThrustDefinition">
+  <Id>
+    <TypeId>Thrust</TypeId>
+    <SubtypeId>SmallBlockLargeZergThrust</SubtypeId>
+  </Id>
+  <DisplayName>Large Zerg Thrust</DisplayName>
+  <Icon>Textures\GUI\Icons\Cubes\thrust_large.dds</Icon>
+  <Description>Description_IonThrust</Description>
+  <CubeSize>Small</CubeSize>
+  <BlockTopology>TriangleMesh</BlockTopology>
+  <Size x="3" y="2" z="4" />
+  <ModelOffset x="0" y="0" z="0" />
+  <Model>Models\Cubes\Small\IonThrusterLarge_SciFi.mwm</Model>
+  <ThrusterType>Ion</ThrusterType>
+  <SilenceableByShipSoundSystem>true</SilenceableByShipSoundSystem>
+  <Components>
+    <Component Subtype="Organic" Count="25" />
+    <Component Subtype="ControlUnit" Count="10">
+        <DeconstructId>
+            <TypeId>Component</TypeId>
+            <SubtypeId>Organic</SubtypeId>
+        </DeconstructId>
+    </Component>
+  </Components>
+  <CriticalComponent Subtype="ControlUnit" Index="0" />
+  <MountPoints>
+    <MountPoint Side="Back" StartX="0" StartY="0" EndX="3" EndY="2" Default="true" />
+    <MountPoint Side="Top" StartX="0" StartY="0" EndX="3" EndY="2" />
+    <MountPoint Side="Bottom" StartX="0" StartY="2" EndX="3" EndY="4" />
+    <MountPoint Side="Right" StartX="0" StartY="0" EndX="2" EndY="2" />
+    <MountPoint Side="Left" StartX="2" StartY="0" EndX="4" EndY="2" />
+  </MountPoints>
+  <BuildProgressModels>
+    <Model BuildPercentUpperBound="0.50" File="Models\Cubes\Small\IonThrusterLarge_SciFi_Construction1.mwm" />
+    <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\IonThrusterLarge_SciFi_Construction2.mwm" />
+  </BuildProgressModels>
+  <VoxelPlacement>
+    <StaticMode>
+      <PlacementMode>Volumetric</PlacementMode>
+      <MaxAllowed>0.2</MaxAllowed>
+      <MinAllowed>0</MinAllowed>
+    </StaticMode>
+    <DynamicMode>
+      <PlacementMode>Volumetric</PlacementMode>
+      <MaxAllowed>0.2</MaxAllowed>
+      <MinAllowed>0</MinAllowed>
+    </DynamicMode>
+  </VoxelPlacement>
+  <BlockPairName>LargeZergThrust</BlockPairName>
+  <Center x="1" y="0" z="2" />
+  <MirroringY>Z</MirroringY>
+  <MirroringZ>Y</MirroringZ>
+  <BuildTimeSeconds>20</BuildTimeSeconds>
+  <EdgeType>Light</EdgeType>
+
+  <ResourceSinkGroup>Thrust</ResourceSinkGroup>
+  <ForceMagnitude>864000</ForceMagnitude>
+  <MaxPowerConsumption>0.000002</MaxPowerConsumption>
+  <MinPowerConsumption>0.000002</MinPowerConsumption>
+  <SlowdownFactor>1</SlowdownFactor>
+
+  <MinPlanetaryInfluence>1</MinPlanetaryInfluence>
+  <MaxPlanetaryInfluence>1</MaxPlanetaryInfluence>
+  <EffectivenessAtMinInfluence>1</EffectivenessAtMinInfluence>
+  <EffectivenessAtMaxInfluence>1</EffectivenessAtMaxInfluence>
+
+  <FlameDamageLengthScale>0</FlameDamageLengthScale>
+  <FlameDamage>0</FlameDamage>
+  <FlameLengthScale>0</FlameLengthScale>
+  <FlameIdleColor>
+    <X>0.2745098</X>
+    <Y>0.4090196</Y>
+    <Z>0.6505882</Z>
+    <W>0.75</W>
+  </FlameIdleColor>
+  <FlameFullColor>
+    <X>0.2745098</X>
+    <Y>0.4090196</Y>
+    <Z>0.6505882</Z>
+    <W>0.75</W>
+  </FlameFullColor>
+  <FlamePointMaterial>EngineThrustMiddle</FlamePointMaterial>
+  <FlameLengthMaterial>EngineThrustMiddle</FlameLengthMaterial>
+  <FlameFlare>SmallGridLargeThruster</FlameFlare>
+  <FlameVisibilityDistance>300</FlameVisibilityDistance>
+  <FlameGlareQuerySize>0.5</FlameGlareQuerySize>
+  <PrimarySound>SmShipLrgJet</PrimarySound>
+  <DamageEffectName>Damage_WeapExpl_Damaged</DamageEffectName>
+  <DamagedSound>ParticleWeapExpl</DamagedSound>
+  <DestroyEffect>BlockDestroyedExplosion_Small</DestroyEffect>
+  <DestroySound>WepSmallWarheadExpl</DestroySound>
+  <PCU>15</PCU>
+    <TieredUpdateTimes>
+        <unsignedInt>100</unsignedInt>
+        <unsignedInt>3600</unsignedInt>
+        <unsignedInt>0</unsignedInt>
+    </TieredUpdateTimes>
+</Definition> -->
+<Definition xsi:type="MyObjectBuilder_ThrustDefinition">
+  <Id>
+    <TypeId>Thrust</TypeId>
+    <SubtypeId>LargeBlockSmallZergThrust</SubtypeId>
+  </Id>
+  <DisplayName>Small Zerg Thruster</DisplayName>
+  <Icon>Textures\GUI\Icons\Cubes\thrust.dds</Icon>
+  <Description>Description_IonThrust</Description>
+  <CubeSize>Large</CubeSize>
+    <GuiVisible>false</GuiVisible>
+  <BlockTopology>TriangleMesh</BlockTopology>
+  <Size x="1" y="1" z="1" />
+  <ModelOffset x="0" y="0" z="0" />
+  <Model>Models\Cubes\Large\Camera.mwm</Model>
+  <ThrusterType>Ion</ThrusterType>
+  <SilenceableByShipSoundSystem>true</SilenceableByShipSoundSystem>
+  <Components>
+    <Component Subtype="Organic" Count="80" />
+    <Component Subtype="ControlUnit" Count="45">
+        <DeconstructId>
+            <TypeId>Component</TypeId>
+            <SubtypeId>Organic</SubtypeId>
+        </DeconstructId>
+    </Component>
+    <Component Subtype="Organic" Count="20" />
+  </Components>
+  <CriticalComponent Subtype="ControlUnit" Index="0" />
+  <MountPoints>
+    <MountPoint Side="Back" ExclusionMask="3" PropertiesMask="3" StartX="0.4" StartY="0.44" EndX="0.6" EndY="0.55" />
+  </MountPoints>
+  <BuildProgressModels>
+    <Model BuildPercentUpperBound="0.50" File="Models\Cubes\Large\CameraConstruction_1.mwm" />
+    <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\CameraConstruction_2.mwm" />
+  </BuildProgressModels>
+  <VoxelPlacement>
+    <!--Possible settings Both,InVoxel,OutsideVoxel,Volumetric. If volumetric set than MaxAllowed and MinAllowed will be used.-->
+    <StaticMode>
+      <PlacementMode>Volumetric</PlacementMode>
+      <MaxAllowed>0.2</MaxAllowed>
+      <MinAllowed>0</MinAllowed>
+    </StaticMode>
+    <DynamicMode>
+      <PlacementMode>Volumetric</PlacementMode>
+      <MaxAllowed>0.2</MaxAllowed>
+      <MinAllowed>0</MinAllowed>
+    </DynamicMode>
+  </VoxelPlacement>
+  <BlockPairName>SmallZergThrust</BlockPairName>
+  <!-- <Center x="0" y="0" z="1" /> -->
+  <MirroringZ>Y</MirroringZ>
+  <EdgeType>Light</EdgeType>
+  <BuildTimeSeconds>40</BuildTimeSeconds>
+
+  <ResourceSinkGroup>Thrust</ResourceSinkGroup>
+  <ForceMagnitude>1728000</ForceMagnitude>
+  <MaxPowerConsumption>0.000002</MaxPowerConsumption>
+  <MinPowerConsumption>0.000002</MinPowerConsumption>
+  <SlowdownFactor>1</SlowdownFactor>
+
+  <MinPlanetaryInfluence>1</MinPlanetaryInfluence>
+  <MaxPlanetaryInfluence>1</MaxPlanetaryInfluence>
+  <EffectivenessAtMinInfluence>1</EffectivenessAtMinInfluence>
+  <EffectivenessAtMaxInfluence>1</EffectivenessAtMaxInfluence>
+
+  <FlameDamageLengthScale>0</FlameDamageLengthScale>
+  <FlameLengthScale>0</FlameLengthScale>
+  <FlameDamage>0</FlameDamage>
+  <FlameIdleColor>
+    <X>0.2745098</X>
+    <Y>0.4090196</Y>
+    <Z>0.6505882</Z>
+    <W>0.75</W>
+  </FlameIdleColor>
+  <FlameFullColor>
+    <X>0.2745098</X>
+    <Y>0.4090196</Y>
+    <Z>0.6505882</Z>
+    <W>0.75</W>
+  </FlameFullColor>
+  <FlamePointMaterial>EngineThrustMiddle</FlamePointMaterial>
+  <FlameLengthMaterial>EngineThrustMiddle</FlameLengthMaterial>
+  <FlameFlare>LargeGridSmallThruster</FlameFlare>
+  <FlameVisibilityDistance>500</FlameVisibilityDistance>
+  <FlameGlareQuerySize>1</FlameGlareQuerySize>
+  <PrimarySound>LrgShipSmJet</PrimarySound>
+  <DamageEffectName>Damage_WeapExpl_Damaged</DamageEffectName>
+  <DamagedSound>ParticleWeapExpl</DamagedSound>
+  <DestroyEffect>BlockDestroyedExplosion_Large</DestroyEffect>
+  <DestroySound>WepSmallWarheadExpl</DestroySound>
+  <PCU>15</PCU>
+    <TieredUpdateTimes>
+        <unsignedInt>100</unsignedInt>
+        <unsignedInt>3600</unsignedInt>
+        <unsignedInt>0</unsignedInt>
+    </TieredUpdateTimes>
+</Definition>
+<!-- <Definition xsi:type="MyObjectBuilder_ThrustDefinition">
+  <Id>
+    <TypeId>Thrust</TypeId>
+    <SubtypeId>LargeBlockLargeZergThrust</SubtypeId>
+  </Id>
+  <DisplayName>Large Zerg Thruster</DisplayName>
+  <Icon>Textures\GUI\Icons\Cubes\thrust_large.dds</Icon>
+  <Description>Description_IonThrust</Description>
+  <CubeSize>Large</CubeSize>
+  <BlockTopology>TriangleMesh</BlockTopology>
+  <Size x="3" y="2" z="4" />
+  <ModelOffset x="0" y="0" z="0" />
+  <Model>Models\Cubes\Large\IonThrusterLarge_SciFi.mwm</Model>
+  <ThrusterType>Ion</ThrusterType>
+  <SilenceableByShipSoundSystem>true</SilenceableByShipSoundSystem>
+  <Components>
+    <Component Subtype="Organic" Count="500" />
+    <Component Subtype="ControlUnit" Count="100">
+        <DeconstructId>
+            <TypeId>Component</TypeId>
+            <SubtypeId>Organic</SubtypeId>
+        </DeconstructId>
+    </Component>
+  </Components>
+  <CriticalComponent Subtype="ControlUnit" Index="0" />
+  <MountPoints>
+    <MountPoint Side="Back" StartX="0" StartY="0" EndX="3" EndY="2" Default="true" />
+    <MountPoint Side="Top" StartX="0" StartY="0" EndX="3" EndY="2" />
+    <MountPoint Side="Bottom" StartX="0" StartY="2" EndX="3" EndY="4" />
+    <MountPoint Side="Left" StartX="2" StartY="0" EndX="4" EndY="2" />
+    <MountPoint Side="Right" StartX="0" StartY="0" EndX="2" EndY="2" />
+  </MountPoints>
+  <BuildProgressModels>
+    <Model BuildPercentUpperBound="0.2" File="Models\Cubes\Large\IonThrusterLarge_SciFi_Construction1.mwm" />
+    <Model BuildPercentUpperBound="0.4" File="Models\Cubes\Large\IonThrusterLarge_SciFi_Construction2.mwm" />
+    <Model BuildPercentUpperBound="0.6" File="Models\Cubes\Large\IonThrusterLarge_SciFi_Construction3.mwm" />
+    <Model BuildPercentUpperBound="0.8" File="Models\Cubes\Large\IonThrusterLarge_SciFi_Construction4.mwm" />
+    <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\IonThrusterLarge_SciFi_Construction5.mwm" />
+  </BuildProgressModels>
+  <VoxelPlacement>
+    <StaticMode>
+      <PlacementMode>Volumetric</PlacementMode>
+      <MaxAllowed>0.2</MaxAllowed>
+      <MinAllowed>0</MinAllowed>
+    </StaticMode>
+    <DynamicMode>
+      <PlacementMode>Volumetric</PlacementMode>
+      <MaxAllowed>0.2</MaxAllowed>
+      <MinAllowed>0</MinAllowed>
+    </DynamicMode>
+  </VoxelPlacement>
+  <BlockPairName>LargeZergThrust</BlockPairName>
+  <Center x="1" y="0" z="2" />
+  <MirroringY>Z</MirroringY>
+  <MirroringZ>Y</MirroringZ>
+  <EdgeType>Light</EdgeType>
+  <BuildTimeSeconds>90</BuildTimeSeconds>
+
+  <ResourceSinkGroup>Thrust</ResourceSinkGroup>
+  <ForceMagnitude>21600000</ForceMagnitude>
+  <MaxPowerConsumption>0.000002</MaxPowerConsumption>
+  <MinPowerConsumption>0.000002</MinPowerConsumption>
+  <SlowdownFactor>1</SlowdownFactor>
+
+  <MinPlanetaryInfluence>1</MinPlanetaryInfluence>
+  <MaxPlanetaryInfluence>1</MaxPlanetaryInfluence>
+  <EffectivenessAtMinInfluence>1</EffectivenessAtMinInfluence>
+  <EffectivenessAtMaxInfluence>1</EffectivenessAtMaxInfluence>
+
+  <FlameDamageLengthScale>0</FlameDamageLengthScale>
+  <FlameLengthScale>0</FlameLengthScale>
+  <FlameDamage>0</FlameDamage>
+  <FlameIdleColor>
+    <X>0.2745098</X>
+    <Y>0.4090196</Y>
+    <Z>0.6505882</Z>
+    <W>0.75</W>
+  </FlameIdleColor>
+  <FlameFullColor>
+    <X>0.2745098</X>
+    <Y>0.4090196</Y>
+    <Z>0.6505882</Z>
+    <W>0.75</W>
+  </FlameFullColor>
+  <FlamePointMaterial>EngineThrustMiddle</FlamePointMaterial>
+  <FlameLengthMaterial>EngineThrustMiddle</FlameLengthMaterial>
+  <FlameFlare>LargeGridLargeThruster</FlameFlare>
+  <FlameVisibilityDistance>700</FlameVisibilityDistance>
+  <FlameGlareQuerySize>1.5</FlameGlareQuerySize>
+  <PrimarySound>LrgShipLrgJet</PrimarySound>
+  <DamageEffectName>Damage_WeapExpl_Damaged</DamageEffectName>
+  <DamagedSound>ParticleWeapExpl</DamagedSound>
+  <DestroyEffect>BlockDestroyedExplosion_Large</DestroyEffect>
+  <DestroySound>WepSmallWarheadExpl</DestroySound>
+  <PCU>15</PCU>
+    <TieredUpdateTimes>
+        <unsignedInt>100</unsignedInt>
+        <unsignedInt>3600</unsignedInt>
+        <unsignedInt>0</unsignedInt>
+    </TieredUpdateTimes>
+  </Definition> -->
+  <!-- End Zerg Thrust -->
+
+  <Definition xsi:type="MyObjectBuilder_GyroDefinition">
+    <Id>
+      <TypeId>Gyro</TypeId>
+      <SubtypeId>LargeZergGyro</SubtypeId>
+    </Id>
+    <DisplayName>Zerg Gyroscope</DisplayName>
+    <Icon>Textures\GUI\Icons\Cubes\gyro.dds</Icon>
+    <Description>Description_Gyroscope</Description>
+    <CubeSize>Large</CubeSize>
+    <BlockTopology>TriangleMesh</BlockTopology>
+    <Size x="1" y="1" z="1" />
+    <ModelOffset x="0" y="0" z="0" />
+    <Model>Models\Cubes\Large\gyroscope.mwm</Model>
+    <Components>
+      <Component Subtype="Organic" Count="250" />
+      <Component Subtype="ControlUnit" Count="100">
+          <DeconstructId>
+              <TypeId>Component</TypeId>
+              <SubtypeId>Organic</SubtypeId>
+          </DeconstructId>
+      </Component>
+      <Component Subtype="Organic" Count="250" />
+    </Components>
+    <CriticalComponent Subtype="ControlUnit" Index="0" />
+    <MountPoints>
+      <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="1" EndY="1" />
+    </MountPoints>
+    <BuildProgressModels>
+      <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\GyroscopeConstruction_1.mwm" />
+      <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\GyroscopeConstruction_2.mwm" />
+      <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\GyroscopeConstruction_3.mwm" />
+    </BuildProgressModels>
+    <BlockPairName>ZergGyroscope</BlockPairName>
+    <MirroringY>Z</MirroringY>
+    <MirroringZ>Y</MirroringZ>
+    <EdgeType>Light</EdgeType>
+    <BuildTimeSeconds>40</BuildTimeSeconds>
+    <PrimarySound>BlockGyroscope</PrimarySound>
+
+    <ResourceSinkGroup>Gyro</ResourceSinkGroup>
+    <ForceMagnitude>3.36E+07</ForceMagnitude>
+    <RequiredPowerInput>0.01</RequiredPowerInput>
+
+    <DamageEffectName>Damage_HeavyMech_Damaged</DamageEffectName>
+    <DamagedSound>ParticleHeavyMech</DamagedSound>
+    <EmissiveColorPreset>Extended</EmissiveColorPreset>
+    <DestroyEffect>BlockDestroyedExplosion_Large</DestroyEffect>
+    <DestroySound>WepSmallWarheadExpl</DestroySound>
+    <PCU>50</PCU>
+    <IsAirTight>false</IsAirTight>
+  </Definition>
+  <Definition xsi:type="MyObjectBuilder_GyroDefinition">
+    <Id>
+      <TypeId>Gyro</TypeId>
+      <SubtypeId>SmallZergGyro</SubtypeId>
+    </Id>
+    <DisplayName>Zerg Gyroscope</DisplayName>
+    <Icon>Textures\GUI\Icons\Cubes\gyro.dds</Icon>
+    <Description>Description_Gyroscope</Description>
+    <CubeSize>Small</CubeSize>
+    <BlockTopology>TriangleMesh</BlockTopology>
+    <Size x="1" y="1" z="1" />
+    <ModelOffset x="0" y="0" z="0" />
+    <Model>Models\Cubes\Small\gyroscope.mwm</Model>
+    <SilenceableByShipSoundSystem>true</SilenceableByShipSoundSystem>
+    <Components>
+      <Component Subtype="Organic" Count="15" />
+      <Component Subtype="ControlUnit" Count="5">
+          <DeconstructId>
+              <TypeId>Component</TypeId>
+              <SubtypeId>Organic</SubtypeId>
+          </DeconstructId>
+      </Component>
+      <Component Subtype="Organic" Count="25" />
+    </Components>
+    <CriticalComponent Subtype="ControlUnit" Index="0" />
+    <MountPoints>
+      <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="1" EndY="1" />
+    </MountPoints>
+    <BuildProgressModels>
+      <Model BuildPercentUpperBound="0.50" File="Models\Cubes\Small\GyroscopeConstruction_1.mwm" />
+      <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\GyroscopeConstruction_2.mwm" />
+    </BuildProgressModels>
+    <BlockPairName>ZergGyroscope</BlockPairName>
+    <MirroringY>Z</MirroringY>
+    <MirroringZ>Y</MirroringZ>
+    <BuildTimeSeconds>14</BuildTimeSeconds>
+    <EdgeType>Light</EdgeType>
+    <PrimarySound>BlockGyroscope</PrimarySound>
+
+    <ResourceSinkGroup>Gyro</ResourceSinkGroup>
+    <ForceMagnitude>448000</ForceMagnitude>
+    <RequiredPowerInput>0.002</RequiredPowerInput>
+
+    <DamageEffectName>Damage_HeavyMech_Damaged</DamageEffectName>
+    <DamagedSound>ParticleHeavyMech</DamagedSound>
+    <EmissiveColorPreset>Extended</EmissiveColorPreset>
+    <DestroyEffect>BlockDestroyedExplosion_Small</DestroyEffect>
+    <DestroySound>WepSmallWarheadExpl</DestroySound>
+    <PCU>50</PCU>
+    <IsAirTight>false</IsAirTight>
+  </Definition>
+
+
+
     <!-- Region ARMOR -->
     <Definition>
       <Id>
@@ -723,7 +2235,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="135" />
-        <Component Subtype="Crystal" Count="50" />
+        <Component Subtype="ZergCarapace" Count="50" />
         <Component Subtype="Organic" Count="15" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -886,7 +2398,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="65" />
-        <Component Subtype="Crystal" Count="25" />
+        <Component Subtype="ZergCarapace" Count="25" />
         <Component Subtype="Organic" Count="10" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -1013,7 +2525,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="20" />
-        <Component Subtype="Crystal" Count="10" />
+        <Component Subtype="ZergCarapace" Count="10" />
         <Component Subtype="Organic" Count="5" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -1113,7 +2625,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="110" />
-        <Component Subtype="Crystal" Count="50" />
+        <Component Subtype="ZergCarapace" Count="50" />
         <Component Subtype="Organic" Count="15" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -1794,7 +3306,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="3" />
-        <Component Subtype="Crystal" Count="2" />
+        <Component Subtype="ZergCarapace" Count="2" />
         <Component Subtype="Organic" Count="2" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -1955,7 +3467,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="2" />
-        <Component Subtype="Crystal" Count="1" />
+        <Component Subtype="ZergCarapace" Count="1" />
         <Component Subtype="Organic" Count="1" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -2081,7 +3593,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="1" />
-        <Component Subtype="Crystal" Count="1" />
+        <Component Subtype="ZergCarapace" Count="1" />
         <Component Subtype="Organic" Count="1" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -2180,7 +3692,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="2" />
-        <Component Subtype="Crystal" Count="1" />
+        <Component Subtype="ZergCarapace" Count="1" />
         <Component Subtype="Organic" Count="2" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -2497,7 +4009,7 @@
       <PhysicsOption>Convex</PhysicsOption>
       <Components>
         <Component Subtype="Organic" Count="50" />
-        <Component Subtype="Crystal" Count="25" />
+        <Component Subtype="ZergCarapace" Count="25" />
         <Component Subtype="Organic" Count="25" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -2824,7 +4336,7 @@
       <PhysicsOption>Convex</PhysicsOption>
       <Components>
         <Component Subtype="Organic" Count="30" />
-        <Component Subtype="Crystal" Count="15" />
+        <Component Subtype="ZergCarapace" Count="15" />
         <Component Subtype="Organic" Count="15" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -3152,7 +4664,7 @@
       <PhysicsOption>Convex</PhysicsOption>
       <Components>
         <Component Subtype="Organic" Count="2" />
-        <Component Subtype="Crystal" Count="1" />
+        <Component Subtype="ZergCarapace" Count="1" />
         <Component Subtype="Organic" Count="1" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -3478,7 +4990,7 @@
       <PhysicsOption>Convex</PhysicsOption>
       <Components>
         <Component Subtype="Organic" Count="1" />
-        <Component Subtype="Crystal" Count="1" />
+        <Component Subtype="ZergCarapace" Count="1" />
         <Component Subtype="Organic" Count="1" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -4017,7 +5529,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="115" />
-        <Component Subtype="Crystal" Count="50" />
+        <Component Subtype="ZergCarapace" Count="50" />
         <Component Subtype="Organic" Count="15" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -4144,7 +5656,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="110" />
-        <Component Subtype="Crystal" Count="40" />
+        <Component Subtype="ZergCarapace" Count="40" />
         <Component Subtype="Organic" Count="15" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -4242,7 +5754,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="125" />
-        <Component Subtype="Crystal" Count="50" />
+        <Component Subtype="ZergCarapace" Count="50" />
         <Component Subtype="Organic" Count="15" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -4766,7 +6278,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="2" />
-        <Component Subtype="Crystal" Count="1" />
+        <Component Subtype="ZergCarapace" Count="1" />
         <Component Subtype="Organic" Count="2" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -4892,7 +6404,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="2" />
-        <Component Subtype="Crystal" Count="1" />
+        <Component Subtype="ZergCarapace" Count="1" />
         <Component Subtype="Organic" Count="2" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -4990,7 +6502,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="3" />
-        <Component Subtype="Crystal" Count="1" />
+        <Component Subtype="ZergCarapace" Count="1" />
         <Component Subtype="Organic" Count="2" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -5975,7 +7487,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="100" />
-        <Component Subtype="Crystal" Count="45" />
+        <Component Subtype="ZergCarapace" Count="45" />
         <Component Subtype="Organic" Count="12" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -6139,7 +7651,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="30" />
-        <Component Subtype="Crystal" Count="6" />
+        <Component Subtype="ZergCarapace" Count="6" />
         <Component Subtype="Organic" Count="5" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -6268,7 +7780,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="50" />
-        <Component Subtype="Crystal" Count="15" />
+        <Component Subtype="ZergCarapace" Count="15" />
         <Component Subtype="Organic" Count="5" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -6397,7 +7909,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="17" />
-        <Component Subtype="Crystal" Count="6" />
+        <Component Subtype="ZergCarapace" Count="6" />
         <Component Subtype="Organic" Count="2" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -6497,7 +8009,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="120" />
-        <Component Subtype="Crystal" Count="45" />
+        <Component Subtype="ZergCarapace" Count="45" />
         <Component Subtype="Organic" Count="13" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -6651,7 +8163,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="84" />
-        <Component Subtype="Crystal" Count="25" />
+        <Component Subtype="ZergCarapace" Count="25" />
         <Component Subtype="Organic" Count="10" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -7631,7 +9143,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="2" />
-        <Component Subtype="Crystal" Count="1" />
+        <Component Subtype="ZergCarapace" Count="1" />
         <Component Subtype="Organic" Count="2" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -7795,7 +9307,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="1" />
-        <Component Subtype="Crystal" Count="1" />
+        <Component Subtype="ZergCarapace" Count="1" />
         <Component Subtype="Organic" Count="1" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -7924,7 +9436,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="2" />
-        <Component Subtype="Crystal" Count="1" />
+        <Component Subtype="ZergCarapace" Count="1" />
         <Component Subtype="Organic" Count="1" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -8053,7 +9565,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="1" />
-        <Component Subtype="Crystal" Count="1" />
+        <Component Subtype="ZergCarapace" Count="1" />
         <Component Subtype="Organic" Count="1" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -8153,7 +9665,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="3" />
-        <Component Subtype="Crystal" Count="1" />
+        <Component Subtype="ZergCarapace" Count="1" />
         <Component Subtype="Organic" Count="2" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />
@@ -8307,7 +9819,7 @@
       </CubeDefinition>
       <Components>
         <Component Subtype="Organic" Count="3" />
-        <Component Subtype="Crystal" Count="1" />
+        <Component Subtype="ZergCarapace" Count="1" />
         <Component Subtype="Organic" Count="2" />
       </Components>
       <CriticalComponent Subtype="Organic" Index="0" />

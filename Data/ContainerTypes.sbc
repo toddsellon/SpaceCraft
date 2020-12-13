@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  
+  <ContainerTypes>
+    <ContainerType CountMin="1" CountMax="2">
+        <Id>
+            <TypeId>ContainerTypeDefinition</TypeId>
+            <SubtypeId>ZergLoot</SubtypeId>
+        </Id>
+        <Items>
+            <Item AmountMin="1" AmountMax="3">
+                <Frequency>1.0</Frequency>
+                <Id>
+                    <TypeId>Component</TypeId>
+                    <SubtypeId>Organic</SubtypeId>
+                </Id>
+            </Item>
+        </Items>
+    </ContainerType>
+
+    <ContainerType CountMin="1" CountMax="2">
+        <Id>
+            <TypeId>ContainerTypeDefinition</TypeId>
+            <SubtypeId>ZergLoot2</SubtypeId>
+        </Id>
+        <Items>
+            <Item AmountMin="4" AmountMax="7">
+                <Frequency>1.0</Frequency>
+                <Id>
+                    <TypeId>Component</TypeId>
+                    <SubtypeId>Organic</SubtypeId>
+                </Id>
+            </Item>
+            <Item AmountMin="2" AmountMax="5">
+                <Frequency>1.0</Frequency>
+                <Id>
+                    <TypeId>Component</TypeId>
+                    <SubtypeId>ZergCarapace</SubtypeId>
+                </Id>
+            </Item>
+        </Items>
+    </ContainerType>
+
+  </ContainerTypes>
+</Definitions>

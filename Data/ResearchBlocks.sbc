@@ -113,6 +113,35 @@
       </UnlockedByGroups>
     </ResearchBlock>
 
+    <!-- Zerg Tech (Locked) -->
+    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_BatteryBlock" Subtype="ZergHeart" />
+      <Id Type="MyObjectBuilder_BatteryBlock" Subtype="SmallZergHeart" />
+      <Id Type="MyObjectBuilder_SurvivalKit" Subtype="ZergSurvivalKit" />
+      <Id Type="MyObjectBuilder_Refinery" Subtype="EvolutionChamber" />
+      <Id Type="MyObjectBuilder_Refinery" Subtype="LargeZergRefinery" />
+      <Id Type="MyObjectBuilder_Assembler" Subtype="ZergAssembler" />
+      <Id Type="MyObjectBuilder_Assembler" Subtype="LargeZergAssembler" />
+      <Id Type="MyObjectBuilder_Thrust" Subtype="SmallBlockSmallZergThrust" />
+      <!-- <Id Type="MyObjectBuilder_Thrust" Subtype="SmallBlockLargeZergThrust" /> -->
+      <Id Type="MyObjectBuilder_Thrust" Subtype="LargeBlockSmallZergThrust" />
+      <!-- <Id Type="MyObjectBuilder_Thrust" Subtype="LargeBlockLargeZergThrust" /> -->
+      <Id Type="MyObjectBuilder_Gyro" Subtype="LargeZergGyro" />
+      <Id Type="MyObjectBuilder_Gyro" Subtype="SmallZergGyro" />
+      <Id Type="MyObjectBuilder_LargeGatlingTurret" Subtype="SporeColony" />
+      <Id Type="MyObjectBuilder_LargeGatlingTurret" Subtype="SmallSporeColony" />
+      <Id Type="MyObjectBuilder_ShipDrill" Subtype="SmallDrillingClaws" />
+      <Id Type="MyObjectBuilder_ShipDrill" Subtype="LargeDrillingClaws" />
+      <Id Type="MyObjectBuilder_RemoteControl" Subtype="LargeZergRemoteControl" />
+      <Id Type="MyObjectBuilder_RemoteControl" Subtype="SmallZergRemoteControl" />
+      <Id Type="MyObjectBuilder_LargeMissileTurret" Subtype="SunkenColony" />
+
+
+      <UnlockedByGroups>
+        <GroupSubtype>5346</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock>
+
 
   </ResearchBlocks>
 </Definitions>

@@ -56,6 +56,8 @@ The &lt;SpawnGroup&gt; **&lt;Description&gt;** is parsed using a Command Line sy
 
 ## Faction Parameters
 Faction parameters are still a work in progress but will allow factions to utilize different playstyles.
+* protoss (Spawn as a Protoss)
+* zerg (Spawn as a Zerg)
 * aggressive (More likely to attack and build fighting units)
 * defensive (Less likely to attack or build fighting units)
 * outsider (Spawns on a different planet than the player)
@@ -115,6 +117,8 @@ These are the settings which can be changed
 - difficulty (float) Multiplier for AI gathered resources (default 1)
 - grids (int) Limit to how many grids each Faction will make (default 20)
 - engineers (int) Limit of how many engineers each Faction should have (default 1)
+- bots (int) Limit of how many bots each Faction should have (default 3)
+- manualkits (bool) Allows admins to disable the automatic functionality on survival kits (default false)
 
 Convars can also technically be changed inside your save folder in a file called "SCConvars.xml".
 
@@ -138,6 +142,13 @@ Convars can also technically be changed inside your save folder in a file called
 - Protoss Nexus
 - Protoss Tempest
 - Protoss Stargate
+- Zerg Drop Site
+- Zerg Drone
+- Zerg Hatchery
+- Zerg Lair
+- Zerg Mutalusk
+- Zerg Hive
+- Zerg Corruptor
 (More to come, subject to change)
 
 # Creating Prefabs

@@ -121,16 +121,18 @@ namespace SpaceCraft.Utils {
 
       if( block is IMyRefinery ) {
         //return 48;
-        return subtypeName == "LargeRefinery" ? 99 : 50;
+        return subtypeName == "LargeRefinery" || subtypeName == "LargeProtossRefinery" || subtypeName == "LargeZergRefinery" ? 99 : 50;
       }
       if( block is IMyAssembler ) {
         //switch( slim.BlockDefinition.DisplayNameString ) {
         switch(subtypeName) {
           case "LargeAssembler":
           case "LargeProtossAssembler":
+          case "LargeZergAssembler":
             return 98;
           case "BasicAssembler":
           case "BasicProtossAssembler":
+          case "ZergAssembler":
             return 49;
         }
         return 48;
@@ -180,7 +182,7 @@ namespace SpaceCraft.Utils {
 
     public void Stop() {
       OrderQueue.Clear();
-      CurrentOrder = null;
+      CurrentOrder.Complete();
     }
 
     public virtual bool Execute( Order order, bool force = false ) {

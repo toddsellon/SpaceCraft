@@ -215,7 +215,7 @@ namespace SpaceCraft.Utils {
       Respond(convar, Convars.Static.Get(convar), message);
     }
 
-    public void Attack( MyCommandLine cmd, Message message ) {
+    /*public void Attack( MyCommandLine cmd, Message message ) {
       IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
       Faction faction = SpaceCraftSession.GetFactionContaining(player.PlayerID);
       if( faction == null ) return;
@@ -238,7 +238,7 @@ namespace SpaceCraft.Utils {
         }
       }
 
-    }
+    }*/
 
     public void Build( MyCommandLine cmd, Message message ) {
       IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;

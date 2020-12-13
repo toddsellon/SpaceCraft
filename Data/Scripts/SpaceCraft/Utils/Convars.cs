@@ -14,7 +14,6 @@ namespace SpaceCraft.Utils {
         if( instance == null ) {
           instance = new Convars();
           if( MyAPIGateway.Utilities.FileExistsInWorldStorage(File,typeof(Convars)) ) {
-            //instance.Spawned = true;
             instance = Open() ?? new Convars();
             instance.Spawned = true;
           } else {
@@ -29,25 +28,11 @@ namespace SpaceCraft.Utils {
     public int Grids = 20;
     public bool Debug = false;
     public int Engineers = 1;
+    public int Bots = 3;
+    public bool ManualKits = false;
     public bool Spawned = false;
 
     protected static string File = "SCConvars.xml";
-
-    // private Convars(){
-    //   bool spawned;
-    //   if( MyAPIGateway.Utilities.FileExistsInWorldStorage(File,typeof(Convars)) ) {
-    //     instance = Open() ?? new Convars();
-    //   }/* else {
-    //     Save();
-    //   }*/
-    //   // MyAPIGateway.Utilities.GetVariable<bool>("SC-Spawned", out spawned);
-    //   // if( !spawned ) {
-  	// 	// 	MyAPIGateway.Utilities.GetVariable<int>("SC-Grids", out Grids);
-  	// 	// 	MyAPIGateway.Utilities.GetVariable<float>("SC-Difficulty", out Difficulty);
-  	// 	// 	MyAPIGateway.Utilities.GetVariable<int>("SC-Engineers", out Engineers);
-  	// 	// 	MyAPIGateway.Utilities.GetVariable<bool>("SC-Debug", out Debug);
-    //   // }
-    // }
 
     private static Convars Open() {
       try {
@@ -83,25 +68,35 @@ namespace SpaceCraft.Utils {
         case "engineers":
           Int32.TryParse(value, out Engineers);
           Save();
-          return Engineers.ToString();
+          break;
         case "grids":
           Int32.TryParse(value, out Grids);
           Save();
-          return Grids.ToString();
+          break;
+        case "bots":
+          Int32.TryParse(value, out Bots);
+          Save();
+          break;
+        case "manualkits":
+          ManualKits = Boolean.Parse(value);
+          Save();
+          break;
         case "difficulty":
           float.TryParse(value, out Difficulty);
           Save();
-          return Difficulty.ToString();
+          break;
       }
 
-      return "null";
+      return Get(convar);
     }
 
     public string Get( string convar ) {
       switch( convar.ToLower() ) {
         case "engineers": return Engineers.ToString();
         case "grids": return Grids.ToString();
+        case "bots": return Bots.ToString();
         case "difficulty": return Difficulty.ToString();
+        case "manualkits": return ManualKits.ToString();
       }
       return "null";
     }

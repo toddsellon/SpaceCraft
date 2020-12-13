@@ -19,6 +19,22 @@
     </Blueprint>
 
     <Blueprint>
+      <Id>
+        <TypeId>BlueprintDefinition</TypeId>
+        <SubtypeId>StoneOreToOrganic</SubtypeId>
+      </Id>
+      <DisplayName>DisplayName_BlueprintClass_Ingots</DisplayName>
+      <Icon>Textures\GUI\Icons\ingot\ingot_class.dds</Icon>
+      <Prerequisites>
+        <Item Amount="1000" TypeId="Ore" SubtypeId="Stone" />
+      </Prerequisites>
+      <Results>
+        <Item Amount="30" TypeId="Ingot" SubtypeId="Organic" />
+      </Results>
+      <BaseProductionTimeInSeconds>10</BaseProductionTimeInSeconds>
+    </Blueprint>
+
+    <Blueprint>
         <Id>
             <TypeId>BlueprintDefinition</TypeId>
             <SubtypeId>Organic</SubtypeId>
@@ -35,6 +51,72 @@
     <Blueprint>
       <Id>
         <TypeId>BlueprintDefinition</TypeId>
+        <SubtypeId>ControlUnit</SubtypeId>
+      </Id>
+      <DisplayName>Zerg Control Unit</DisplayName>
+      <Icon>Textures\GUI\Icons\ore_biomass.dds</Icon>
+      <Prerequisites>
+        <Item Amount="30" TypeId="Ingot" SubtypeId="Organic" />
+      </Prerequisites>
+      <Result Amount="1" TypeId="Component" SubtypeId="ControlUnit" />
+      <BaseProductionTimeInSeconds>6</BaseProductionTimeInSeconds>
+      <IsPrimary>true</IsPrimary>
+    </Blueprint>
+
+    <Blueprint>
+      <Id>
+        <TypeId>BlueprintDefinition</TypeId>
+        <SubtypeId>ZergCarapace</SubtypeId>
+      </Id>
+      <DisplayName>Zerg Carapace</DisplayName>
+      <Icon>Textures\GUI\Icons\Bug.dds</Icon>
+      <Prerequisites>
+        <Item Amount="5" TypeId="Ingot" SubtypeId="Cobalt" />
+        <Item Amount="30" TypeId="Ingot" SubtypeId="Organic" />
+      </Prerequisites>
+      <Result Amount="1" TypeId="Component" SubtypeId="ZergCarapace" />
+      <BaseProductionTimeInSeconds>6</BaseProductionTimeInSeconds>
+      <IsPrimary>true</IsPrimary>
+    </Blueprint>
+
+    <Blueprint>
+      <Id>
+        <TypeId>BlueprintDefinition</TypeId>
+        <SubtypeId>VentralSacks</SubtypeId>
+      </Id>
+      <DisplayName>Ventral Sacks</DisplayName>
+      <Icon>Textures\GUI\Icons\ore_biomass.dds</Icon>
+      <Prerequisites>
+        <Item Amount="30" TypeId="Ingot" SubtypeId="Organic" />
+        <Item Amount="3" TypeId="Ingot" SubtypeId="Silver" />
+        <Item Amount="2" TypeId="Ingot" SubtypeId="Gold" />
+      </Prerequisites>
+      <Result Amount="1" TypeId="Component" SubtypeId="VentralSacks" />
+      <BaseProductionTimeInSeconds>6</BaseProductionTimeInSeconds>
+      <IsPrimary>true</IsPrimary>
+    </Blueprint>
+
+    <Blueprint>
+      <Id>
+        <TypeId>BlueprintDefinition</TypeId>
+        <SubtypeId>MetabolicGlands</SubtypeId>
+      </Id>
+      <DisplayName>Metabolic Glands</DisplayName>
+      <Icon>Textures\GUI\Icons\ore_biomass.dds</Icon>
+      <Prerequisites>
+        <Item Amount="30" TypeId="Ingot" SubtypeId="Organic" />
+        <Item Amount="1" TypeId="Ingot" SubtypeId="Uranium" />
+        <Item Amount="1" TypeId="Ingot" SubtypeId="Platinum" />
+      </Prerequisites>
+      <Result Amount="1" TypeId="Component" SubtypeId="MetabolicGlands" />
+      <BaseProductionTimeInSeconds>12</BaseProductionTimeInSeconds>
+      <IsPrimary>true</IsPrimary>
+    </Blueprint>
+
+
+    <Blueprint>
+      <Id>
+        <TypeId>BlueprintDefinition</TypeId>
         <SubtypeId>Adanium</SubtypeId>
       </Id>
       <DisplayName>Adanium</DisplayName>
@@ -46,8 +128,6 @@
       <BaseProductionTimeInSeconds>1</BaseProductionTimeInSeconds>
       <IsPrimary>true</IsPrimary>
     </Blueprint>
-
-
 
     <Blueprint>
       <Id>

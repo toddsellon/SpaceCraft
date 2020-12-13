@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <BlockVariantGroups>
+
+        <!-- Armor -->
+      <BlockVariantGroup>
+        <Id Type="MyObjectBuilder_BlockVariantGroup" Subtype="ZergArmorCubeGroup" />
+        <Icon>Textures\GUI\Icons\Cubes\light_armor_cube.dds</Icon>
+        <DisplayName>Zerg Armor Blocks</DisplayName>
+        <Description>Description_LightArmor</Description>
+        <Blocks>
+    			<Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeBlockOrganicBlock" />
+    			<Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeBlockCubeBlocksSlope" />
+    			<Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeBlockOrganicCorner" />
+    			<Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeBlockOrganicCornerInv" />
+    			<Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeRoundOrganic_Slope" />
+    			<Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeRoundOrganic_Corner" />
+    			<Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeRoundOrganic_CornerInv" />
+    			<Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallBlockOrganicBlock" />
+    			<Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallBlockOrganicSlope" />
+    			<Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallBlockOrganicCorner" />
+    			<Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallBlockOrganicCornerInv" />
+        </Blocks>
+      </BlockVariantGroup>
+
+      <BlockVariantGroup>
+        <Id Type="MyObjectBuilder_BlockVariantGroup" Subtype="ZergHeavyCubeGroup" />
+        <Icon>Textures\GUI\Icons\Cubes\heavy_armor_cube.dds</Icon>
+        <DisplayName>Zerg Heavy Armor Blocks</DisplayName>
+        <Description>Description_HeavyArmor</Description>
+        <Blocks>
+      		<Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHeavyBlockOrganicBlock" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHeavyBlockOrganicSlope" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHeavyBlockOrganicCorner" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHeavyBlockOrganicCornerInv" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallHeavyBlockOrganicBlock" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallHeavyBlockOrganicSlope" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallHeavyBlockOrganicCorner" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallHeavyBlockOrganicCornerInv" />
+        </Blocks>
+      </BlockVariantGroup>
+
+      <BlockVariantGroup>
+            <Id Type="MyObjectBuilder_BlockVariantGroup" Subtype="ZergRoundGroup" />
+            <Icon>Textures\GUI\Icons\Cubes\RoundArmorSlope.dds</Icon>
+            <DisplayName>Rounded Zerg Armor Blocks</DisplayName>
+            <Description>Description_LightArmor</Description>
+            <Blocks>
+              <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeBlockOrganicRoundSlope" />
+              <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeBlockOrganicRoundCorner" />
+              <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeBlockOrganicRoundCornerInv" />
+              <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallBlockOrganicRoundSlope" />
+              <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallBlockOrganicRoundCorner" />
+              <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallBlockOrganicRoundCornerInv" />
+            </Blocks>
+        </BlockVariantGroup>
+
+      <BlockVariantGroup>
+        <Id Type="MyObjectBuilder_BlockVariantGroup" Subtype="ZergLightRampCornerGroup" />
+        <Icon>Textures\GUI\Icons\Cubes\Corner2x1x1Base.dds</Icon>
+        <DisplayName>Zerg Armor Ramps</DisplayName>
+        <Description>Description_LightArmor</Description>
+        <Blocks>
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHalfOrganicBlock" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHalfSlopeOrganicBlock" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="HalfOrganicBlock" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="HalfSlopeOrganicBlock" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeBlockOrganicSlope2Base" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeBlockOrganicSlope2Tip" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeBlockOrganicCorner2Base" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeBlockOrganicCorner2Tip" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeBlockOrganicInvCorner2Base" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeBlockOrganicInvCorner2Tip" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallBlockOrganicSlope2Base" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallBlockOrganicSlope2Tip" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallBlockOrganicCorner2Base" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallBlockOrganicCorner2Tip" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallBlockOrganicInvCorner2Base" />
+          <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallBlockOrganicInvCorner2Tip" />
+        </Blocks>
+    </BlockVariantGroup>
+
+    <BlockVariantGroup>
+      <Id Type="MyObjectBuilder_BlockVariantGroup" Subtype="ZergHeavyRoundGroup" />
+      <Icon>Textures\GUI\Icons\Cubes\HeavyRoundArmorSlope.dds</Icon>
+      <DisplayName>Rounded Zerg Heavy Armor</DisplayName>
+      <Description>Description_HeavyArmor</Description>
+      <Blocks>
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHeavyBlockOrganicRoundSlope" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHeavyBlockOrganicRoundCorner" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHeavyBlockOrganicRoundCornerInv" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallHeavyBlockOrganicRoundSlope" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallHeavyBlockOrganicRoundCorner" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallHeavyBlockOrganicRoundCornerInv" />
+      </Blocks>
+    </BlockVariantGroup>
+
+    <BlockVariantGroup>
+      <Id Type="MyObjectBuilder_BlockVariantGroup" Subtype="ZergHeavyRampGroup" />
+      <Icon>Textures\GUI\Icons\Cubes\HeavySlope2x1x1Base.dds</Icon>
+      <DisplayName>Zerg Heavy Armor Ramps</DisplayName>
+      <Description>Description_HeavyArmor</Description>
+      <Blocks>
+  			<Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHeavyHalfOrganicBlock" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHeavyHalfSlopeOrganicBlock" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="HeavyHalfOrganicBlock" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="HeavyHalfSlopeOrganicBlock" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHeavyBlockOrganicSlope2Base" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHeavyBlockOrganicSlope2Tip" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHeavyBlockOrganicCorner2Base" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHeavyBlockOrganicCorner2Tip" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHeavyBlockOrganicInvCorner2Base" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="LargeHeavyBlockOrganicInvCorner2Tip" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallHeavyBlockOrganicSlope2Base" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallHeavyBlockOrganicSlope2Tip" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallHeavyBlockOrganicCorner2Base" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallHeavyBlockOrganicCorner2Tip" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallHeavyBlockOrganicInvCorner2Base" />
+        <Block Type="MyObjectBuilder_CubeBlock" Subtype="SmallHeavyBlockOrganicInvCorner2Tip" />
+      </Blocks>
+    </BlockVariantGroup>
+
+
+    </BlockVariantGroups>
+</Definitions>

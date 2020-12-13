@@ -7,6 +7,7 @@ using Sandbox.Common.ObjectBuilders.Definitions;
 using Sandbox.ModAPI.Interfaces;
 using Sandbox.Engine.Voxels;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using VRage;
@@ -21,15 +22,6 @@ using VRage.Game.ModAPI.Ingame.Utilities; // MyCommandLine
 
 
 namespace SpaceCraft.Utils {
-
-  public enum Progression {
-    None,
-    BasicAssembler,
-    BasicRefinery,
-    Assembler,
-    Refinery,
-    Reactor
-  };
 
   public enum Priorties {
     None,
@@ -66,7 +58,7 @@ namespace SpaceCraft.Utils {
 
 
     public static int LIMIT = 20;
-
+    public List<IMyCharacter> Bots = new List<IMyCharacter>();
     public int Engineers = 0;
     public Races Race = Races.Terran;
     public string Name;
@@ -77,13 +69,13 @@ namespace SpaceCraft.Utils {
     public SerializableVector3 Color = new SerializableVector3(0f,-0.8f,-0.306840628f);
     public Goal CurrentGoal = new Goal{ Type = Goals.Stabilize };
     private IMyCubeBlock RespawnPoint;
-    private Progression Progress = Progression.None;
-    private string Roadblock = string.Empty;
     public List<Controllable> Controlled = new List<Controllable>();
     private List<IMyFaction> Enemies = new List<IMyFaction>();
     private List<IMyEntity> Targets = new List<IMyEntity>();
     public CubeGrid MainBase;
-    private List<string> Resources = new List<string>(){"Stone","Iron","Silicon","Nickel"};
+    private static readonly List<string> DefaultResources = new List<string>(){"Stone","Iron","Silicon","Nickel"};
+    //private List<string> Resources = new List<string>(){"Stone","Iron","Silicon","Nickel"};
+    public List<string> Resources = DefaultResources.ToList();
     protected static Random Randy = new Random();
     protected int Tick = 0;
     public MyPlanet Homeworld;
@@ -130,6 +122,13 @@ namespace SpaceCraft.Utils {
 
       if( Tick == 99 ) {
         Tick = 0;
+
+        // Cleanup Bots
+        foreach( IMyCharacter bot in Bots.ToList() ) {
+          if( bot == null || bot.Closed || bot.MarkedForClose )
+            Bots.Remove(bot);
+        }
+
         if( Spawning || CommandLine.Switch("spawned") ) return;
 
         if( Engineers < Convars.Static.Engineers ) {
@@ -139,6 +138,17 @@ namespace SpaceCraft.Utils {
         }
 
       }
+    }
+
+    public string GetCharacterModel() {
+
+      if( Founder != null)
+        foreach(MyCharacterDefinition character in MyDefinitionManager.Static.Characters ) {
+          if( character.Name == Founder.DisplayName )
+            return character.Name;
+        }
+
+      return "Astronaut";
     }
 
     private void RemapDocking() {
@@ -343,6 +353,13 @@ namespace SpaceCraft.Utils {
       }
     }
 
+    public void BotSpawned( IMyCharacter bot ) {
+      if(Convars.Static.Debug) MyAPIGateway.Utilities.ShowMessage( "BotSpawned", bot.ToString() );
+      Bots.Add(bot);
+      Spawning = false;
+      CurrentGoal.Complete();
+    }
+
     public void Construct() {
 
       if( Spawning || CurrentGoal == null ) return;
@@ -356,10 +373,12 @@ namespace SpaceCraft.Utils {
         MainBase = GetBestRefinery();
         if( MainBase.DockedTo == null ) {
           MainBase.Balance = CurrentGoal.Balance;
-          MainBase.AddQueueItems(CurrentGoal.Prefab.GetBattery(),true);
+          // MainBase.AddQueueItems(CurrentGoal.Prefab.GetBattery(),true);
+          MainBase.AddQueueItems(CurrentGoal.Balance,true);
         } else {
           MainBase.DockedTo.Balance = CurrentGoal.Balance;
-          MainBase.DockedTo.AddQueueItems(CurrentGoal.Prefab.GetBattery(),true);
+          // MainBase.DockedTo.AddQueueItems(CurrentGoal.Prefab.GetBattery(),true);
+          MainBase.DockedTo.AddQueueItems(CurrentGoal.Balance,true);
         }
 
 
@@ -372,8 +391,12 @@ namespace SpaceCraft.Utils {
 
         Building = true;
         MatrixD location = GetPlacementLocation( CurrentGoal.Prefab );
-        //CubeGrid grid = new CubeGrid( CubeGrid.Spawn( CurrentGoal.Prefab, location, this) );
-        if( CurrentGoal.Prefab.IsStatic ) { // Haven't gotten static alignment to work yet
+
+        if( CurrentGoal.Prefab.Bot ) {
+          Spawning = true;
+          SpaceCraftSession.SpawnBot( CurrentGoal.Prefab.BotDefinition.Id.SubtypeName, location.Translation, BotSpawned );
+
+        } else if( CurrentGoal.Prefab.IsStatic ) { // Haven't gotten static alignment to work yet
           CubeGrid grid = new CubeGrid( CubeGrid.Spawn( CurrentGoal.Prefab, location, this) );
           if( grid == null || grid.Grid == null ) {
             CurrentGoal.Complete();
@@ -391,6 +414,7 @@ namespace SpaceCraft.Utils {
         CurrentGoal.Progress();
 
       } else if( CurrentGoal.Step == Steps.Started ) {
+
         // Facilitate Production
         CubeGrid grid = CurrentGoal.Entity as CubeGrid;
         if( grid == null || grid.ConstructionSite == null ) {
@@ -406,8 +430,10 @@ namespace SpaceCraft.Utils {
     public Prefab GetConstructionProject() {
       Prefab best = null;
       float priority = 0f;
+      // MyAPIGateway.Utilities.ShowMessage( "GetConstructionProject", String.Join(",",Resources) );
       foreach( Prefab prefab in Prefab.Prefabs ) {
         float p = Prioritize(prefab);
+        // MyAPIGateway.Utilities.ShowMessage( "GetConstructionProject", prefab.SubtypeId + ": " + p.ToString() );
         if( best == null || p > priority ) {
           best = prefab;
           priority = p;
@@ -430,27 +456,21 @@ namespace SpaceCraft.Utils {
         MatrixD m = last.Grid.WorldMatrix;
         Vector3D p = m.Translation;
         MyPlanet planet = SpaceCraftSession.GetClosestPlanet(p);
-        // if( prefab.IsStatic && Tier >= Tech.Space ) {
-        //   // TODO: Determine resource wanted
-        //   string resource = "Uranium";
-        //   if( Resources.Contains("Uranium") && !Resources.Contains("Platinum") ) {
-        //     resource = "Platinum";
-        //   }
-        //   planet = SpaceCraftSession.GetClosestPlanet(p, Colonized, resource);
-        //   Colonized.Add( planet );
-        // } else {
-        //   planet = SpaceCraftSession.GetClosestPlanet(p);
-        // }
-        //Quaternion q = Quaternion.CreateFromRotationMatrix(m);
-        //q.W += Controlled.Count;
 
         Vector3 blocked = last.Grid.LocalAABB.Size; // size of last base
-        BoundingBox box = prefab.Definition.BoundingBox; // box around prefab
+        BoundingBox box = prefab.Definition == null ? new BoundingBox(Vector3.Zero,new Vector3(1,1,1)) : prefab.Definition.BoundingBox; // box around prefab
+        // BoundingBox box = prefab.Definition.BoundingBox; // box around prefab
 
         Vector3D offset = m.Forward + m.Up;
-        if( prefab.IsStatic ) {
+        if( prefab.Bot ) {
+          // IMyEntity enemy = GetClosestEnemy(p);
+          IMyPlayer enemy = GetClosestEnemy(p);
+          if( enemy != null ) {
+            Vector3D towards = Vector3D.Normalize(enemy.GetPosition() - p);
+            p = Vector3D.Distance(enemy.GetPosition(),p) < 140 ? enemy.GetPosition() - (towards*5) : enemy.GetPosition() - (towards*140);
+          }
+        } else if( prefab.IsStatic ) {
           p = p + (m.Forward*100) + (m.Up*100);
-          //p = p + blocked + (offset*(size+10)*Controlled.Count);
         } else {
           p = p + blocked + (box.Size*2);
         }
@@ -467,10 +487,10 @@ namespace SpaceCraft.Utils {
         }
 
         else {
-          // if( prefab.IsStatic )
-          //   position = position + (up * (box.Height *.5) );
-          // else
-          if( !prefab.IsStatic )
+          if( prefab.IsStatic )
+            position = position + (up * (box.Height *.05) );
+          else
+          // if( !prefab.IsStatic )
             //position = position + (up * (box.Height*.75) );
             position = position + (up * (box.Width) );
         }
@@ -542,51 +562,6 @@ namespace SpaceCraft.Utils {
         return MyAPIGateway.Session.Factions.GetReputationBetweenPlayerAndFaction(playerId, MyFaction.FactionId);
       return 0;
     }
-
-    public static MatrixD CalculateDerelictSpawnMatrix(MatrixD existingMatrix, Vector3D rotationValues) {
-
-			//X: Pitch - Up/Forward | +Up -Down
-			//Y: Yaw   - Forward/Up | +Right -Left
-			//Z: Roll  - Up/Forward | +Right -Left
-
-			var resultMatrix = existingMatrix;
-
-			if(rotationValues.X != 0) {
-
-				var translation = resultMatrix.Translation;
-				var fowardPos = resultMatrix.Forward * 45;
-				var upPos = resultMatrix.Up * 45;
-				var pitchForward = Vector3D.Normalize(resultMatrix.Up * rotationValues.X + fowardPos);
-				var pitchUp = Vector3D.Normalize(resultMatrix.Backward * rotationValues.X + upPos);
-				resultMatrix = MatrixD.CreateWorld(translation, pitchForward, pitchUp);
-
-			}
-
-			if(rotationValues.Y != 0) {
-
-				var translation = resultMatrix.Translation;
-				var fowardPos = resultMatrix.Forward * 45;
-				var upPos = resultMatrix.Up * 45;
-				var yawForward = Vector3D.Normalize(resultMatrix.Right * rotationValues.Y + fowardPos);
-				var yawUp = resultMatrix.Up;
-				resultMatrix = MatrixD.CreateWorld(translation, yawForward, yawUp);
-
-			}
-
-			if(rotationValues.Z != 0) {
-
-				var translation = resultMatrix.Translation;
-				var fowardPos = resultMatrix.Forward * 45;
-				var upPos = resultMatrix.Up * 45;
-				var rollForward = resultMatrix.Forward;
-				var rollUp = Vector3D.Normalize(resultMatrix.Right * rotationValues.Z + upPos);
-				resultMatrix = MatrixD.CreateWorld(translation, rollForward, rollUp);
-
-			}
-
-			return resultMatrix;
-
-		}
 
     public Controllable GetControllable( IMyEntity entity ) {
       foreach( Controllable c in Controlled ) {
@@ -769,14 +744,21 @@ namespace SpaceCraft.Utils {
           resources.Add("Gold",(VRage.MyFixedPoint)0.5*Convars.Static.Difficulty);
           goto default;
         default:
-          resources.Add("Iron",(VRage.MyFixedPoint)2*Convars.Static.Difficulty);
-          resources.Add("Nickel",(VRage.MyFixedPoint)0.2*Convars.Static.Difficulty);
-          resources.Add("Cobalt",(VRage.MyFixedPoint)0.4*Convars.Static.Difficulty);
           if( Race == Races.Terran )
             resources.Add("Ice",(VRage.MyFixedPoint)6*Convars.Static.Difficulty);
-          resources.Add("Magnesium",(VRage.MyFixedPoint)1.5*Convars.Static.Difficulty);
-          resources.Add("Silicon",(VRage.MyFixedPoint)0.2*Convars.Static.Difficulty);
-          //resources.Add("Stone",(VRage.MyFixedPoint)0.05*Convars.Static.Difficulty);
+
+          resources.Add("Cobalt",(VRage.MyFixedPoint)0.4*Convars.Static.Difficulty);
+
+          if( Race != Races.Zerg ) {
+            resources.Add("Iron",(VRage.MyFixedPoint)2*Convars.Static.Difficulty);
+            resources.Add("Nickel",(VRage.MyFixedPoint)0.2*Convars.Static.Difficulty);
+            resources.Add("Magnesium",(VRage.MyFixedPoint)1.5*Convars.Static.Difficulty);
+            resources.Add("Silicon",(VRage.MyFixedPoint)0.2*Convars.Static.Difficulty);
+          } else {
+            //resources["Stone"] *= 2;
+            resources["Cobalt"] *= 2;
+          }
+
           break;
       }
       return resources;
@@ -1010,6 +992,9 @@ namespace SpaceCraft.Utils {
           if( c.Entity == null ) continue;
           MyAPIGateway.Entities.RemoveEntity( c.Entity );
         }
+      Resources = DefaultResources.ToList();
+      if( Race == Races.Zerg )
+        Resources.Add("Organic");
       Controlled = new List<Controllable>();
       Colonized = new List<MyPlanet>();
       Engineers = 0;
@@ -1083,23 +1068,70 @@ namespace SpaceCraft.Utils {
       return MatrixD.Zero;
     }
 
-    public IMyEntity GetClosestEnemy( Vector3D point, IMyFaction faction = null ) {
+    public IMyPlayer GetClosestEnemy( Vector3D point, IMyFaction faction = null ) {
       //BoundingSphereD sphere = new BoundingSphereD( center, (double)5000 );
       //List<IMyEntity> entities = MyAPIGateway.Entities.GetEntitiesInSphere( ref sphere );
+      List<IMyPlayer> players = new List<IMyPlayer>();
+      MyAPIGateway.Players.GetPlayers(players);
+      IMyPlayer best = null;
+      double distance = 0.0f;
+      foreach( IMyPlayer player in players ) {
+        IMyFaction owner = MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.PlayerID);
+
+        if( owner != null && MyRelationsBetweenFactions.Enemies != MyAPIGateway.Session.Factions.GetRelationBetweenFactions(owner.FactionId, MyFaction.FactionId))
+          continue;
+
+        double d = Vector3D.Distance( player.GetPosition(), point );
+        if( best == null || d < distance ) {
+          best = player;
+          distance = d;
+        }
+      }
+
+      return best;
+    }
+
+    public IMyEntity GetClosestEnemy_old( Vector3D point, IMyFaction faction = null ) {
+      //BoundingSphereD sphere = new BoundingSphereD( center, (double)5000 );
+      //List<IMyEntity> entities = MyAPIGateway.Entities.GetEntitiesInSphere( ref sphere );
+      HashSet<IMyEntity> entities = new HashSet<IMyEntity>();
+			MyAPIGateway.Entities.GetEntities(entities);
       IMyEntity best = null;
       double distance = 0.0f;
-      foreach( IMyEntity entity in Targets ) {
+      foreach( IMyEntity entity in entities ) {
+        IMyCubeGrid grid = entity as IMyCubeGrid;
+        IMyCharacter character = entity as IMyCharacter;
         IMyFaction owner = null;
+        IMyPlayer player = null;
+        List<long> owners = grid == null ? null : grid.GridSizeEnum == MyCubeSize.Large ? grid.BigOwners : grid.SmallOwners;
         if( faction != null ) {
-          if( entity is IMyCubeGrid ) {
-            IMyCubeGrid grid = entity as IMyCubeGrid;
-            owner = MyAPIGateway.Session.Factions.TryGetPlayerFaction(grid.GridSizeEnum == MyCubeSize.Large ? grid.BigOwners[0] : grid.SmallOwners[0]);
+          if( grid != null ) {
+            if( owners == null || owners.Count == 0 ) continue;
+            owner = MyAPIGateway.Session.Factions.TryGetPlayerFaction(owners[0]);
             if( owner != faction ) continue;
-          }/* else if( entity is IMyCharacter ) {
-            owner = MyAPIGateway.Session.Factions.TryGetPlayerFaction();
-            if( owner != faction ) continue;
-          }*/
+          } else if( character != null ) {
+            player = MyAPIGateway.Players.GetPlayerControllingEntity(character);
+            if( player == null ) continue;
+            owner = MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.PlayerID);
+
+          }
+          if( faction != null && owner != faction ) continue;
+        } else {
+          if( grid != null ) {
+            if( owners == null || owners.Count == 0 ) continue;
+            owner = MyAPIGateway.Session.Factions.TryGetPlayerFaction(owners[0]);
+          } else if( character != null ) {
+            player = MyAPIGateway.Players.GetPlayerControllingEntity(character);
+            if( player == null ) continue;
+            owner = MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.PlayerID);
+          } else {
+            continue;
+          }
         }
+
+        if( owner == null || MyRelationsBetweenFactions.Enemies != MyAPIGateway.Session.Factions.GetRelationBetweenFactions(owner.FactionId, MyFaction.FactionId))
+          continue;
+
         double d = Vector3D.Distance( entity.WorldMatrix.Translation, point );
         if( best == null || d < distance ) {
           best = entity;
@@ -1130,11 +1162,11 @@ namespace SpaceCraft.Utils {
         if( Homeworld == null ) {
           Homeworld = SpaceCraftSession.ClosestPlanet;
         }
-        Colonized.Add( Homeworld );
+        // Colonized.Add( Homeworld );
         //int rand = Randy.Next(Homeworld.Size.X);
-        //Vector3 p = new Vector3(Randy.Next(-Homeworld.Size.X,Homeworld.Size.X),Randy.Next(-Homeworld.Size.Y,Homeworld.Size.Y),Randy.Next(-Homeworld.Size.Z,Homeworld.Size.Z)) + Homeworld.WorldMatrix.Translation;
-        Vector3 p = new Vector3(Randy.Next(Homeworld.Size.X),Randy.Next(Homeworld.Size.Y),Randy.Next(Homeworld.Size.Z)) + Vector3.Normalize(Homeworld.PositionLeftBottomCorner);
-        //position = planet.GetClosestSurfacePointLocal( ref p );
+        Vector3 p = new Vector3(Randy.Next(-Homeworld.Size.X,Homeworld.Size.X),Randy.Next(-Homeworld.Size.Y,Homeworld.Size.Y),Randy.Next(-Homeworld.Size.Z,Homeworld.Size.Z)) + Homeworld.WorldMatrix.Translation;
+        // Vector3 p = new Vector3(Randy.Next(Homeworld.Size.X),Randy.Next(Homeworld.Size.Y),Randy.Next(Homeworld.Size.Z)) + Vector3.Normalize(Homeworld.PositionLeftBottomCorner);
+
         position = Homeworld.GetClosestSurfacePointGlobal( p );
         Homeworld.CorrectSpawnLocation(ref position,250f);
       }
@@ -1220,8 +1252,10 @@ namespace SpaceCraft.Utils {
     //   base.Init(session);
     // }
 
+
     protected float Prioritize( Prefab prefab ) {
       if( prefab.Race != Race ) return 0;
+      if( !String.IsNullOrWhiteSpace(prefab.Faction) && prefab.Faction != Name ) return 0;
 
       foreach( string resource in prefab.Cost.Keys ) {
         // Doesn't have access to resources
@@ -1255,6 +1289,11 @@ namespace SpaceCraft.Utils {
         priority *= prefab.Atmosphere && !prefab.IsStatic ? 2 : 1;
       else if( prefab.Atmosphere ) {
         return 0f;
+      }
+
+      if( prefab.Bot && Bots.Count < Convars.Static.Bots && MyStats.Ratio["Workers"] >= MyStats.Desired["Workers"] ) {
+        priority *= 2000;
+        return priority;
       }
 
       //if( CommandLine.Switch("aerial") && !prefab.Flying && !prefab.IsStatic ) return 0f;
@@ -1353,7 +1392,7 @@ namespace SpaceCraft.Utils {
           Resources.Add("Magnesium");
         }
 
-        if( subtypeName == "LargeRefinery" || subtypeName == "LargeProtossRefinery" ) {
+        if( subtypeName == "LargeRefinery" || subtypeName == "LargeProtossRefinery" || subtypeName == "LargeZergRefinery" ) {
           if( Tier == Tech.Established ) {
             Resources.Add("Silver");
             Resources.Add("Gold");

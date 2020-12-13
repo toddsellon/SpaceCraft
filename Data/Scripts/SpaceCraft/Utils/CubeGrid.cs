@@ -348,13 +348,15 @@ namespace SpaceCraft.Utils {
 					FactoryTier = (uint)Math.Max(FactoryTier,1);
 					RefineryTier = (uint)Math.Max(RefineryTier,1);
 				} else {
-					FactoryTier = (uint)Math.Max(FactoryTier,block.FatBlock.BlockDefinition.SubtypeId == "LargeAssembler" ? 3 : 2);
+					string subtype = block.FatBlock.BlockDefinition.SubtypeId;
+					FactoryTier = (uint)Math.Max(FactoryTier,subtype == "LargeAssembler" || subtype == "LargeProtossAssembler" || subtype == "LargeZergAssembler" ? 3 : 2);
 				}
 			}
 			blocks = GetBlocks<IMyRefinery>(null,true);
 			foreach( IMySlimBlock block in blocks ) {
 				if( !block.FatBlock.IsFunctional ) continue;
-				RefineryTier = (uint)Math.Max(RefineryTier,block.FatBlock.BlockDefinition.SubtypeId == "LargeRefinery" ? 3 : 2);
+				string subtype = block.FatBlock.BlockDefinition.SubtypeId;
+				RefineryTier = (uint)Math.Max(RefineryTier,subtype == "LargeRefinery" || subtype == "LargeProtossRefinery" || subtype == "LargeZergRefinery" ? 3 : 2);
 			}
 			//IMySmallMissileLauncher IMyUserControllableGun
 			if( Drills || IsStatic )
@@ -582,11 +584,15 @@ namespace SpaceCraft.Utils {
 			IMyInventory inventory = null;
 			List<IMyInventoryItem> items = null;
 			if( block is IMyAssembler ) {
-				if( block.BlockDefinition.TypeIdString == "MyObjectBuilder_SurvivalKit" )
+				if( block.BlockDefinition.TypeIdString == "MyObjectBuilder_SurvivalKit" ) {
+					IMyProductionBlock kit = block as IMyProductionBlock;
+					if( Convars.Static.ManualKits && (kit.IsQueueEmpty || !kit.IsProducing) )
+						kit.AddQueueItem( OBTypes.StoneToOre, (VRage.MyFixedPoint)1 );
 					return new CubeGrid.Item {
 						Id = OBTypes.Stone,
 						Amount = (VRage.MyFixedPoint)500
 					};
+				}
 
 				IMyAssembler ass = block as IMyAssembler;
 				if( ass.IsQueueEmpty ) return null;
@@ -689,11 +695,14 @@ namespace SpaceCraft.Utils {
 					IMyInventory inv = block.GetInventory(i);
 					if( inv == null ) continue;
 					List<IMyInventoryItem> items = inv.GetItems();
-					foreach( IMyInventoryItem item in items ) {
+					for( int j = items.Count-1; j >= 0; j-- ) {
+						IMyInventoryItem item = items[j];
+					// foreach( IMyInventoryItem item in items ) {
 						string subtypeName = item.Content.SubtypeName;
 
 						if( Balance.ContainsKey(subtypeName) ) {
-							VRage.MyFixedPoint diff = (VRage.MyFixedPoint)Math.Max(item.Amount.ToIntSafe()-Balance[subtypeName],0);
+							//VRage.MyFixedPoint diff = (VRage.MyFixedPoint)Math.Max(item.Amount.ToIntSafe()-Balance[subtypeName],0);
+							MyFixedPoint original = (MyFixedPoint)Balance[subtypeName];
 
 							Balance[subtypeName] = (int)Math.Max(Balance[subtypeName]-item.Amount.ToIntSafe(),0);
 							if( Balance[subtypeName] <= 0 ) {
@@ -701,7 +710,13 @@ namespace SpaceCraft.Utils {
 								// if( Balance.Count == 0 )
 								// 	Balance = null;
 							}
-							inv.RemoveItemsOfType(diff, new SerializableDefinitionId(item.Content.TypeId, subtypeName) );
+
+							if( item.Amount > original ) {
+								item.Amount -= original;
+							} else {
+								inv.RemoveItemsAt(j);
+							}
+							// inv.RemoveItemsOfType(diff, new SerializableDefinitionId(item.Content.TypeId, subtypeName) );
 							break;
 						}
 					}
@@ -744,6 +759,31 @@ namespace SpaceCraft.Utils {
 				//from.TransferItemsFrom(to, item, item.Amount);
 				to.Add( item, item.Amount );
 			}
+		}
+
+		public bool AddQueueItems( Dictionary<string,int> components, bool clear = false ) {
+			if( components == null ) return true;
+			IMyAssembler ass = GetAssembler();
+			if( ass == null ) return false;
+
+			if( clear ) ass.ClearQueue();
+
+			foreach( string component in components.Keys ) {
+				MyDefinitionId id = new MyDefinitionId(OBTypes.Component,component);
+				MyBlueprintDefinitionBase blueprint = null;
+				MyDefinitionManager.Static.TryGetComponentBlueprintDefinition(id, out blueprint);
+				if( blueprint == null ) {
+					blueprint = SpaceCraftSession.GetBlueprintDefinition(id.SubtypeName);
+
+					if( blueprint == null ) {
+						if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( "AddQueueItems", "DBP was null:" + id.ToString() );
+						return false;
+					}
+				}
+				ass.AddQueueItem( blueprint, (MyFixedPoint)components[component] );
+			}
+
+			return true;
 		}
 
 		public bool AddQueueItems( Prefab prefab ) {
@@ -1025,7 +1065,7 @@ namespace SpaceCraft.Utils {
       // }
 			//
 			// MyAPIGateway.Entities.RemapObjectBuilderCollection(grids);
-
+			long ownerId = owner != null && owner.MyFaction != null ? owner.MyFaction.FounderId : 0;
       foreach( MyObjectBuilder_CubeGrid grid in prefab.CubeGrids ) {
 				//MyPositionAndOrientation po = grid.PositionAndOrientation ?? new MyPositionAndOrientation(ref matrix);
 				// if( prefab.SubtypeId ) {
@@ -1053,11 +1093,11 @@ namespace SpaceCraft.Utils {
 				// 	grid.PositionAndOrientation = new MyPositionAndOrientation(ref offset);
 				// }
 
-				long ownerId = owner != null && owner.MyFaction != null ? owner.MyFaction.FounderId : 0;
+
 				foreach( MyObjectBuilder_CubeBlock block in grid.CubeBlocks ) {
 					block.EntityId = (long)0;
 					block.Owner = ownerId;
-					//block.BuiltBy = ownerId;
+					block.BuiltBy = ownerId;
 					block.ShareMode = MyOwnershipShareModeEnum.Faction;
 					if( block.ColorMaskHSV == DefaultColor )
 						block.ColorMaskHSV = owner.Color;
@@ -1079,7 +1119,7 @@ namespace SpaceCraft.Utils {
 
 				if( g == null ) {
 	        g = entity as IMyCubeGrid;
-					//g.ChangeGridOwnership(ownerId, MyOwnershipShareModeEnum.Faction);
+					g.ChangeGridOwnership(ownerId, MyOwnershipShareModeEnum.Faction);
 
 					// Double check them really needed?
 					// List<IMySlimBlock> blocks = new List<IMySlimBlock>();
@@ -1096,7 +1136,7 @@ namespace SpaceCraft.Utils {
 
 
 				} else {
-					//(entity as IMyCubeGrid).ChangeGridOwnership(ownerId, MyOwnershipShareModeEnum.Faction);
+					(entity as IMyCubeGrid).ChangeGridOwnership(ownerId, MyOwnershipShareModeEnum.Faction);
 					subgrids.Add(entity as IMyCubeGrid);
 				}
       }
@@ -1366,7 +1406,9 @@ namespace SpaceCraft.Utils {
 						IMyInventory inv = block.FatBlock.GetInventory(i);
 						if( inv == null ) continue;
 						List<IMyInventoryItem> items = inv.GetItems();
-						foreach( IMyInventoryItem item in items ) {
+						for( int j = items.Count; j >= 0; j-- ) {
+							IMyInventoryItem item = items[j];
+						//foreach( IMyInventoryItem item in items ) {
 							string subtypeName = item.Content.SubtypeName;
 
 							if( Balance.ContainsKey(subtypeName) ) {

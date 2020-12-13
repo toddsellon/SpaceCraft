@@ -63,7 +63,7 @@
                 <TypeId>Ingot</TypeId>
                 <SubtypeId>Organic</SubtypeId>
             </Id>
-            <DisplayName>DisplayName_Item_Organic</DisplayName>
+            <DisplayName>Organic Slurry</DisplayName>
             <Icon>Textures\GUI\Icons\ore_biomass.dds</Icon>
             <Size>
                 <X>0.07</X>

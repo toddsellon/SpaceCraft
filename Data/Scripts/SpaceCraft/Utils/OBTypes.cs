@@ -26,6 +26,8 @@ namespace SpaceCraft.Utils {
     public static MyDefinitionId Uranium;
     public static MyDefinitionId Gravel;
     public static MyDefinitionId Drill;
+    public static MyDefinitionId StoneToOre;
+
     //public static MyDefinitionId Magazine;
 
 
@@ -49,7 +51,7 @@ namespace SpaceCraft.Utils {
       Ice = MyDefinitionId.Parse("MyObjectBuilder_Ore/Ice");
       Uranium = MyDefinitionId.Parse("MyObjectBuilder_Ingot/Uranium");
       Drill = MyDefinitionId.Parse( "MyObjectBuilder_PhysicalGunObject/HandDrillItem" );
-
+      StoneToOre = MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/StoneOreToIngotBasic");
       AnyOre = new MyDefinitionId(Ore);
       Turret = MyObjectBuilderType.Parse("MyObjectBuilder_LargeGatlingTurret");
       Hydrogen = MyDefinitionId.Parse("MyObjectBuilder_GasProperties/Hydrogen");

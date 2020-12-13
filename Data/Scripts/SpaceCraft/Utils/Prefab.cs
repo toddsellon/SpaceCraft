@@ -24,6 +24,8 @@ namespace SpaceCraft.Utils {
     public bool Fighter = false;
     public bool Worker = false;
     public bool Atmosphere = false;
+    public bool Bot = false;
+    public MyBotDefinition BotDefinition;
     public Tech Teir = Tech.Primitive;
     public Races Race = Races.Terran;
     public static readonly SerializableVector3 DefaultColor = new SerializableVector3(0.575f,0.150000036f,0.199999958f);
@@ -48,15 +50,58 @@ namespace SpaceCraft.Utils {
     }
 
     public void Init() {
-      if( SubtypeId == String.Empty && Definition == null ) return;
+      if( SubtypeId == String.Empty && Definition == null && !Bot ) return;
 
       if( Definition == null )
         Definition = MyDefinitionManager.Static.GetPrefabDefinition(SubtypeId);
 
-      if( Definition == null ) return;
-
+      if( Definition == null && !Bot ) return;
 
       Prefabs.Add( this );
+
+      if( BotDefinition != null ) {
+
+        MyAnimalBotDefinition animal = BotDefinition as MyAnimalBotDefinition;
+        MyHumanoidBotDefinition human = BotDefinition as MyHumanoidBotDefinition;
+        if( animal == null && human == null ) return;
+        if( animal != null ) {
+          switch( animal.DisplayNameString ) {
+            default:
+              Count = Price = 50;
+              Components.Add("Organic",25);
+              // Components.Add("ControlUnit",10);
+              Cost.Add("Organic",75);
+              Fighter = true;
+              Race = Races.Zerg;
+              break;
+            // case "Mutalusk":
+            //   Count = 1000;
+            //   Components.Add("Organic",500);
+            //   Components.Add("VentralSacks",5);
+            //   Cost.Add("Organic",500);
+            //   Cost.Add("Gold",10);
+            //   Cost.Add("Silver",15);
+            //
+            //   Fighter = true;
+            //   Flying = true;
+            //   Spacecraft = true;
+            //   break;
+            case "Ultralusk":
+              Count = Price = 10000;
+              Components.Add("Organic",5000);
+              Components.Add("ZergCarapace",150);
+              Components.Add("MetabolicGlands",15);
+              Cost.Add("Organic",5000);
+              Cost.Add("Cobalt",500);
+              Cost.Add("Uranium",15);
+              Cost.Add("Platinum",15);
+              Race = Races.Zerg;
+              Fighter = true;
+              break;
+          }
+        }
+        return;
+      }
 
       if( Definition.CubeGrids == null ) return;
 
@@ -128,11 +173,31 @@ namespace SpaceCraft.Utils {
             continue;
           }
           if( block is MyObjectBuilder_Assembler ) {
-            FactoryTier = (block.SubtypeName == "LargeAssembler" || block.SubtypeName == "LargeProtossAssembler") ? 3 : Math.Max(FactoryTier,2);
+            switch(block.SubtypeName) {
+              case "LargeAssembler":
+              case "LargeProtossAssembler":
+              case "LargeZergAssembler":
+                FactoryTier = 3;
+                break;
+              default:
+                FactoryTier = Math.Max(FactoryTier,2);
+                break;
+            }
+            //FactoryTier = (block.SubtypeName == "LargeAssembler" || block.SubtypeName == "LargeProtossAssembler") ? 3 : Math.Max(FactoryTier,2);
             continue;
           }
           if( block is MyObjectBuilder_Refinery ) {
-            RefineryTier = (block.SubtypeName == "LargeRefinery" || block.SubtypeName == "LargeProtossRefinery") ? 3 : Math.Max(RefineryTier,2);
+            switch(block.SubtypeName) {
+              case "LargeRefinery":
+              case "LargeProtossRefinery":
+              case "LargeZergRefinery":
+                RefineryTier = 3;
+                break;
+              default:
+                RefineryTier = Math.Max(RefineryTier,2);
+                break;
+            }
+            // RefineryTier = (block.SubtypeName == "LargeRefinery" || block.SubtypeName == "LargeProtossRefinery") ? 3 : Math.Max(RefineryTier,2);
             continue;
           }
           if( block is MyObjectBuilder_MotorSuspension ) {
@@ -232,7 +297,8 @@ namespace SpaceCraft.Utils {
 
     // Returns the cost of the first battery, minumum required to spawn
     public Dictionary<string,int> GetBalance() {
-      if( Definition == null ) return null;
+      if( Definition == null ) return new Dictionary<string,int>(Components);
+
       MyObjectBuilder_BatteryBlock battery = GetBattery();
       if( battery == null ) return null;
 
@@ -254,7 +320,7 @@ namespace SpaceCraft.Utils {
       return null;
     }
 
-    public static Prefab Add( string subtypeId, string faction, Races race ) {
+    public static Prefab Add( string subtypeId, Races race, string faction ) {
       Prefab prefab = Prefab.Get(subtypeId);
       if( prefab == null ) {
         prefab = new Prefab{
@@ -263,6 +329,8 @@ namespace SpaceCraft.Utils {
           Race = race
         };
         prefab.Init();
+        // MyAPIGateway.Utilities.ShowMessage( "Prefab.Add", subtypeId + ": " + String.Join(",",prefab.Cost.Keys) );
+        // MyAPIGateway.Utilities.ShowMessage( "Prefab.Add", subtypeId + ": " + (prefab. IsStatic ? "Static" : "Not static") );
       }
       return prefab;
     }

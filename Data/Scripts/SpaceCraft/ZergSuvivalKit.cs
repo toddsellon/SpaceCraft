@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
-using VRage;
 using SpaceCraft;
 using SpaceCraft.Utils;
+using VRage;
 using Sandbox.ModAPI;
 using Sandbox.Game.Entities;
 using Sandbox.Game.AI;
@@ -24,11 +24,10 @@ using VRage.Game.Entity;
 
 namespace SpaceCraft {
 
-	[MyEntityComponentDescriptor(typeof(MyObjectBuilder_SurvivalKit), false, "SurvivalKit", "SurvivalKitLarge", "ProtossSurvivalKit", "ProtossSurvivalKitLarge")]
-	public class SurvivalKit : MyGameLogicComponent {
+	[MyEntityComponentDescriptor(typeof(MyObjectBuilder_SurvivalKit), false, "ZergSurvivalKit")]
+	public class ZergSurvivalKit : MyGameLogicComponent {
 
 		public IMyProductionBlock block;
-		public MyDefinitionId gravel;
 		public MyDefinitionId stone;
 		public VRage.MyFixedPoint amount = (VRage.MyFixedPoint)10;
 
@@ -36,20 +35,15 @@ namespace SpaceCraft {
 			//NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
 
 			block = Entity as IMyProductionBlock;
-			stone = MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/StoneOreToIngotBasic");
-			gravel = MyDefinitionId.Parse("MyObjectBuilder_Ingot/Stone");
-
-			if( !Convars.Static.ManualKits )
-				NeedsUpdate = MyEntityUpdateEnum.EACH_100TH_FRAME;
+			stone = MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/StoneOreToOrganic");
+			NeedsUpdate = MyEntityUpdateEnum.EACH_100TH_FRAME;
 		}
 
 
 		//public override void UpdateAfterSimulation() {
 		public override void UpdateAfterSimulation100() {
 			//MyInventoryBase inv = block.GetInventoryBase();
-			if( block == null ) return;
-
-			if( Convars.Static.ManualKits ) {
+			if( block == null ) {
 				NeedsUpdate = MyEntityUpdateEnum.NONE;
 				return;
 			}
@@ -59,10 +53,7 @@ namespace SpaceCraft {
 			if( inv == null ) return;
 
 			if( block.IsQueueEmpty || !block.IsProducing )
-				//block.AddQueueItem( stone, amount );
-				block.AddQueueItem( OBTypes.StoneToOre, amount );
-
-			inv.RemoveItemsOfType( amount, gravel );
+				block.AddQueueItem( stone, amount );
 
 			// if( (int)(inv.CurrentVolume) < (int)(inv.MaxVolume) / 2 )
 			// 	inv.AddItems((VRage.MyFixedPoint)1, new MyObjectBuilder_Ore(){

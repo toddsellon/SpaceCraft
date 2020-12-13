@@ -106,5 +106,35 @@
     </AmmoMagazines>
   </Weapon>
 
+  <Weapon>
+      <Id>
+        <TypeId>WeaponDefinition</TypeId>
+        <SubtypeId>SporeColony</SubtypeId>
+      </Id>
+      <ProjectileAmmoData RateOfFire="600" ShootSoundName="WepGatlingTurretShot" ShotsInBurst="180" />
+      <ReleaseTimeAfterFire>204</ReleaseTimeAfterFire>
+      <DeviateShotAngle>0.4</DeviateShotAngle>
+      <MuzzleFlashLifeSpan>40</MuzzleFlashLifeSpan>
+      <AmmoMagazines>
+        <AmmoMagazine Subtype="Spores" />
+      </AmmoMagazines>
+      <ReloadTime>6000</ReloadTime>
+    </Weapon>
+
+    <Weapon>
+      <Id>
+        <TypeId>WeaponDefinition</TypeId>
+        <SubtypeId>SmallSporeColony</SubtypeId>
+      </Id>
+      <ProjectileAmmoData RateOfFire="300" ShootSoundName="WepGatlingTurretShot" ShotsInBurst="180" />
+      <ReleaseTimeAfterFire>204</ReleaseTimeAfterFire>
+      <DeviateShotAngle>0.4</DeviateShotAngle>
+      <MuzzleFlashLifeSpan>40</MuzzleFlashLifeSpan>
+      <AmmoMagazines>
+        <AmmoMagazine Subtype="Spores" />
+      </AmmoMagazines>
+      <ReloadTime>3000</ReloadTime>
+    </Weapon>
+
 </Weapons>
 </Definitions>
