@@ -1109,8 +1109,13 @@ namespace SpaceCraft.Utils {
           return null;
         }
 
+				entity.Storage = new MyModStorageComponent();
+				entity.Storage.Add(SpaceCraftSession.GuidSpawnType,"true"); // MES
+				entity.Storage.Add(SpaceCraftSession.GuidIgnoreCleanup,"true"); // MES
+
         entity.Flags &= ~EntityFlags.Save;
 				entity.Save = true;
+
 
         entity.Render.Visible = true;
         entity.WorldMatrix = matrix;
@@ -1119,7 +1124,11 @@ namespace SpaceCraft.Utils {
 
 				if( g == null ) {
 	        g = entity as IMyCubeGrid;
+					if( g == null ) continue;
+
 					g.ChangeGridOwnership(ownerId, MyOwnershipShareModeEnum.Faction);
+
+
 
 					// Double check them really needed?
 					// List<IMySlimBlock> blocks = new List<IMySlimBlock>();

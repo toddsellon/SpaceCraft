@@ -597,8 +597,6 @@
   <Description>Description_SurvivalKit</Description>
   <Icon>Textures\GUI\Icons\Cubes\SurvivalKitLarge.dds</Icon>
   <CubeSize>Large</CubeSize>
-  <ResearchGroup>Tier00Basics</ResearchGroup>
-  <ResearchCost>5</ResearchCost>
   <BlockTopology>TriangleMesh</BlockTopology>
   <Size x="1" y="1" z="1" />
   <ModelOffset x="0" y="0" z="0" />

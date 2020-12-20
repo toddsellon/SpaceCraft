@@ -50,11 +50,15 @@ namespace SpaceCraft {
 		private readonly static MyStringHash SourceGroup = MyStringHash.Get("Battery");
 		private readonly static MyStringHash SinkGroup = MyStringHash.Get("BatteryBlock");
 
+		// Modular Encounter Spawner
+		public static Guid GuidSpawnType = new Guid("C9D22735-C76B-4DB4-AFB5-51D1E1516A05");
+    public static Guid GuidIgnoreCleanup = new Guid("7ADDED32-4069-4C52-891C-25F52478B2EB");
+
 		public ulong Current = 0;
     public string SaveName;
 		public bool Loaded = false;
 		public bool Spawned = false;
-		public bool Server = false;
+		public static bool Server = false;
     public static List<Faction> Factions = new List<Faction>();
 		public static List<MyPlanet> Planets = new List<MyPlanet>();
 		public static MyPlanet ClosestPlanet { get; protected set; }

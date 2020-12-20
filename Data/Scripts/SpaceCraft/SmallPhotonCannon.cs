@@ -28,7 +28,8 @@ namespace SpaceCraft {
 		public IMyUserControllableGun Block;
 
 		public override void Init(MyObjectBuilder_EntityBase objectBuilder) {
-
+			if( !SpaceCraftSession.Server ) return;
+			
 			Block = Entity as IMyUserControllableGun;
 			if( Block == null ) return;
 

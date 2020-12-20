@@ -32,6 +32,7 @@ namespace SpaceCraft {
 		public VRage.MyFixedPoint amount = (VRage.MyFixedPoint)10;
 
 		public override void Init(MyObjectBuilder_EntityBase objectBuilder) {
+			if( !SpaceCraftSession.Server ) return;
 			//NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
 
 			block = Entity as IMyProductionBlock;

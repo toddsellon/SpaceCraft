@@ -29,7 +29,8 @@ namespace SpaceCraft {
 		public IMyBatteryBlock Block;
 
 		public override void Init(MyObjectBuilder_EntityBase objectBuilder) {
-
+			if( !SpaceCraftSession.Server ) return;
+			
 			Block = Entity as IMyBatteryBlock;
 			if( Block == null ) return;
 

@@ -2,6 +2,7 @@ using Sandbox.Game.Entities;
 using Sandbox.ModAPI;
 using Sandbox.Game;
 using Sandbox.Game.Entities.Cube;
+using Sandbox.Game.EntityComponents;
 using Sandbox.Definitions;
 using Sandbox.Common.ObjectBuilders.Definitions;
 using Sandbox.ModAPI.Interfaces;
@@ -55,7 +56,6 @@ namespace SpaceCraft.Utils {
       public Dictionary<string,float> Ratio = new Dictionary<string,float>{};
       public Dictionary<string,float> Desired = new Dictionary<string,float>{};
     }
-
 
     public static int LIMIT = 20;
     public List<IMyCharacter> Bots = new List<IMyCharacter>();
@@ -212,7 +212,10 @@ namespace SpaceCraft.Utils {
       if(Convars.Static.Debug) MyAPIGateway.Utilities.ShowMessage( "PrefabSpawned", "Success" );
       CubeGrid grid = new CubeGrid(SpawnedGrids[0]);
       foreach( IMyCubeGrid g in SpawnedGrids ) {
-
+        //g.Storage.Add(SpaceCraftSession.GuidIgnoreCleanup,"true"); // MES
+        g.Storage = g.Storage ?? new MyModStorageComponent();
+				g.Storage.Add(SpaceCraftSession.GuidSpawnType,"true"); // MES
+				g.Storage.Add(SpaceCraftSession.GuidIgnoreCleanup,"true"); // MES
         g.DisplayName = Name + " " + g.DisplayName;
         if( g == SpawnedGrids[0] ) continue;
         grid.Subgrids.Add(g);
@@ -370,7 +373,9 @@ namespace SpaceCraft.Utils {
 
         CurrentGoal.Balance = CurrentGoal.Prefab == null ? null : CurrentGoal.Prefab.GetBalance();
 
-        MainBase = GetBestRefinery();
+        MainBase = MainBase ?? GetBestRefinery();
+        if( MainBase == null ) return;
+
         if( MainBase.DockedTo == null ) {
           MainBase.Balance = CurrentGoal.Balance;
           // MainBase.AddQueueItems(CurrentGoal.Prefab.GetBattery(),true);
@@ -406,6 +411,7 @@ namespace SpaceCraft.Utils {
           CurrentGoal.Entity = grid;
           grid.SetToConstructionSite();
           MainBase = MainBase ?? GetBestRefinery();
+          if( MainBase == null ) return;
           MainBase.ToggleDocked( grid );
           MainBase.FindConstructionSite();
         } else
@@ -417,7 +423,7 @@ namespace SpaceCraft.Utils {
 
         // Facilitate Production
         CubeGrid grid = CurrentGoal.Entity as CubeGrid;
-        if( grid == null || grid.ConstructionSite == null ) {
+        if( grid == null || grid.ConstructionSite == null || grid.ConstructionSite.FatBlock == null || grid.ConstructionSite.FatBlock.Closed ) {
           if( Convars.Static.Debug ) MyAPIGateway.Utilities.ShowMessage( Name, "Completed construction" );
           // if( grid.DockedTo != null && !grid.Drills )
           //   grid.DockedTo.ToggleDocked( grid );

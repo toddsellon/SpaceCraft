@@ -34,6 +34,7 @@ namespace SpaceCraft {
 
 		public override void Init(MyObjectBuilder_EntityBase objectBuilder) {
 			//NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;
+			if( !SpaceCraftSession.Server ) return;
 
 			block = Entity as IMyProductionBlock;
 			stone = MyDefinitionId.Parse("MyObjectBuilder_BlueprintDefinition/StoneOreToIngotBasic");

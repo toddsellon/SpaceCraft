@@ -14,7 +14,7 @@
       <BlockTopology>TriangleMesh</BlockTopology>
       <Size x="1" y="1" z="1" />
       <ModelOffset x="0" y="0" z="0" />
-      <Model>Models\Cubes\Large\VirtualMassBlock.mwm</Model>
+      <Model>Models\Cubes\Large\BatteryLarge.mwm</Model>
       <Components>
         <Component Subtype="Organic" Count="70" />
         <Component Subtype="ControlUnit" Count="80">
@@ -27,9 +27,9 @@
       </Components>
       <CriticalComponent Subtype="ControlUnit" Index="0" />
       <BuildProgressModels>
-        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\VirtualMassBlockConstruction_1.mwm" />
-        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\VirtualMassBlockConstruction_2.mwm" />
-        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\VirtualMassBlockConstruction_3.mwm" />
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\BatteryLargeConstruction_1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\BatteryLargeConstruction_2.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\BatteryLargeConstruction_3.mwm" />
       </BuildProgressModels>
       <BlockPairName>ZergHeart</BlockPairName>
       <EdgeType>Light</EdgeType>
@@ -74,7 +74,7 @@
     <BlockTopology>TriangleMesh</BlockTopology>
     <Size x="1" y="1" z="1" />
     <ModelOffset x="0" y="0" z="0" />
-    <Model>Models\Cubes\Small\VirtualMassBlock.mwm</Model>
+    <Model>Models\Cubes\Small\BatterySmall.mwm</Model>
     <Components>
         <Component Subtype="Organic" Count="5" />
         <Component Subtype="ControlUnit" Count="3">
@@ -87,8 +87,8 @@
     </Components>
     <CriticalComponent Subtype="ControlUnit" Index="0" />
     <BuildProgressModels>
-      <Model BuildPercentUpperBound="0.55" File="Models\Cubes\Small\VirtualMassBlockConstruction_1.mwm" />
-      <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\VirtualMassBlockConstruction_2.mwm" />
+      <Model BuildPercentUpperBound="0.50" File="Models\Cubes\Small\BatterySmallConstruction_1.mwm" />
+      <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\BatterySmallConstruction_2.mwm" />
     </BuildProgressModels>
     <BlockPairName>ZergHeart</BlockPairName>
     <EdgeType>Light</EdgeType>
@@ -127,8 +127,6 @@
     <Description>Description_SurvivalKit</Description>
     <Icon>Textures\GUI\Icons\Cubes\SurvivalKitLarge.dds</Icon>
     <CubeSize>Large</CubeSize>
-    <ResearchGroup>Tier00Basics</ResearchGroup>
-    <ResearchCost>5</ResearchCost>
     <BlockTopology>TriangleMesh</BlockTopology>
     <Size x="1" y="1" z="1" />
     <ModelOffset x="0" y="0" z="0" />
