@@ -1166,8 +1166,9 @@ namespace SpaceCraft.Utils {
         }
 
         if( Homeworld == null ) {
-          Homeworld = SpaceCraftSession.ClosestPlanet;
+          Homeworld = SpaceCraftSession.ClosestPlanet ?? GetRandomPlanet();
         }
+        if( Homeworld == null ) return false;
         // Colonized.Add( Homeworld );
         //int rand = Randy.Next(Homeworld.Size.X);
         Vector3 p = new Vector3(Randy.Next(-Homeworld.Size.X,Homeworld.Size.X),Randy.Next(-Homeworld.Size.Y,Homeworld.Size.Y),Randy.Next(-Homeworld.Size.Z,Homeworld.Size.Z)) + Homeworld.WorldMatrix.Translation;
@@ -1177,7 +1178,10 @@ namespace SpaceCraft.Utils {
         Homeworld.CorrectSpawnLocation(ref position,250f);
       }
 
-      if( CommandLine.Switch("nuclear") && !Resources.Contains("Uranium") ) Resources.Add("Uranium");
+      if( CommandLine.Switch("nuclear") && !Resources.Contains("Uranium") ) {
+        Resources.Add("Uranium");
+        Resources.Add("Platinum");
+      }
 
       if( CommandLine.Switch("spawned") ) return true;
 
@@ -1205,6 +1209,7 @@ namespace SpaceCraft.Utils {
       } else MainBase = new CubeGrid(CubeGrid.Spawn(subtypeId, matrix, this));
 
 
+      if( MainBase == null || MainBase.Entity == null ) return false;
       //else
         // SpawnPrefab(subtypeId, MatrixD.CreateWorld(position, up, Vector3D.CalculatePerpendicularVector(up)), SpawningOptions.UseGridOrigin );
 

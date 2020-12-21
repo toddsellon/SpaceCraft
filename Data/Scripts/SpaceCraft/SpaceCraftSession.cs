@@ -50,9 +50,13 @@ namespace SpaceCraft {
 		private readonly static MyStringHash SourceGroup = MyStringHash.Get("Battery");
 		private readonly static MyStringHash SinkGroup = MyStringHash.Get("BatteryBlock");
 
+
+		public static Guid GuidFaction = new Guid("420E2CAB-0947-4E2C-A8E2-41D96806E22D");
 		// Modular Encounter Spawner
 		public static Guid GuidSpawnType = new Guid("C9D22735-C76B-4DB4-AFB5-51D1E1516A05");
     public static Guid GuidIgnoreCleanup = new Guid("7ADDED32-4069-4C52-891C-25F52478B2EB");
+
+
 
 		public ulong Current = 0;
     public string SaveName;

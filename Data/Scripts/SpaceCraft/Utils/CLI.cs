@@ -118,11 +118,12 @@ namespace SpaceCraft.Utils {
     }
 
     public void Respawn( MyCommandLine cmd, Message message ) {
-      if( message != null ) {
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+      // if( message != null ) {
+      if( player == null || (player.PromoteLevel != MyPromoteLevel.Admin && player.PromoteLevel != MyPromoteLevel.Owner) ) {
         Respond("Error", "You do not have permission", message);
         return;
       }
-      IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
       Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(2)) ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(2).ToUpper());
       if( faction == null ) {
         Respond("Error", "SpaceCraft faction not found " + cmd.Argument(2), message);
@@ -135,10 +136,7 @@ namespace SpaceCraft.Utils {
 
     public void Donate( MyCommandLine cmd, Message message ) {
 
-      IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
-      if( message != null ) {
-        player = SpaceCraftSession.GetPlayer(message.PlayerID);
-      }
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
 
       if( player == null ) {
         Respond("Error", "Player not found", message);
@@ -177,9 +175,14 @@ namespace SpaceCraft.Utils {
 
 
     public void GPS( MyCommandLine cmd, Message message ) {
-      // GPS:here:1002758.94895413:133846.064550405:1575992.06520915:#FF75C9F1:
-      IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
-      Faction faction = SpaceCraftSession.GetFactionContaining(message == null ? player.PlayerID : message.PlayerID);
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+
+      if( player == null ) {
+        Respond("Error", "Player not found", message);
+        return;
+      }
+
+      Faction faction = SpaceCraftSession.GetFactionContaining(player.PlayerID);
       if( faction == null ) {
         Respond("Error", "You do not belong to a SpaceCraft faction", message);
         return;
@@ -188,19 +191,28 @@ namespace SpaceCraft.Utils {
       foreach( Controllable c in faction.Controlled ) {
         //Vector3D position = c.Entity.WorldMatrix.Translation;
         IMyGps gps = MyAPIGateway.Session.GPS.Create(c.Entity.DisplayName, c.Entity.DisplayName, c.Entity.WorldMatrix.Translation, true, false);
-        MyAPIGateway.Session.GPS.AddGps(message == null ? player.PlayerID : message.PlayerID, gps);
+        MyAPIGateway.Session.GPS.AddGps(player.PlayerID, gps);
         //Respond("GPS", "GPS:" + c.Entity.DisplayName + ":" + position.X.ToString() + ":" + position.Y.ToString() + ":" + position.Z.ToString(), message);
       }
 
     }
 
     public void Debug( MyCommandLine cmd, Message message ) {
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+      
+      if( player == null || (player.PromoteLevel != MyPromoteLevel.Admin && player.PromoteLevel != MyPromoteLevel.Owner) ) {
+        Respond("Error","You don't have permission", message);
+        return;
+      }
+
       Convars.Static.Debug = !Convars.Static.Debug;
       Respond("Debug", Convars.Static.Debug ? "On" : "Off", message);
     }
 
     public void Set( MyCommandLine cmd, Message message ) {
-      if( message != null ) {
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+      // if( message != null ) {
+      if( player == null || (player.PromoteLevel != MyPromoteLevel.Admin && player.PromoteLevel != MyPromoteLevel.Owner) ) {
         Respond("Error","You don't have permission", message);
         return;
       }
@@ -241,8 +253,14 @@ namespace SpaceCraft.Utils {
     }*/
 
     public void Build( MyCommandLine cmd, Message message ) {
-      IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
-      Faction faction = SpaceCraftSession.GetFactionContaining(message == null ? player.PlayerID : message.PlayerID);
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+
+      if( player == null ) {
+        Respond("Error", "Player not found", message);
+        return;
+      }
+
+      Faction faction = SpaceCraftSession.GetFactionContaining(player.PlayerID);
       if( faction == null ) {
         Respond("Error", "You do not belong to a SpaceCraft faction", message);
         return;
@@ -263,11 +281,19 @@ namespace SpaceCraft.Utils {
     }
 
     public void Spawn( MyCommandLine cmd, Message message ) {
-      if( message != null ) {
+
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+
+      if( player == null ) {
+        Respond("Error", "Player not found", message);
+        return;
+      }
+
+      if( player == null || (player.PromoteLevel != MyPromoteLevel.Admin && player.PromoteLevel != MyPromoteLevel.Owner) ) {
         Respond("Error","You don't have permission", message);
         return;
       }
-      IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
+
       Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(3)) ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(3).ToUpper());
       if( faction == null ) {
         Respond("Error", "SpaceCraft faction not found " + cmd.Argument(3), message);
@@ -311,11 +337,19 @@ namespace SpaceCraft.Utils {
     }
 
     public void Complete( MyCommandLine cmd, Message message ) {
-      if( message != null ) {
+
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+
+      if( player == null ) {
+        Respond("Error", "Player not found", message);
+        return;
+      }
+
+      if( player == null || (player.PromoteLevel != MyPromoteLevel.Admin && player.PromoteLevel != MyPromoteLevel.Owner) ) {
         Respond("Error","You don't have permission", message);
         return;
       }
-      IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
+
       Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(3)) ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(3).ToUpper());
       if( faction == null ) {
         Respond("Error", "SpaceCraft faction not found " + cmd.Argument(3), message);
@@ -360,11 +394,19 @@ namespace SpaceCraft.Utils {
 
     // Pays off a battery balance if applicable
     public void Pay( MyCommandLine cmd, Message message ) {
-      if( message != null ) {
+
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+
+      if( player == null ) {
+        Respond("Error", "Player not found", message);
+        return;
+      }
+
+      if( player == null || (player.PromoteLevel != MyPromoteLevel.Admin && player.PromoteLevel != MyPromoteLevel.Owner) ) {
         Respond("Error","You don't have permission", message);
         return;
       }
-      IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
+
       Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(3)) ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(3).ToUpper());
       if( faction == null ) {
         Respond("Error", "SpaceCraft faction not found " + cmd.Argument(3), message);
