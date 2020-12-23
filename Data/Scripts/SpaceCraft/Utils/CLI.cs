@@ -8,6 +8,7 @@ using VRage.Game.ObjectBuilders.Definitions;
 using Sandbox.Definitions;
 using SpaceCraft.Utils;
 using VRage.Game.ModAPI.Ingame.Utilities;
+using Sandbox.Game.Entities;
 
 namespace SpaceCraft.Utils {
 
@@ -129,7 +130,10 @@ namespace SpaceCraft.Utils {
         Respond("Error", "SpaceCraft faction not found " + cmd.Argument(2), message);
         return;
       }
-      faction.Mulligan("User chat command", cmd.Switch("remove") );
+
+      MyPlanet planet = String.IsNullOrWhiteSpace(cmd.Argument(3)) ? null : SpaceCraftSession.GetPlanet(cmd.Argument(3));
+
+      faction.Mulligan("User chat command", !cmd.Switch("remain"), planet );
 
       Respond("Respawn", "Attempted to respawn " + faction.Name, message);
     }
@@ -199,7 +203,7 @@ namespace SpaceCraft.Utils {
 
     public void Debug( MyCommandLine cmd, Message message ) {
       IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
-      
+
       if( player == null || (player.PromoteLevel != MyPromoteLevel.Admin && player.PromoteLevel != MyPromoteLevel.Owner) ) {
         Respond("Error","You don't have permission", message);
         return;

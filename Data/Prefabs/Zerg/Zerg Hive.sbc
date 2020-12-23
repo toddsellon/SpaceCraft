@@ -693,6 +693,7 @@
               <BuiltBy>144115188075855897</BuiltBy>
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_SurvivalKit">
+            <!-- <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Assembler"> -->
               <SubtypeName>ZergSurvivalKit</SubtypeName>
               <EntityId>113965243767650524</EntityId>
               <Min x="-1" y="1" z="5" />

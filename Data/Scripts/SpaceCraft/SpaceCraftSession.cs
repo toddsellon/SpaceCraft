@@ -368,6 +368,13 @@ namespace SpaceCraft {
 			MyAPIGateway.Entities.OnEntityAdd -= EntityAdded;
 		}
 
+		public static MyPlanet GetPlanet( string name ) {
+			foreach( MyPlanet planet in Planets ) {
+				if( planet.AsteroidName.StartsWith(name,StringComparison.OrdinalIgnoreCase) ) return planet;
+			}
+			return null;
+		}
+
 		public static MyPlanet GetClosestPlanet( Vector3D position, List<MyPlanet> exclude = null, string containing = "" ) {
 			if( exclude == null ) exclude = new List<MyPlanet>();
 			MyPlanet best = null;

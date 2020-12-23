@@ -134,6 +134,10 @@ namespace SpaceCraft.Utils {
           case "BasicProtossAssembler":
           case "ZergAssembler":
             return 49;
+          case "ZergSurvivalKit":
+          case "ProtossSurvivalKitLarge":
+          case "ProtossSurvivalKit":
+            return 48;
         }
         return 48;
       }
@@ -182,7 +186,7 @@ namespace SpaceCraft.Utils {
 
     public void Stop() {
       OrderQueue.Clear();
-      CurrentOrder.Complete();
+      if( CurrentOrder != null ) CurrentOrder.Complete();
     }
 
     public virtual bool Execute( Order order, bool force = false ) {

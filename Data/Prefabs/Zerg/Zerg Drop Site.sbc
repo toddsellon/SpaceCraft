@@ -43,6 +43,7 @@
               <ChargeMode>0</ChargeMode>
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_SurvivalKit">
+            <!-- <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Assembler"> -->
               <SubtypeName>ZergSurvivalKit</SubtypeName>
               <EntityId>101679432029400173</EntityId>
               <Min x="0" y="1" z="0" />

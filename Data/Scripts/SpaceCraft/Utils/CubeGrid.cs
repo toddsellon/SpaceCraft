@@ -349,7 +349,18 @@ namespace SpaceCraft.Utils {
 					RefineryTier = (uint)Math.Max(RefineryTier,1);
 				} else {
 					string subtype = block.FatBlock.BlockDefinition.SubtypeId;
-					FactoryTier = (uint)Math.Max(FactoryTier,subtype == "LargeAssembler" || subtype == "LargeProtossAssembler" || subtype == "LargeZergAssembler" ? 3 : 2);
+					switch( subtype ) {
+						case "ZergSurvivalKit":
+	          case "ProtossSurvivalKitLarge":
+	          case "ProtossSurvivalKit":
+							FactoryTier = (uint)Math.Max(FactoryTier,1);
+							RefineryTier = (uint)Math.Max(RefineryTier,1);
+							break;
+						default:
+							FactoryTier = (uint)Math.Max(FactoryTier,subtype == "LargeAssembler" || subtype == "LargeProtossAssembler" || subtype == "LargeZergAssembler" ? 3 : 2);
+							break;
+					}
+
 				}
 			}
 			blocks = GetBlocks<IMyRefinery>(null,true);
@@ -584,9 +595,12 @@ namespace SpaceCraft.Utils {
 			IMyInventory inventory = null;
 			List<IMyInventoryItem> items = null;
 			if( block is IMyAssembler ) {
-				if( block.BlockDefinition.TypeIdString == "MyObjectBuilder_SurvivalKit" ) {
+				if( block.BlockDefinition.TypeIdString == "MyObjectBuilder_SurvivalKit"
+						|| block.BlockDefinition.SubtypeName == "ProtossSurvivalKit"	|| block.BlockDefinition.SubtypeName == "ProtossSurvivalKitLarge"	|| block.BlockDefinition.SubtypeName == "ZergSurvivalKit" )
+				{
 					IMyProductionBlock kit = block as IMyProductionBlock;
-					if( Convars.Static.ManualKits && (kit.IsQueueEmpty || !kit.IsProducing) )
+					//if( Convars.Static.ManualKits && (kit.IsQueueEmpty || !kit.IsProducing) )
+					if( kit.IsQueueEmpty || !kit.IsProducing )
 						kit.AddQueueItem( OBTypes.StoneToOre, (VRage.MyFixedPoint)1 );
 					return new CubeGrid.Item {
 						Id = OBTypes.Stone,
@@ -965,10 +979,12 @@ namespace SpaceCraft.Utils {
 			if( Grid == null ) return null;
 			List<IMySlimBlock> blocks = new List<IMySlimBlock>();
 			Grid.GetBlocks( blocks );
-			foreach( IMySlimBlock block in blocks ) {
-				if( block.FatBlock == null ) continue;
-				if( block.FatBlock is IMyMedicalRoom || block.FatBlock.BlockDefinition.TypeIdString == "MyObjectBuilder_SurvivalKit" ) {
-					return block.FatBlock;
+			foreach( IMySlimBlock slim in blocks ) {
+				if( slim.FatBlock == null ) continue;
+				string subtype = slim.FatBlock.BlockDefinition.SubtypeName;
+				if( slim.FatBlock is IMyMedicalRoom || slim.FatBlock.BlockDefinition.TypeIdString == "MyObjectBuilder_SurvivalKit"
+				 	|| subtype == "ProtossSurvivalKit" || subtype == "ProtossSurvivalKitLarge" || subtype == "ZergSurvivalKit") {
+					return slim.FatBlock;
 				}
 			}
 			return null;

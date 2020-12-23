@@ -596,7 +596,8 @@
               <SkinSubtypeId>Rusty_Armor</SkinSubtypeId>
               <BuiltBy>144115188075855897</BuiltBy>
             </MyObjectBuilder_CubeBlock>
-            <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_SurvivalKit">
+            <!-- <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_SurvivalKit"> -->
+            <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Assembler">
               <SubtypeName>ZergSurvivalKit</SubtypeName>
               <EntityId>122868465203759574</EntityId>
               <Min x="2" y="9" z="-3" />

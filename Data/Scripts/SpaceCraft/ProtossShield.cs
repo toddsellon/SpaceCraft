@@ -31,7 +31,7 @@ namespace SpaceCraft {
 
 		public override void Init(MyObjectBuilder_EntityBase objectBuilder) {
 			if( !SpaceCraftSession.Server ) return;
-			
+
 			Block = Entity as IMyBatteryBlock;
 			if( Block == null ) return;
 			MyResourceSourceComponent source = Block.Components.Get<MyResourceSourceComponent>();
@@ -46,7 +46,10 @@ namespace SpaceCraft {
 			if( Block == null || !Block.IsFunctional || Block.CubeGrid == null ) return false;
 
 			MatrixD matrix = Block.CubeGrid.WorldMatrix;
-			MySimpleObjectDraw.DrawTransparentSphere(ref matrix, Block.CubeGrid.LocalVolume.Radius*1.1f, ref Blue, MySimpleObjectRasterizer.SolidAndWireframe, 20);
+			try {
+				MySimpleObjectDraw.DrawTransparentSphere(ref matrix, Block.CubeGrid.LocalVolume.Radius*1.1f, ref Blue, MySimpleObjectRasterizer.SolidAndWireframe, 20);
+			} catch( NullReferenceException e ) {
+			}
 
 			return true;
 

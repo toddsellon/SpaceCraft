@@ -990,7 +990,7 @@ namespace SpaceCraft.Utils {
       return null;
     }
 
-    public void Mulligan( string reason = "No reason specified", bool remove = false, uint attempt = 0 ) {
+    public void Mulligan( string reason = "No reason specified", bool remove = false, MyPlanet planet = null, uint attempt = 0 ) {
       if( Convars.Static.Debug )
         MyAPIGateway.Utilities.ShowMessage( "Mulligan", Name + " took a mulligan:" + reason );
       if( remove )
@@ -1009,10 +1009,10 @@ namespace SpaceCraft.Utils {
       CurrentGoal = new Goal{
         Type = Goals.Stabilize
       };
-      if( !Spawn() ) {
+      if( !Spawn(planet) ) {
         if( attempt < 5 ) {
           attempt++;
-          Mulligan("Previous mulligan failed",remove,attempt);
+          Mulligan("Previous mulligan failed",remove,planet,attempt);
         } else {
           MyAPIGateway.Utilities.ShowMessage( Name, "Failed to spawn" );
         }
@@ -1152,21 +1152,25 @@ namespace SpaceCraft.Utils {
       return SpaceCraftSession.Planets[Randy.Next(SpaceCraftSession.Planets.Count)];
 		}
 
+    public bool Spawn( MyPlanet planet = null ) {
+      return Spawn( Vector3D.Zero, planet );
+    }
+
     public bool Spawn() {
       return Spawn( Vector3D.Zero );
     }
 
-    public bool Spawn( Vector3D position ) {
-      Homeworld = null;
+    public bool Spawn( Vector3D position, MyPlanet planet = null ) {
+      Homeworld = planet;
 
       if( position == Vector3D.Zero ) {
         // Get Random Spawn
-        if( CommandLine.Switch("outsider")){
-          Homeworld = GetRandomPlanet();
-        }
+
 
         if( Homeworld == null ) {
-          Homeworld = SpaceCraftSession.ClosestPlanet ?? GetRandomPlanet();
+          if( CommandLine.Switch("outsider")){
+            Homeworld = GetRandomPlanet();
+          } else Homeworld = SpaceCraftSession.ClosestPlanet ?? GetRandomPlanet();
         }
         if( Homeworld == null ) return false;
         // Colonized.Add( Homeworld );

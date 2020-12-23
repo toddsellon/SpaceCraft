@@ -25,6 +25,7 @@ using VRage.Game.Entity;
 namespace SpaceCraft {
 
 	[MyEntityComponentDescriptor(typeof(MyObjectBuilder_SurvivalKit), false, "ZergSurvivalKit")]
+	// [MyEntityComponentDescriptor(typeof(MyObjectBuilder_Assembler), false, "ZergSurvivalKit")]
 	public class ZergSurvivalKit : MyGameLogicComponent {
 
 		public IMyProductionBlock block;

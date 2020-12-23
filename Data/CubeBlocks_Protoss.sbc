@@ -589,8 +589,10 @@
 <!-- End Assemblers -->
 
 <Definition xsi:type="MyObjectBuilder_SurvivalKitDefinition">
+<!-- <Definition xsi:type="MyObjectBuilder_AssemblerDefinition"> -->
   <Id>
       <TypeId>SurvivalKit</TypeId>
+      <!-- <TypeId>Assembler</TypeId> -->
       <SubtypeId>ProtossSurvivalKitLarge</SubtypeId>
   </Id>
   <DisplayName>Protoss Survival Kit</DisplayName>
@@ -645,7 +647,13 @@
       <X>2</X>
       <Y>2</Y>
       <Z>2</Z>
+      <!-- <X>1</X>
+      <Y>1</Y>
+      <Z>1</Z> -->
   </InventorySize>
+
+  <InventoryFillFactorMin>0.3</InventoryFillFactorMin>
+  <InventoryFillFactorMax>0.6</InventoryFillFactorMax>
 
   <!--
 <OtherInventoryMaxVolume>2</OtherInventoryMaxVolume>
@@ -674,8 +682,10 @@
   </TieredUpdateTimes>
 </Definition>
 <Definition xsi:type="MyObjectBuilder_SurvivalKitDefinition">
+<!-- <Definition xsi:type="MyObjectBuilder_AssemblerDefinition"> -->
   <Id>
       <TypeId>SurvivalKit</TypeId>
+      <!-- <TypeId>Assembler</TypeId> -->
       <SubtypeId>ProtossSurvivalKit</SubtypeId>
   </Id>
   <DisplayName>Protoss Survival Kit</DisplayName>
@@ -733,7 +743,13 @@
       <X>2</X>
       <Y>2</Y>
       <Z>2</Z>
+      <!-- <X>1</X>
+      <Y>1</Y>
+      <Z>1</Z> -->
   </InventorySize>
+
+  <InventoryFillFactorMin>0.3</InventoryFillFactorMin>
+  <InventoryFillFactorMax>0.6</InventoryFillFactorMax>
 
   <!--
 <OtherInventoryMaxVolume>2</OtherInventoryMaxVolume>
