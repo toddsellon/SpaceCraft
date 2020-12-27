@@ -33,6 +33,7 @@ using VRageMath;
 using VRage.Collections;
 using LitJson;
 using SpaceCraft.Utils;
+using SpaceCraft.Utils.MES;
 
 namespace SpaceCraft {
 
@@ -326,6 +327,7 @@ namespace SpaceCraft {
 
 			if( !Loaded ) {
 				Preload();
+				MES.Init();
 			}
 
 			if( !Spawned ) {

@@ -74,7 +74,7 @@
     <BlockTopology>TriangleMesh</BlockTopology>
     <Size x="1" y="1" z="1" />
     <ModelOffset x="0" y="0" z="0" />
-    <Model>Models\Cubes\Small\BatterySmall.mwm</Model>
+    <Model>Models\Cubes\Small\BatterySmall1x1.mwm</Model>
     <Components>
         <Component Subtype="Organic" Count="5" />
         <Component Subtype="ControlUnit" Count="3">
@@ -87,8 +87,8 @@
     </Components>
     <CriticalComponent Subtype="ControlUnit" Index="0" />
     <BuildProgressModels>
-      <Model BuildPercentUpperBound="0.50" File="Models\Cubes\Small\BatterySmallConstruction_1.mwm" />
-      <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\BatterySmallConstruction_2.mwm" />
+      <Model BuildPercentUpperBound="0.50" File="Models\Cubes\Small\BatterySmall1x1_Construction_1.mwm" />
+      <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Small\BatterySmall1x1_Construction_2.mwm" />
     </BuildProgressModels>
     <BlockPairName>ZergHeart</BlockPairName>
     <EdgeType>Light</EdgeType>
