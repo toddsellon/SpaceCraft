@@ -1126,8 +1126,11 @@ namespace SpaceCraft.Utils {
         }
 
 				entity.Storage = new MyModStorageComponent();
-				entity.Storage.Add(SpaceCraftSession.GuidSpawnType,"true"); // MES
-				entity.Storage.Add(SpaceCraftSession.GuidIgnoreCleanup,"true"); // MES
+				 // MES
+				entity.Storage.Add(SpaceCraftSession.GuidSpawnType,"true");
+				entity.Storage.Add(SpaceCraftSession.GuidIgnoreCleanup,"true");
+				// entity.Storage.Add(GuidStartCoords,matrix.Translation.ToString());
+				// entity.Storage.Add(GuidEndCoords,matrix.Translation.ToString());
 
         entity.Flags &= ~EntityFlags.Save;
 				entity.Save = true;

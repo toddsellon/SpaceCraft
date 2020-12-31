@@ -519,7 +519,7 @@ namespace SpaceCraft.Utils {
         //   matrix = MatrixD.CreateWorld( position, matrix.Right, matrix.Down );
         // else if( prefab.IsStatic )
   			//   matrix = MatrixD.CreateWorld(position, matrix.Backward, matrix.Left);
-        if( prefab.IsStatic && prefab.SubtypeId.StartsWith("Terran") ) {
+        if( prefab.IsStatic && (prefab.SubtypeId == "Planetary Fortress" || prefab.SubtypeId.StartsWith("Terran")) ) {
           //position = position + (up * (box.Height *.5) );
           //matrix = MatrixD.CreateWorld(position, matrix.Backward, matrix.Left);
           // Vector3D.CalculatePerpendicularVector(matrix.Forward);
@@ -729,13 +729,13 @@ namespace SpaceCraft.Utils {
       //resources.Add("Stone",(VRage.MyFixedPoint)(Tier == Tech.Primitive ? 100 : 10)*Convars.Static.Difficulty);
       resources.Add("Stone",(VRage.MyFixedPoint)100*Convars.Static.Difficulty);
 
-      if( grid != null && grid.DockedTo != null && grid.DockedTo.RefineryTier == 1 ) {
-        return resources;
-      }
+      // if( grid != null && grid.DockedTo != null && grid.DockedTo.RefineryTier == 1 ) {
+      //   return resources;
+      // }
       switch( Tier ) {
-        case Tech.Primitive:
-
-          break;
+        // case Tech.Primitive:
+        //
+        //   break;
         case Tech.Space:
           resources.Add("Uranium",(VRage.MyFixedPoint)0.05*Convars.Static.Difficulty);
           resources.Add("Platinum",(VRage.MyFixedPoint)0.1*Convars.Static.Difficulty);
@@ -1029,6 +1029,15 @@ namespace SpaceCraft.Utils {
 
       if( c is Engineer )
         Engineers++;
+      else if( c.Entity != null ) {
+        if( !c.Entity.DisplayName.StartsWith(Name) )
+          c.Entity.DisplayName = Name + " " + c.Entity.DisplayName;
+        c.Entity.Storage = c.Entity.Storage ?? new MyModStorageComponent();
+        if( c.Entity.Storage.ContainsKey(SpaceCraftSession.GuidFaction) )
+          c.Entity.Storage[SpaceCraftSession.GuidFaction] = Name;
+        else
+          c.Entity.Storage.Add(SpaceCraftSession.GuidFaction,Name);
+      }
 
       return c;
     }
@@ -1036,7 +1045,10 @@ namespace SpaceCraft.Utils {
     public Controllable ReleaseControl( IMyEntity entity ) {
       foreach( Controllable controllable in Controlled ) {
         if( controllable.Entity == entity ) {
+          // if( entity.DisplayName.StartsWith(Name) )
           Controlled.Remove(controllable);
+          entity.Storage = entity.Storage ?? new MyModStorageComponent();
+          entity.Storage.Remove(SpaceCraftSession.GuidFaction);
           return controllable;
         }
       }
@@ -1179,7 +1191,8 @@ namespace SpaceCraft.Utils {
         // Vector3 p = new Vector3(Randy.Next(Homeworld.Size.X),Randy.Next(Homeworld.Size.Y),Randy.Next(Homeworld.Size.Z)) + Vector3.Normalize(Homeworld.PositionLeftBottomCorner);
 
         position = Homeworld.GetClosestSurfacePointGlobal( p );
-        Homeworld.CorrectSpawnLocation(ref position,250f);
+        //Homeworld.CorrectSpawnLocation(ref position,250f);
+        Homeworld.CorrectSpawnLocation(ref position,5f);
       }
 
       if( CommandLine.Switch("nuclear") && !Resources.Contains("Uranium") ) {

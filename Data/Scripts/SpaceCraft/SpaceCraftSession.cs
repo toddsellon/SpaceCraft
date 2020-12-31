@@ -56,6 +56,8 @@ namespace SpaceCraft {
 		// Modular Encounter Spawner
 		public static Guid GuidSpawnType = new Guid("C9D22735-C76B-4DB4-AFB5-51D1E1516A05");
     public static Guid GuidIgnoreCleanup = new Guid("7ADDED32-4069-4C52-891C-25F52478B2EB");
+		public static Guid GuidStartCoords = new Guid("CC27ADFD-A121-477A-94B1-FB1B4E2E3046");
+		public static Guid GuidEndCoords = new Guid("513F6C90-E0D9-4A8F-972E-09757FE32C19");
 
 
 
@@ -445,7 +447,8 @@ namespace SpaceCraft {
 					//List<long> owners = grid.GridSizeEnum == MyCubeSize.Large ? grid.BigOwners : grid.SmallOwners;
 					//foreach(long owner in owners) {
 						//Faction faction = GetFaction( owner ); // This should have worked but didn't, assuming the NPC owner ids get jumbled?
-						Faction faction = GetFaction( grid.DisplayName.Split(' ')[0] ); // Use first word in grid name, not ideal but it works
+
+						Faction faction = entity.Storage != null && entity.Storage.ContainsKey(GuidFaction) ? GetFaction( entity.Storage[GuidFaction] ) : GetFaction( grid.DisplayName.Split(' ')[0] ); // Use first word in grid name, not ideal but it works
 						if( faction != null && !faction.IsSubgrid(grid) ) {
 							if( faction.MyFaction != null ) {
 								grid.ChangeGridOwnership(faction.MyFaction.FounderId, MyOwnershipShareModeEnum.Faction);

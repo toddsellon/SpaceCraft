@@ -71,7 +71,7 @@ namespace SpaceCraft.Utils {
 
       Message message = MyAPIGateway.Utilities.SerializeFromBinary<Message>(data);
 
-      if( Server ) {
+      if( Server && String.IsNullOrWhiteSpace(message.Sender) ) {
         ParseMessage(message.Text,message);
       } else {
         MyAPIGateway.Utilities.ShowMessage( message.Sender, message.Text );
@@ -85,11 +85,11 @@ namespace SpaceCraft.Utils {
 
       string action = cmd.Argument(1);
 
-      if( Actions.ContainsKey(action) ) {
+      if( !String.IsNullOrWhiteSpace(action) && Actions.ContainsKey(action) ) {
         Actions[action](cmd, message);
         return true;
       }
-      Respond("Error","Unknown command " + cmd.Argument(1));
+      Respond("Error","Unknown command " + cmd.Argument(1) );
       return false;
     }
 
@@ -163,6 +163,7 @@ namespace SpaceCraft.Utils {
         if( grid == null ) continue;
         grid.DisplayName = faction.Name + " " + grid.DisplayName;
         CubeGrid g = new CubeGrid(grid);
+        g.FindSubgrids();
         g.CheckFlags();
         faction.TakeControl( g );
         if( faction.MainBase != null ) {
@@ -315,6 +316,8 @@ namespace SpaceCraft.Utils {
           return;
       }
 
+
+
       List<IMySlimBlock> suspensions = grid.GetBlocks<IMyMotorSuspension>();
       long owner = faction.MyFaction == null ? (long)0 : faction.MyFaction.FounderId;
       foreach(IMySlimBlock block in suspensions) {
@@ -324,6 +327,7 @@ namespace SpaceCraft.Utils {
           suspension.RotorGrid.DisplayName = faction.Name + " Subgrid";
           suspension.RotorGrid.ChangeGridOwnership(owner, MyOwnershipShareModeEnum.Faction);
           grid.Subgrids.Add(suspension.RotorGrid);
+
           IMySlimBlock wheel = suspension.RotorGrid.GetCubeBlock(Vector3I.Zero) as IMySlimBlock;
           if( wheel == null ) continue;
           wheel.SpawnConstructionStockpile();
@@ -332,7 +336,15 @@ namespace SpaceCraft.Utils {
       }
 
       grid.Grid.ChangeGridOwnership(owner, MyOwnershipShareModeEnum.Faction);
+      grid.FindSubgrids();
       grid.CheckFlags();
+
+
+      List<IMySlimBlock> blocks = grid.GetBlocks<IMySlimBlock>();
+      foreach(IMySlimBlock slim in blocks ) {
+        faction.BlockCompleted(slim);
+      }
+
       faction.TakeControl( grid );
       if( faction.MainBase != null )
         faction.MainBase.ToggleDocked(grid);
@@ -536,6 +548,8 @@ namespace SpaceCraft.Utils {
 
       if( entity is IMyCubeGrid ) {
         CubeGrid grid = new CubeGrid(entity as IMyCubeGrid);
+        grid.FindSubgrids();
+        grid.CheckFlags();
         faction.TakeControl( grid );
         if( faction.MainBase != null )
           faction.MainBase.ToggleDocked(grid);
@@ -581,7 +595,7 @@ namespace SpaceCraft.Utils {
         grid.DockedTo.ToggleDocked(grid);
 
       if( removed == null )
-        Respond("Error", "Could release control of " + entity.DisplayName, message);
+        Respond("Error", "Could not release control of " + entity.DisplayName, message);
 
     }
 
