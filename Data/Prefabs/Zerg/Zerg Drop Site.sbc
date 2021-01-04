@@ -25,12 +25,14 @@
           <CubeBlocks>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_BatteryBlock">
               <SubtypeName>ZergHeart</SubtypeName>
+              <Owner>144115188075855897</Owner>
               <EntityId>98489773200198630</EntityId>
               <ColorMaskHSV x="0" y="-0.8" z="-0.3" />
               <SkinSubtypeId>Rusty_Armor</SkinSubtypeId>
               <BuiltBy>144115188075855897</BuiltBy>
               <CustomName>Zerg Heart</CustomName>
               <ShowOnHUD>false</ShowOnHUD>
+              <ShareMode>Faction</ShareMode>
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
               <ShowInInventory>true</ShowInInventory>
@@ -48,7 +50,9 @@
               <Min x="0" y="1" z="0" />
               <BlockOrientation Forward="Right" Up="Up" />
               <ColorMaskHSV x="0" y="-0.8" z="-0.3" />
+              <ShareMode>Faction</ShareMode>
               <SkinSubtypeId>Rusty_Armor</SkinSubtypeId>
+              <Owner>144115188075855897</Owner>
               <BuiltBy>144115188075855897</BuiltBy>
               <ComponentContainer>
                 <Components>
@@ -177,8 +181,10 @@
               <Min x="0" y="1" z="1" />
               <IntegrityPercent>1.52590219E-05</IntegrityPercent>
               <BuildPercent>1.52590219E-05</BuildPercent>
+              <ShareMode>Faction</ShareMode>
               <ColorMaskHSV x="0" y="-0.8" z="-0.3" />
               <SkinSubtypeId>Rusty_Armor</SkinSubtypeId>
+              <Owner>144115188075855897</Owner>
               <BuiltBy>144115188075855897</BuiltBy>
               <ComponentContainer>
                 <Components>
@@ -252,7 +258,7 @@
           </ConveyorLines>
           <DisplayName>Zerg Drop Site</DisplayName>
           <DestructibleBlocks>true</DestructibleBlocks>
-          <IsRespawnGrid>false</IsRespawnGrid>
+          <IsRespawnGrid>true</IsRespawnGrid>
           <LocalCoordSys>14</LocalCoordSys>
           <TargetingTargets />
         </CubeGrid>

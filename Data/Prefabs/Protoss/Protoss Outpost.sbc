@@ -124,7 +124,6 @@
               <BuiltBy>144115188075855897</BuiltBy>
             </MyObjectBuilder_CubeBlock>
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_SurvivalKit">
-            <!-- <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Assembler"> -->
               <SubtypeName>ProtossSurvivalKitLarge</SubtypeName>
               <EntityId>93526445025584814</EntityId>
               <Min x="0" y="1" z="-2" />
@@ -284,7 +283,7 @@
           </ConveyorLines>
           <DisplayName>Protoss Outpost</DisplayName>
           <DestructibleBlocks>true</DestructibleBlocks>
-          <IsRespawnGrid>false</IsRespawnGrid>
+          <IsRespawnGrid>true</IsRespawnGrid>
           <LocalCoordSys>2</LocalCoordSys>
           <TargetingTargets />
         </CubeGrid>

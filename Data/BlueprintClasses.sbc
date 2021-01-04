@@ -227,14 +227,17 @@
     <Entry Class="ZergComponents" BlueprintSubtypeId="ZergCarapace" />
     <Entry Class="ZergComponents" BlueprintSubtypeId="ControlUnit" />
     <Entry Class="ZergComponents" BlueprintSubtypeId="Organic" />
+    <Entry Class="ZergComponents" BlueprintSubtypeId="ComputerComponent" />
     <Entry Class="ZergComponents" BlueprintSubtypeId="Missile200mm" />
 
     <Entry Class="SimpleZergComponents" BlueprintSubtypeId="ZergCarapace" />
     <Entry Class="SimpleZergComponents" BlueprintSubtypeId="ControlUnit" />
+    <Entry Class="SimpleZergComponents" BlueprintSubtypeId="ComputerComponent" />
     <Entry Class="SimpleZergComponents" BlueprintSubtypeId="Organic" />
 
     <Entry Class="BasicZergComponents" BlueprintSubtypeId="StoneOreToOrganic" />
     <Entry Class="BasicZergComponents" BlueprintSubtypeId="ControlUnit" />
+    <Entry Class="BasicZergComponents" BlueprintSubtypeId="ComputerComponent" />
     <Entry Class="BasicZergComponents" BlueprintSubtypeId="Organic" />
 
     <Entry Class="CommonZergMetals" BlueprintSubtypeId="StoneOreToOrganic" />

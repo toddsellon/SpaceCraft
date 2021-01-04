@@ -29,7 +29,9 @@
         <Item Amount="1000" TypeId="Ore" SubtypeId="Stone" />
       </Prerequisites>
       <Results>
-        <Item Amount="30" TypeId="Ingot" SubtypeId="Organic" />
+        <Item Amount="20" TypeId="Ingot" SubtypeId="Organic" />
+        <Item Amount="0.25" TypeId="Ingot" SubtypeId="Iron" />
+        <Item Amount="0.1" TypeId="Ingot" SubtypeId="Silicon" />
       </Results>
       <BaseProductionTimeInSeconds>10</BaseProductionTimeInSeconds>
     </Blueprint>

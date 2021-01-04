@@ -589,10 +589,8 @@
 <!-- End Assemblers -->
 
 <Definition xsi:type="MyObjectBuilder_SurvivalKitDefinition">
-<!-- <Definition xsi:type="MyObjectBuilder_AssemblerDefinition"> -->
   <Id>
       <TypeId>SurvivalKit</TypeId>
-      <!-- <TypeId>Assembler</TypeId> -->
       <SubtypeId>ProtossSurvivalKitLarge</SubtypeId>
   </Id>
   <DisplayName>Protoss Survival Kit</DisplayName>
@@ -682,10 +680,8 @@
   </TieredUpdateTimes>
 </Definition>
 <Definition xsi:type="MyObjectBuilder_SurvivalKitDefinition">
-<!-- <Definition xsi:type="MyObjectBuilder_AssemblerDefinition"> -->
   <Id>
       <TypeId>SurvivalKit</TypeId>
-      <!-- <TypeId>Assembler</TypeId> -->
       <SubtypeId>ProtossSurvivalKit</SubtypeId>
   </Id>
   <DisplayName>Protoss Survival Kit</DisplayName>

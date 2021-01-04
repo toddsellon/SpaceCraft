@@ -1125,6 +1125,12 @@ namespace SpaceCraft.Utils {
           return null;
         }
 
+				// MyCubeGrid cg = entity as MyCubeGrid;
+				// if( cg != null ) {
+				// 	cg.IsRespawnGrid = false;
+				// }
+				//MySpaceRespawnComponent.Static.
+
 				entity.Storage = new MyModStorageComponent();
 				 // MES
 				entity.Storage.Add(SpaceCraftSession.GuidSpawnType,"true");

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using VRageMath;
 using VRage;
@@ -30,7 +31,8 @@ namespace SpaceCraft.Utils.MES {
 
       foreach( string type in EncounterTypes ) {
         SyncData message = new SyncData {
-          ChatMessage = "/MES.Settings."+type+".CleanupUseDistance.false"
+          //ChatMessage = "/MES.Settings."+type+".CleanupUseDistance.false"
+          ChatMessage = "/MES.Settings."+type+".UseCleanupSettings.false"
         };
         Send( message );
       }
@@ -44,14 +46,21 @@ namespace SpaceCraft.Utils.MES {
     }
 
     public static bool Send(SyncData message) {
-      if( message == null ) return false;
       IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
+      if( message == null || player == null ) return false;
+
       message.PlayerId = player.IdentityId;
       message.SteamUserId = player.SteamUserId;
       message.Instruction = "MESChatMsg";
 
-      byte[] data = MyAPIGateway.Utilities.SerializeToBinary<SyncData>(message);
-      return MyAPIGateway.Multiplayer.SendMessageToServer(Id, data);
+      try {
+        byte[] data = MyAPIGateway.Utilities.SerializeToBinary<SyncData>(message);
+        return MyAPIGateway.Multiplayer.SendMessageToServer(Id, data);
+      } catch(Exception exc) {
+        return false;
+      }
+
+      return true;
     }
 
   }

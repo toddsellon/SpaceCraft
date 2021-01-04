@@ -17,6 +17,7 @@
       <Model>Models\Cubes\Large\BatteryLarge.mwm</Model>
       <Components>
         <Component Subtype="Organic" Count="70" />
+        <Component Subtype="Computer" Count="1" />
         <Component Subtype="ControlUnit" Count="80">
           <DeconstructId>
               <TypeId>Component</TypeId>
@@ -77,6 +78,7 @@
     <Model>Models\Cubes\Small\BatterySmall1x1.mwm</Model>
     <Components>
         <Component Subtype="Organic" Count="5" />
+        <Component Subtype="Computer" Count="1" />
         <Component Subtype="ControlUnit" Count="3">
           <DeconstructId>
               <TypeId>Component</TypeId>
@@ -119,10 +121,8 @@
 
 
   <Definition xsi:type="MyObjectBuilder_SurvivalKitDefinition">
-  <!-- <Definition xsi:type="MyObjectBuilder_AssemblerDefinition"> -->
     <Id>
         <TypeId>SurvivalKit</TypeId>
-        <!-- <TypeId>Assembler</TypeId> -->
         <SubtypeId>ZergSurvivalKit</SubtypeId>
     </Id>
     <DisplayName>Zerg Survival Kit</DisplayName>
@@ -135,6 +135,7 @@
     <Model>Models\Cubes\Large\SurvivalKit.mwm</Model>
     <Components>
       <Component Subtype="Organic" Count="50" />
+      <Component Subtype="Computer" Count="1" />
       <Component Subtype="ControlUnit" Count="5">
           <DeconstructId>
               <TypeId>Component</TypeId>
@@ -183,9 +184,6 @@
         <X>2</X>
         <Y>2</Y>
         <Z>2</Z>
-        <!-- <X>1</X>
-        <Y>1</Y>
-        <Z>1</Z> -->
     </InventorySize>
 
     <InventoryFillFactorMin>0.3</InventoryFillFactorMin>
@@ -206,6 +204,91 @@
     </TieredUpdateTimes>
   </Definition>
 
+  <!-- <Definition xsi:type="MyObjectBuilder_SurvivalKitDefinition">
+    <Id>
+        <TypeId>SurvivalKit</TypeId>
+        <SubtypeId>ZergSurvivalKit</SubtypeId>
+    </Id>
+    <DisplayName>Zerg Survival Kit</DisplayName>
+    <Description>Description_SurvivalKit</Description>
+    <Icon>Textures\GUI\Icons\Cubes\SurvivalKitLarge.dds</Icon>
+    <CubeSize>Large</CubeSize>
+    <BlockTopology>TriangleMesh</BlockTopology>
+    <Size x="1" y="1" z="1" />
+    <ModelOffset x="0" y="0" z="0" />
+    <Model>Models\Cubes\Large\SurvivalKit.mwm</Model>
+    <Components>
+      <Component Subtype="Organic" Count="50" />
+      <Component Subtype="ControlUnit" Count="5">
+          <DeconstructId>
+              <TypeId>Component</TypeId>
+              <SubtypeId>Organic</SubtypeId>
+          </DeconstructId>
+      </Component>
+      <Component Subtype="VentralSacks" Count="5">
+          <DeconstructId>
+              <TypeId>Component</TypeId>
+              <SubtypeId>Organic</SubtypeId>
+          </DeconstructId>
+      </Component>
+      <Component Subtype="Organic" Count="50" />
+    </Components>
+    <MountPoints>
+        <MountPoint Side="Left" StartX="0.1" StartY="0" EndX="0.9" EndY="0.9" />
+        <MountPoint Side="Right" StartX="0.1" StartY="0" EndX="0.9" EndY="0.9" />
+        <MountPoint Side="Bottom" StartX="0" StartY="0" EndX="1" EndY="1" Default="true" />
+    </MountPoints>
+    <CriticalComponent Subtype="ControlUnit" Index="0" />
+    <MirroringZ>Y</MirroringZ>
+    <MirroringY>Z</MirroringY>
+    <BuildProgressModels>
+        <Model BuildPercentUpperBound="0.33" File="Models\Cubes\Large\SurvivalKit_Construction1.mwm" />
+        <Model BuildPercentUpperBound="0.66" File="Models\Cubes\Large\SurvivalKit_Construction2.mwm" />
+        <Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\SurvivalKit_Construction3.mwm" />
+    </BuildProgressModels>
+    <BlockPairName>ZergSurvivalKit</BlockPairName>
+    <EdgeType>Light</EdgeType>
+    <BuildTimeSeconds>30</BuildTimeSeconds>
+    <ResourceSinkGroup>Factory</ResourceSinkGroup>
+    <ScreenAreas>
+        <ScreenArea Name="CockpitScreen_01" DisplayName="Top panel" />
+        <ScreenArea Name="CockpitScreen_02" DisplayName="Bottom panel" />
+    </ScreenAreas>
+    <BlueprintClasses>
+      <Class>BasicZergComponents</Class>
+      <Class>BasicTools</Class>
+    </BlueprintClasses>
+    <AssemblySpeed>0.3</AssemblySpeed>
+
+    <StandbyPowerConsumption>0.015</StandbyPowerConsumption>
+    <OperationalPowerConsumption>0.2</OperationalPowerConsumption>
+
+    <InventoryMaxVolume>2</InventoryMaxVolume>
+    <InventorySize>
+        <X>2</X>
+        <Y>2</Y>
+        <Z>2</Z>
+    </InventorySize>
+
+    <InventoryFillFactorMin>0.3</InventoryFillFactorMin>
+    <InventoryFillFactorMax>0.6</InventoryFillFactorMax>
+
+    <DamageEffectName>Damage_WeapExpl_Damaged</DamageEffectName>
+    <DamagedSound>ParticleWeapExpl</DamagedSound>
+    <DestroyEffect>BlockDestroyedExplosion_Large</DestroyEffect>
+    <DestroySound>WepSmallWarheadExpl</DestroySound>
+    <PrimarySound>BlockAssembler</PrimarySound>
+    <ActionSound>BlockAssemblerProcess</ActionSound>
+    <ProgressSound>BlockMedicalProgress</ProgressSound>
+
+    <PCU>140</PCU>
+    <TieredUpdateTimes>
+        <unsignedInt>60</unsignedInt>
+        <unsignedInt>120</unsignedInt>
+        <unsignedInt>240</unsignedInt>
+    </TieredUpdateTimes>
+  </Definition> -->
+
   <Definition xsi:type="MyObjectBuilder_AssemblerDefinition">
     <Id>
         <TypeId>Assembler</TypeId>
@@ -222,6 +305,7 @@
     <Model>Models\Cubes\Large\BasicAssembler.mwm</Model>
     <Components>
         <Component Subtype="Organic" Count="80" />
+        <Component Subtype="Computer" Count="1" />
         <Component Subtype="ControlUnit" Count="50">
             <DeconstructId>
                 <TypeId>Component</TypeId>
@@ -291,6 +375,7 @@
     <Model>Models\Cubes\Large\JumpDrive.mwm</Model>
     <Components>
         <Component Subtype="Organic" Count="180" />
+        <Component Subtype="Computer" Count="1" />
         <Component Subtype="ControlUnit" Count="80">
             <DeconstructId>
                 <TypeId>Component</TypeId>
@@ -359,6 +444,7 @@
   <Model>Models\Cubes\Large\GeneratorLarge.mwm</Model>
   <Components>
       <Component Subtype="Organic" Count="600" />
+      <Component Subtype="Computer" Count="1" />
       <Component Subtype="ZergCarapace" Count="20" />
       <Component Subtype="ControlUnit" Count="20">
           <DeconstructId>
@@ -440,6 +526,7 @@
     <Model>Models\Cubes\Large\SolarHydroponics.mwm</Model>
     <Components>
         <Component Subtype="Organic" Count="50" />
+        <Component Subtype="Computer" Count="1" />
         <Component Subtype="ControlUnit" Count="20">
             <DeconstructId>
                 <TypeId>Component</TypeId>
@@ -520,6 +607,7 @@
   <UseModelIntersection>true</UseModelIntersection>
   <Components>
       <Component Subtype="Organic" Count="50" />
+      <Component Subtype="Computer" Count="1" />
       <Component Subtype="ControlUnit" Count="20">
           <DeconstructId>
               <TypeId>Component</TypeId>
@@ -603,6 +691,7 @@
   <UseModelIntersection>true</UseModelIntersection>
   <Components>
       <Component Subtype="Organic" Count="50" />
+      <Component Subtype="Computer" Count="1" />
       <Component Subtype="ControlUnit" Count="20">
           <DeconstructId>
               <TypeId>Component</TypeId>
@@ -690,6 +779,7 @@
   <UseModelIntersection>true</UseModelIntersection>
   <Components>
     <Component Subtype="Organic" Count="30" />
+    <Component Subtype="Computer" Count="1" />
     <Component Subtype="ZergCarapace" Count="5" />
     <Component Subtype="MetabolicGlands" Count="15" />
     <Component Subtype="ControlUnit" Count="12" />
@@ -774,13 +864,15 @@
   <PlaceDecals>false</PlaceDecals>
   <UseModelIntersection>true</UseModelIntersection>
   <Components>
+    <Component Subtype="Organic" Count="6" />
+    <Component Subtype="Computer" Count="1" />
     <Component Subtype="ControlUnit" Count="5">
         <DeconstructId>
             <TypeId>Component</TypeId>
             <SubtypeId>Organic</SubtypeId>
         </DeconstructId>
     </Component>
-    <Component Subtype="Organic" Count="12" />
+    <Component Subtype="Organic" Count="6" />
   </Components>
   <CriticalComponent Subtype="ControlUnit" Index="0" />
   <!-- <Center x="1" y="1" z="5" /> -->
@@ -848,13 +940,15 @@
   <UseModelIntersection>true</UseModelIntersection>
   <UsesDeformation>false</UsesDeformation>
   <Components>
+    <Component Subtype="Organic" Count="150" />
+    <Component Subtype="Computer" Count="1" />
     <Component Subtype="ControlUnit" Count="20">
         <DeconstructId>
             <TypeId>Component</TypeId>
             <SubtypeId>Organic</SubtypeId>
         </DeconstructId>
     </Component>
-    <Component Subtype="Organic" Count="300" />
+    <Component Subtype="Organic" Count="150" />
   </Components>
   <CriticalComponent Subtype="ControlUnit" Index="0" />
   <MountPoints>
@@ -922,6 +1016,7 @@
   <Model>Models\Cubes\Large\RemoteControl.mwm</Model>
   <Components>
     <Component Subtype="Organic" Count="25" />
+    <Component Subtype="Computer" Count="1" />
     <Component Subtype="ControlUnit" Count="5">
         <DeconstructId>
             <TypeId>Component</TypeId>
@@ -977,6 +1072,7 @@
   <Model>Models\Cubes\Small\RemoteControl.mwm</Model>
   <Components>
     <Component Subtype="Organic" Count="5" />
+    <Component Subtype="Computer" Count="1" />
     <Component Subtype="ControlUnit" Count="3">
         <DeconstructId>
             <TypeId>Component</TypeId>
@@ -1040,6 +1136,7 @@
   <SilenceableByShipSoundSystem>true</SilenceableByShipSoundSystem>
   <Components>
     <Component Subtype="Organic" Count="5" />
+    <Component Subtype="Computer" Count="1" />
     <Component Subtype="ControlUnit" Count="5">
         <DeconstructId>
             <TypeId>Component</TypeId>
@@ -1234,6 +1331,7 @@
   <SilenceableByShipSoundSystem>true</SilenceableByShipSoundSystem>
   <Components>
     <Component Subtype="Organic" Count="80" />
+    <Component Subtype="Computer" Count="1" />
     <Component Subtype="ControlUnit" Count="45">
         <DeconstructId>
             <TypeId>Component</TypeId>
@@ -1430,6 +1528,7 @@
     <Model>Models\Cubes\Large\gyroscope.mwm</Model>
     <Components>
       <Component Subtype="Organic" Count="250" />
+      <Component Subtype="Computer" Count="1" />
       <Component Subtype="ControlUnit" Count="100">
           <DeconstructId>
               <TypeId>Component</TypeId>
@@ -1482,6 +1581,7 @@
     <SilenceableByShipSoundSystem>true</SilenceableByShipSoundSystem>
     <Components>
       <Component Subtype="Organic" Count="15" />
+      <Component Subtype="Computer" Count="1" />
       <Component Subtype="ControlUnit" Count="5">
           <DeconstructId>
               <TypeId>Component</TypeId>
