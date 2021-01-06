@@ -489,7 +489,7 @@ namespace SpaceCraft.Utils {
         Vector3D perp = Vector3D.CalculatePerpendicularVector(up);
 
         if( Tier >= Tech.Advanced && (prefab.IsStatic || prefab.Spacecraft) && !CommandLine.Switch("grounded") ) {
-          position = position + ( up * (planet.AtmosphereAltitude*3) );
+          position = position + ( up * (planet.AtmosphereAltitude*3.5) );
         }
 
         else {
@@ -1192,7 +1192,7 @@ namespace SpaceCraft.Utils {
 
         position = Homeworld.GetClosestSurfacePointGlobal( p );
         //Homeworld.CorrectSpawnLocation(ref position,250f);
-        Homeworld.CorrectSpawnLocation(ref position,5f);
+        Homeworld.CorrectSpawnLocation(ref position,15f);
       }
 
       if( CommandLine.Switch("nuclear") && !Resources.Contains("Uranium") ) {

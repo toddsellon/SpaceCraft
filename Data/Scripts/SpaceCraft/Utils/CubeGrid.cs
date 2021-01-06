@@ -6,6 +6,7 @@ using VRage.Game;
 using VRage.Game.Entity;
 using VRage.Game.ModAPI;
 using Sandbox.ModAPI;
+// using Sandbox.ModAPI.Ingame;
 using Sandbox.ModAPI.Interfaces;
 using Sandbox.Definitions;
 //using Sandbox.ModAPI.Ingame;
@@ -169,12 +170,39 @@ namespace SpaceCraft.Utils {
 
 			if( Tick == 99 ) {
 				//AssessInventory();
+				if( Drone ) CheckAutopilot();
+
 				if( DockedTo == null )
 					UpdateInventory();
 				// if( Grid.IsStatic )
 				// 	Drill();
 				Tick = 0;
 			}
+		}
+
+		protected void CheckAutopilot() {
+			if( Grid == null ) return;
+
+			Remote = Remote ?? FindRemoteControl();
+			if( Remote == null || !Remote.IsFunctional )
+				Remote = FindRemoteControl();
+			if( Remote == null || (Remote.IsAutoPilotEnabled && Grid.Physics.IsMoving) ) return;
+
+			IMyPlayer player = Owner.GetClosestEnemy(Grid.WorldMatrix.Translation);
+
+			if( player == null ) return;
+
+			Remote.ClearWaypoints();
+			Remote.AddWaypoint( player.GetPosition(), "Long Range Destination" );
+			Remote.FlightMode = Sandbox.ModAPI.Ingame.FlightMode.OneWay;
+			if( !Block.DoAction( Remote, "Collision avoidance On") ) {
+				MyAPIGateway.Utilities.ShowMessage( "CheckAutopilot", "Failed to CollisionAvoidance_On" );
+				List<ITerminalAction> actions = new List<ITerminalAction>();
+	      Remote.GetActions( actions );
+				foreach( ITerminalAction action in actions )
+					MyAPIGateway.Utilities.ShowMessage( "Action", action.ToString() + ": " + action.Name );
+			}
+			Remote.SetAutoPilotEnabled(true);
 		}
 
 		public void CheckOrder() {
