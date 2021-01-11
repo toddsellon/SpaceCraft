@@ -517,6 +517,7 @@ namespace SpaceCraft {
 						Races race = Races.Terran;
 						if( cmd.Switch("toss") ) race = Races.Protoss;
 						if( cmd.Switch("zerg") ) race = Races.Zerg;
+						if( cmd.Switch("hybrid") ) race = Races.Hybrid;
 
 						// if( first == String.Empty && Name != String.Empty ) first = prefab.SubtypeId;
 						// else Prefab.Add(prefab.SubtypeId, Name, race);
@@ -648,6 +649,18 @@ namespace SpaceCraft {
 				if( !faction.Resources.Contains("Organic") )
 					faction.Resources.Add("Organic");
 			}
+			if( cmd.Switch("hybrid") ) {
+				faction.Race = Races.Hybrid;
+				if( !faction.Resources.Contains("Organic") )
+					faction.Resources.Add("Organic");
+				faction.Resources.Add("Silver");
+        faction.Resources.Add("Gold");
+        faction.Resources.Add("Cobalt");
+        faction.Resources.Add("Magnesium");
+        faction.Resources.Add("Uranium");
+        faction.Resources.Add("Platinum");
+				faction.Tier = Tech.Space;
+			}
 			if( !String.IsNullOrWhiteSpace(cmd.Argument(2)) ) {
 				string[] colors = cmd.Argument(2).Split(',');
 				faction.Color = new SerializableVector3(float.Parse(colors[0]),float.Parse(colors[1]),float.Parse(colors[2]));
@@ -684,6 +697,17 @@ namespace SpaceCraft {
 		// 			faction.SetReputation(player.PlayerID);
 		// 		}
 		// 	}
+		// }
+
+		// public void IncreaseStat( IMyCharacter character, MyStringHash id) {
+		// 	if( character == null ) return;
+		// 	MyEntityStatComponent comp = character.Components.Get<MyEntityStatComponent>();
+		// 	if( comp == null ) return;
+		//
+		// 	MyEntityStat stat;
+    //   if(!Stats.TryGetValue(id, out stat)) return;
+		//
+		// 	stat.MaxValue += amount;
 		// }
 
 		public void SetReputation(long playerID) {

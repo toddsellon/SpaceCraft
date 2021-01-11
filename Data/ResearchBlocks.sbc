@@ -137,6 +137,9 @@
       <Id Type="MyObjectBuilder_LargeMissileTurret" Subtype="SunkenColony" />
 
 
+      <Id Type="MyObjectBuilder_Refinery" Subtype="LargeHybridRefinery" />
+      <Id Type="MyObjectBuilder_Assembler" Subtype="LargeHybridAssembler" />
+
       <UnlockedByGroups>
         <GroupSubtype>5346</GroupSubtype>
       </UnlockedByGroups>

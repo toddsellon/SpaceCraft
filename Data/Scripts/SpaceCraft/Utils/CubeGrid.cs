@@ -5,10 +5,12 @@ using VRage.ModAPI;
 using VRage.Game;
 using VRage.Game.Entity;
 using VRage.Game.ModAPI;
+using VRage.Game.Models;
 using Sandbox.ModAPI;
 // using Sandbox.ModAPI.Ingame;
 using Sandbox.ModAPI.Interfaces;
 using Sandbox.Definitions;
+using Sandbox.ModAPI.Physics;
 //using Sandbox.ModAPI.Ingame;
 using Sandbox.Game;
 using Sandbox.Game.Screens.Terminal.Controls;
@@ -63,7 +65,8 @@ namespace SpaceCraft.Utils {
       }
 		}
 
-		private static float PlayerDistance = 10000;
+		// private static float PlayerDistance = 10000;
+		private static float PlayerDistance = float.MaxValue;
 		private static SerializableVector3 DefaultColor = new SerializableVector3(0.575f,0.150000036f,0.199999958f);
 		private static readonly uint DrillLimit = 3;
 		public IMySlimBlock ConstructionSite;
@@ -186,22 +189,60 @@ namespace SpaceCraft.Utils {
 			Remote = Remote ?? FindRemoteControl();
 			if( Remote == null || !Remote.IsFunctional )
 				Remote = FindRemoteControl();
-			if( Remote == null || (Remote.IsAutoPilotEnabled && Grid.Physics.IsMoving) ) return;
+			// if( Remote == null || (Remote.IsAutoPilotEnabled && Grid.Physics.IsMoving) ) return;
+			if( Remote == null ) return;
 
 			IMyPlayer player = Owner.GetClosestEnemy(Grid.WorldMatrix.Translation);
 
 			if( player == null ) return;
 
+			Vector3D position = player.GetPosition();
+
+			MyPlanet planet = SpaceCraftSession.GetClosestPlanet(Grid.WorldMatrix.Translation);
+
 			Remote.ClearWaypoints();
-			Remote.AddWaypoint( player.GetPosition(), "Long Range Destination" );
-			Remote.FlightMode = Sandbox.ModAPI.Ingame.FlightMode.OneWay;
-			if( !Block.DoAction( Remote, "Collision avoidance On") ) {
-				MyAPIGateway.Utilities.ShowMessage( "CheckAutopilot", "Failed to CollisionAvoidance_On" );
-				List<ITerminalAction> actions = new List<ITerminalAction>();
-	      Remote.GetActions( actions );
-				foreach( ITerminalAction action in actions )
-					MyAPIGateway.Utilities.ShowMessage( "Action", action.ToString() + ": " + action.Name );
+
+			LineD line = new LineD(Grid.WorldMatrix.Translation,position);
+			Vector3D? hit = null;
+
+			if( planet != null && planet.GetIntersectionWithLine(ref line,out hit, true) && hit.HasValue ) {
+				//Vector3D direction = Grid.WorldMatrix.Translation - position;
+				Vector3D direction = Vector3D.Normalize(hit.Value - Grid.WorldMatrix.Translation);
+				Vector3D up = Vector3D.Normalize(Grid.WorldMatrix.Translation - planet.WorldMatrix.Translation);
+				// Remote.AddWaypoint( hit+(Grid.WorldMatrix.Forward*1000), "Detour" );
+				Remote.AddWaypoint( Grid.WorldMatrix.Translation+(direction*1000)+(up*1000), "Detour" );
 			}
+
+			Remote.AddWaypoint( position, "Tracked Player Location" );
+
+
+
+			if( Remote.IsAutoPilotEnabled ) return;
+
+			// IHitInfo hitInfo = null;
+			// if( MyPhysics.CastRay(Grid.WorldMatrix.Translation, player.GetPosition(), hitInfo, MyPhysics.CollisionLayers.DefaultCollisionLayer)
+			// 	&& hitInfo.HitEntity is MyPlanet ) {
+			// if( MyAPIGateway.Entities.IsRaycastBlocked(Grid.WorldMatrix.Translation,player.GetPosition()) ) {
+			// 	// Plot course around
+			// 	Remote.ClearWaypoints();
+			//
+			// 	Vector3D direction = Vector3D.Normalize(Grid.WorldMatrix.Translation - player.GetPosition());
+      //   Vector3D perp = Vector3D.CalculatePerpendicularVector(direction);
+			//
+			// 	Remote.AddWaypoint( Grid.WorldMatrix.Translation + (perp * Vector3D.Distance(Grid.WorldMatrix.Translation,player.GetPosition())), "Detour" );
+			//
+			// 	Remote.AddWaypoint( player.GetPosition(), "Tracked Player Location" );
+			// }
+
+			Remote.FlightMode = Sandbox.ModAPI.Ingame.FlightMode.OneWay;
+			Remote.SetCollisionAvoidance(true);
+			// if( !Block.DoAction( Remote, "Collision avoidance On") ) {
+			// 	// MyAPIGateway.Utilities.ShowMessage( "CheckAutopilot", "Failed to CollisionAvoidance_On" );
+			// 	// List<ITerminalAction> actions = new List<ITerminalAction>();
+	    //   // Remote.GetActions( actions );
+			// 	// foreach( ITerminalAction action in actions )
+			// 	// 	MyAPIGateway.Utilities.ShowMessage( "Action", action.ToString() + ": " + action.Name );
+			// }
 			Remote.SetAutoPilotEnabled(true);
 		}
 
@@ -432,8 +473,16 @@ namespace SpaceCraft.Utils {
 
 				//MyVisualScriptLogicProvider.MusicPlayMusicCue(MusicId);
 				Drone = true;
+				// MyVisualScriptLogicProvider.SetDroneBehaviourFull(Grid.EntityId.ToString(), presetName, true, false, null, false, null, 10, PlayerDistance);
+				//
+				//
+				// IMyEntity enemy = Owner.GetClosestEnemy(Grid.WorldMatrix.Translation);
+				// if( enemy != null ) {
+				// 	MyVisualScriptLogicProvider.DroneTargetClear(Grid.EntityId.ToString());
+				// 	MyVisualScriptLogicProvider.DroneTargetAdd(Grid.EntityId.ToString(), enemy as MyEntity);
+				// }
 			}
-			MyVisualScriptLogicProvider.SetDroneBehaviourFull(Grid.EntityId.ToString(), presetName, true, false, null, false, null, 10, PlayerDistance);
+
 		}
 
 		public List<IMySlimBlock> GetBlocks<t>( List<IMySlimBlock> blocks = null, bool excludeDocked = false ) {

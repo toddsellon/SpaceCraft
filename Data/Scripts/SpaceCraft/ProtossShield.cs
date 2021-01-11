@@ -48,8 +48,9 @@ namespace SpaceCraft {
 			MatrixD matrix = Block.CubeGrid.WorldMatrix;
 			try {
 				MySimpleObjectDraw.DrawTransparentSphere(ref matrix, Block.CubeGrid.LocalVolume.Radius*1.1f, ref Blue, MySimpleObjectRasterizer.SolidAndWireframe, 20);
-			} catch( NullReferenceException e ) {
+			} catch( Exception e ) {
 			}
+
 
 			return true;
 
