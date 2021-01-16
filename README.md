@@ -6,6 +6,54 @@ A mod for Space Engineers allowing AI controlled factions. Simply find the mod i
 # Early Access
 SpaceCraft is still a work in progress, so please expect issues/bugs/other frustrations. Don't hesitate to reach out should you encounter any difficulties and be as descriptive as possible so I can try to get to the bottom of any issues.
 
+# Command Line Interface
+SpaceCraft has a chat-based command interface that allows you to control SpaceCraft factions or change session settings. To use the CLI, simply type "/sc" into the chat, followed by your command. The following are the available commands (square brackets indicates optional arguments):
+
+- **get**
+	- Returns the value of a setting. All possible settings listed below.
+	- /sc get difficulty
+- **set**
+	- Changes a configuration setting
+	- /sc set engineers 2
+- **join** faction
+	- Joins a faction even if you haven't found them yet. Host player is force joined, others request invite.
+	- /sc join ARC
+- **gps** 
+	- Adds a GPS marker for each Grid or Engineer controlled by your Faction
+	- /sc gps
+- **follow** [distance]
+	- Orders all offensive grids in your faction to follow you. Optionally, specify how far away they should try to stay in meters (default 0).
+	- /sc follow 600
+- **stop** 
+	- Stops your faction from following
+	- /sc stop
+- **build** "Prefab Name" [faction]
+	- Orders the specified faction to begin construction of a specific prefab or orders your current faction if one is not specified.
+	- /sc build "Terran SCV"
+- **spawn** "Prefab Name" [faction]
+	- Spawns a completed prefab for specified faction or your faction if one is not specified.
+	- /sc spawn "Terran Battlecruiser" ARC
+- **donate**
+	- Donates the grid you're currently controlling to your faction. Be warned that the grid will count towards your Faction's grid limits and will impact its decision making.
+	- /sc donate
+- **respawn** [faction] [-remain]
+	- Respawns target faction incase they glitched out or were added later into the game. Add the -remain flag to leave their grids behind for loot
+	- /sc respawn ARC -remain
+- **debug**
+	- Toggles debug mode on/off
+	- /sc debug
+- **control** entityId faction
+	- Tells SpaceCraft to control the specified entity. This is intended to be used by other mods.
+	- /sc control 12345 ARC
+- **release** entityId faction
+	- Tells SpaceCraft to stop controlling the specified entity. This is intended to be used by other mods.
+	- /sc release 12345 ARC
+- **complete**
+	- Tells your faction to complete the current building project (super laggy)
+	- /sc complete
+- **pay**
+	- Pays off any outstanding balance for your faction. A balance is incurred whenever a construction project is started and the faction has to pay off the cost of one battery to avoid garbage collection.
+
 
 # Factions
 Factions are defined inside XML formated .sbc files *outside the SpaceCraft base mod*. Custom prefabs can also be added via XML.
@@ -69,47 +117,7 @@ Faction parameters are still a work in progress but will allow factions to utili
 * nuclear (This faction gains access to Uranium once it builds its first Refinery. This is intended for grounded factions who never reach space and get Uranium legitimately.)
 More to come!
 
-# Command Line Interface
-SpaceCraft has a chat-based command interface that allows you to control SpaceCraft factions or change session settings. To use the CLI, simply type "/sc" into the chat, followed by your command. The following are the available commands (square brackets indicates optional arguments):
 
-- **get**
-	- Returns the value of a setting. All possible settings listed below.
-	- /sc get difficulty
-- **set**
-	- Changes a configuration setting
-	- /sc set engineers 2
-- **join** faction
-	- Joins a faction even if you haven't found them yet. Host player is force joined, others request invite.
-	- /sc join ARC
-- **gps** 
-	- Adds a GPS marker for each Grid or Engineer controlled by your Faction
-	- /sc gps
-- **build** "Prefab Name" [faction]
-	- Orders the specified faction to begin construction of a specific prefab or orders your current faction if one is not specified.
-	- /sc build "Terran SCV"
-- **spawn** "Prefab Name" [faction]
-	- Spawns a completed prefab for specified faction or your faction if one is not specified.
-	- /sc spawn "Terran Battlecruiser" ARC
-- **donate**
-	- Donates the grid you're currently controlling to your faction. Be warned that the grid will count towards your Faction's grid limits and will impact its decision making.
-	- /sc donate
-- **respawn** [faction] [-remove]
-	- Respawns target faction incase they glitched out or were added later into the game. Add the -remove flag to also remove all their entities
-	- /sc respawn ARC -remove
-- **debug**
-	- Toggles debug mode on/off
-	- /sc debug
-- **control** entityId faction
-	- Tells SpaceCraft to control the specified entity. This is intended to be used by other mods.
-	- /sc control 12345 ARC
-- **release** entityId faction
-	- Tells SpaceCraft to stop controlling the specified entity. This is intended to be used by other mods.
-	- /sc release 12345 ARC
-- **complete**
-	- Tells your faction to complete the current building project (super laggy)
-	- /sc complete
-- **pay**
-	- Pays off any outstanding balance for your faction. A balance is incurred whenever a construction project is started and the faction has to pay off the cost of one battery to avoid garbage collection.
 
 
 ## Settings

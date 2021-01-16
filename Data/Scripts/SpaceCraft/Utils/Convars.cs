@@ -31,6 +31,7 @@ namespace SpaceCraft.Utils {
     public int Bots = 3;
     public bool ManualKits = false;
     public bool Spawned = false;
+    public bool Animations = true;
 
     protected static string File = "SCConvars.xml";
 
@@ -85,6 +86,10 @@ namespace SpaceCraft.Utils {
           float.TryParse(value, out Difficulty);
           Save();
           break;
+        case "animations":
+          Animations = Boolean.Parse(value);
+          Save();
+          break;
       }
 
       return Get(convar);
@@ -97,6 +102,7 @@ namespace SpaceCraft.Utils {
         case "bots": return Bots.ToString();
         case "difficulty": return Difficulty.ToString();
         case "manualkits": return ManualKits.ToString();
+        case "animations": return Animations.ToString();
       }
       return "null";
     }

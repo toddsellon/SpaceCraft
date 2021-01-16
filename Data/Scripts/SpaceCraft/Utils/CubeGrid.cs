@@ -173,7 +173,7 @@ namespace SpaceCraft.Utils {
 
 			if( Tick == 99 ) {
 				//AssessInventory();
-				if( Drone ) CheckAutopilot();
+				if( Drone || (Fighter && Owner.Following != null) ) CheckAutopilot();
 
 				if( DockedTo == null )
 					UpdateInventory();
@@ -192,7 +192,7 @@ namespace SpaceCraft.Utils {
 			// if( Remote == null || (Remote.IsAutoPilotEnabled && Grid.Physics.IsMoving) ) return;
 			if( Remote == null ) return;
 
-			IMyPlayer player = Owner.GetClosestEnemy(Grid.WorldMatrix.Translation);
+			IMyPlayer player = Owner.Following == null ? Owner.GetClosestEnemy(Grid.WorldMatrix.Translation) : Owner.Following;
 
 			if( player == null ) return;
 
@@ -213,36 +213,19 @@ namespace SpaceCraft.Utils {
 				Remote.AddWaypoint( Grid.WorldMatrix.Translation+(direction*1000)+(up*1000), "Detour" );
 			}
 
-			Remote.AddWaypoint( position, "Tracked Player Location" );
+			if( Owner.Following != null && Owner.FollowDistance > 0 ) {
+				Vector3D dir = Vector3D.Normalize(position - Grid.WorldMatrix.Translation);
+				Remote.AddWaypoint( position - (dir*Owner.FollowDistance), "Offset Player Location" );
+			} else
+				Remote.AddWaypoint( position, "Tracked Player Location" );
 
 
 
 			if( Remote.IsAutoPilotEnabled ) return;
 
-			// IHitInfo hitInfo = null;
-			// if( MyPhysics.CastRay(Grid.WorldMatrix.Translation, player.GetPosition(), hitInfo, MyPhysics.CollisionLayers.DefaultCollisionLayer)
-			// 	&& hitInfo.HitEntity is MyPlanet ) {
-			// if( MyAPIGateway.Entities.IsRaycastBlocked(Grid.WorldMatrix.Translation,player.GetPosition()) ) {
-			// 	// Plot course around
-			// 	Remote.ClearWaypoints();
-			//
-			// 	Vector3D direction = Vector3D.Normalize(Grid.WorldMatrix.Translation - player.GetPosition());
-      //   Vector3D perp = Vector3D.CalculatePerpendicularVector(direction);
-			//
-			// 	Remote.AddWaypoint( Grid.WorldMatrix.Translation + (perp * Vector3D.Distance(Grid.WorldMatrix.Translation,player.GetPosition())), "Detour" );
-			//
-			// 	Remote.AddWaypoint( player.GetPosition(), "Tracked Player Location" );
-			// }
 
 			Remote.FlightMode = Sandbox.ModAPI.Ingame.FlightMode.OneWay;
 			Remote.SetCollisionAvoidance(true);
-			// if( !Block.DoAction( Remote, "Collision avoidance On") ) {
-			// 	// MyAPIGateway.Utilities.ShowMessage( "CheckAutopilot", "Failed to CollisionAvoidance_On" );
-			// 	// List<ITerminalAction> actions = new List<ITerminalAction>();
-	    //   // Remote.GetActions( actions );
-			// 	// foreach( ITerminalAction action in actions )
-			// 	// 	MyAPIGateway.Utilities.ShowMessage( "Action", action.ToString() + ": " + action.Name );
-			// }
 			Remote.SetAutoPilotEnabled(true);
 		}
 
@@ -1054,8 +1037,9 @@ namespace SpaceCraft.Utils {
 
 		public IMyCubeBlock GetRespawnBlock() {
 			if( Grid == null ) return null;
-			List<IMySlimBlock> blocks = new List<IMySlimBlock>();
-			Grid.GetBlocks( blocks );
+			// List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+			// Grid.GetBlocks( blocks );
+			List<IMySlimBlock> blocks = blocks = GetBlocks<IMySlimBlock>();
 			foreach( IMySlimBlock slim in blocks ) {
 				if( slim.FatBlock == null ) continue;
 				string subtype = slim.FatBlock.BlockDefinition.SubtypeName;
@@ -1278,6 +1262,9 @@ namespace SpaceCraft.Utils {
 				entity.Flags &= ~EntityFlags.Save;
         entity.Render.Visible = true;
 				entity.Save = true;
+
+				entity.Storage = new MyModStorageComponent();
+				entity.Storage.Add(SpaceCraftSession.GuidFaction,owner.Name);
         //entity.WorldMatrix = matrix;
         MyAPIGateway.Entities.AddEntity(entity);
 

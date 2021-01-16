@@ -30,7 +30,8 @@ namespace SpaceCraft.Utils {
       Actions.Add("spawn",Spawn);
       Actions.Add("complete",Complete);
       Actions.Add("pay",Pay);
-      // Actions.Add("follow",Follow);
+      Actions.Add("follow",Follow);
+      Actions.Add("stop",Stop);
       Actions.Add("war",War);
       Actions.Add("peace",Peace);
       Actions.Add("join",Join);
@@ -452,8 +453,31 @@ namespace SpaceCraft.Utils {
         return;
       }
 
+      float distance = 0f;
+      if( !String.IsNullOrWhiteSpace(cmd.Argument(2)) ) {
+        Single.TryParse(cmd.Argument(2), out distance);
+      }
+
+      faction.FollowDistance = distance;
       faction.Follow(player);
       Respond("Following", player.DisplayName, message);
+    }
+
+    public void Stop( MyCommandLine cmd, Message message ) {
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+      if( player == null ) {
+        Respond("Error", "Player not found", message);
+        return;
+      }
+      Faction faction = SpaceCraftSession.GetFactionContaining(player.PlayerID);
+      if( faction == null ) {
+        Respond("Error", "You do not belong to a SpaceCraft faction", message);
+        return;
+      }
+
+      faction.FollowDistance = 0f;
+      faction.Follow(null);
+      Respond("Stopped", "following", message);
     }
 
     public void Join( MyCommandLine cmd, Message message ) {

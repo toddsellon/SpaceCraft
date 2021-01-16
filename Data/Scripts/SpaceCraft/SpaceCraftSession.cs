@@ -726,6 +726,8 @@ namespace SpaceCraft {
 				SetReputation(MyAPIGateway.Session.Player.PlayerID);
 			}
 
+			Convars.Static.Animations = true;
+
 			foreach( Faction faction in Factions ) {
 
 				if( ClosestPlanet == null ) {
