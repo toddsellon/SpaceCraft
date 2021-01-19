@@ -14,7 +14,7 @@ namespace SpaceCraft.Utils {
       block.GetActions( actions );
 
       foreach( ITerminalAction action in actions ) {
-        //MyAPIGateway.Utilities.ShowMessage( "Action", action.ToString() + ": " + action.Name );
+        // MyAPIGateway.Utilities.ShowMessage( "Action", action.ToString() + ": " + action.Name );
         if( action.Name.ToString() == name ) {
           action.Apply( block );
           return true;
@@ -29,6 +29,7 @@ namespace SpaceCraft.Utils {
 
 
     public static void ListProperties( IMyTerminalBlock block ) {
+      if( block == null ) return;
       List<ITerminalProperty> props = new List<ITerminalProperty>();
       block.GetProperties( props );
 

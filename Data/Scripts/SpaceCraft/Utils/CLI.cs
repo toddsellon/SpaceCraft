@@ -3,12 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using VRageMath;
 using VRage;
+using VRage.Utils;
 using VRage.Game.Entity;
 using VRage.Game.ObjectBuilders.Definitions;
+using Sandbox.Game;
 using Sandbox.Definitions;
 using SpaceCraft.Utils;
 using VRage.Game.ModAPI.Ingame.Utilities;
 using Sandbox.Game.Entities;
+using VRage.Audio;
 
 namespace SpaceCraft.Utils {
 
@@ -19,6 +22,7 @@ namespace SpaceCraft.Utils {
     protected static ushort Id = 8008;
     protected bool Server;
     protected Dictionary<string,Action<MyCommandLine,Message>> Actions = new Dictionary<string,Action<MyCommandLine,Message>>(StringComparer.OrdinalIgnoreCase);
+    protected MyEntity3DSoundEmitter SoundEmitter;
 
     public CLI(bool server) {
       Server = server;
@@ -41,6 +45,9 @@ namespace SpaceCraft.Utils {
       Actions.Add("release",Release);
       Actions.Add("respawn",Respawn);
       Actions.Add("donate",Donate);
+      Actions.Add("reset",Reset);
+      Actions.Add("unlock",Unlock);
+      Actions.Add("lock",Lock);
 
       MyAPIGateway.Utilities.MessageEntered += MessageEntered;
       MyAPIGateway.Multiplayer.RegisterMessageHandler(Id, MessageHandler);
@@ -78,6 +85,10 @@ namespace SpaceCraft.Utils {
         MyAPIGateway.Utilities.ShowMessage( message.Sender, message.Text );
       }
 
+      if( !String.IsNullOrWhiteSpace(message.Sound) ) {
+        PlaySound(message.Sound);
+      }
+
 		}
 
     public bool ParseMessage(string text, Message message = null) {
@@ -103,7 +114,7 @@ namespace SpaceCraft.Utils {
       return MyAPIGateway.Multiplayer.SendMessageToServer(Id, data);
     }
 
-    public bool SendMessageToClient(Message message) {
+    public static bool SendMessageToClient(Message message) {
       if( message == null || message.SteamUserId == 0 ) return false;
       byte[] data = MyAPIGateway.Utilities.SerializeToBinary<Message>(message);
       return MyAPIGateway.Multiplayer.SendMessageTo(Id, data, message.SteamUserId);
@@ -117,6 +128,24 @@ namespace SpaceCraft.Utils {
         message.Text = text;
         SendMessageToClient(message);
       }
+    }
+
+    public void PlaySound( string sound ) {
+      if( SoundEmitter != null ) {
+        SoundEmitter.StopSound(true);
+      }
+
+      var ent = MyAPIGateway.Session.Player.Controller?.ControlledEntity?.Entity;
+      if( ent == null ) return;
+      SoundEmitter = new MyEntity3DSoundEmitter(ent as MyEntity);
+      SoundEmitter.StopSound(true);
+      SoundEmitter.PlaySingleSound( new MySoundPair(sound) );
+      // MyVisualScriptLogicProvider.MusicPlayMusicCue(sound);
+      // IMyEntity entity = MyAPIGateway.Session.ControlledObject as IMyEntity;
+      // MyVisualScriptLogicProvider.SetName(entity.EntityId, entity.EntityId.ToString());
+      // MyVisualScriptLogicProvider.PlaySingleSoundAtEntity(sound, entity.EntityId.ToString());
+      // MyVisualScriptLogicProvider.PlaySingleSoundAtPosition(sound,MyAPIGateway.Session.LocalHumanPlayer.GetPosition());
+
     }
 
     public void Respawn( MyCommandLine cmd, Message message ) {
@@ -201,6 +230,46 @@ namespace SpaceCraft.Utils {
         //Respond("GPS", "GPS:" + c.Entity.DisplayName + ":" + position.X.ToString() + ":" + position.Y.ToString() + ":" + position.Z.ToString(), message);
       }
 
+    }
+
+    public void Reset( MyCommandLine cmd, Message message ) {
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+
+      if( player == null || (player.PromoteLevel != MyPromoteLevel.Admin && player.PromoteLevel != MyPromoteLevel.Owner) ) {
+        Respond("Error","You don't have permission", message);
+        return;
+      }
+
+      Quests.Reset();
+
+      if( Convars.Static.Quests ) {
+        Quests.LockTechnology();
+      }
+      Respond("Reset", "Quest progress has been reset", message);
+    }
+
+    public void Lock( MyCommandLine cmd, Message message ) {
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+
+      if( player == null || (player.PromoteLevel != MyPromoteLevel.Admin && player.PromoteLevel != MyPromoteLevel.Owner) ) {
+        Respond("Error","You don't have permission", message);
+        return;
+      }
+
+      Quests.LockTechnology( Quests.Technology[Races.Protoss] );
+      Respond("Lock", "Technology has been locked", message);
+    }
+
+    public void Unlock( MyCommandLine cmd, Message message ) {
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+
+      if( player == null || (player.PromoteLevel != MyPromoteLevel.Admin && player.PromoteLevel != MyPromoteLevel.Owner) ) {
+        Respond("Error","You don't have permission", message);
+        return;
+      }
+
+      Quests.UnlockTechnology( Quests.Technology[Races.Protoss] );
+      Respond("Unlock", "Technology has been unlocked", message);
     }
 
     public void Debug( MyCommandLine cmd, Message message ) {

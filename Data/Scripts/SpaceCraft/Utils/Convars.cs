@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using VRage.Game.ModAPI;
+using SpaceCraft;
 
 namespace SpaceCraft.Utils {
 
@@ -32,6 +33,7 @@ namespace SpaceCraft.Utils {
     public bool ManualKits = false;
     public bool Spawned = false;
     public bool Animations = true;
+    public bool Quests = true;
 
     protected static string File = "SCConvars.xml";
 
@@ -90,6 +92,13 @@ namespace SpaceCraft.Utils {
           Animations = Boolean.Parse(value);
           Save();
           break;
+        case "quests":
+          Quests = Boolean.Parse(value);
+          if( !Quests ) {
+            SpaceCraft.Utils.Quests.UnlockTechnology();
+          }
+          Save();
+          break;
       }
 
       return Get(convar);
@@ -103,6 +112,7 @@ namespace SpaceCraft.Utils {
         case "difficulty": return Difficulty.ToString();
         case "manualkits": return ManualKits.ToString();
         case "animations": return Animations.ToString();
+        case "quests": return Quests.ToString();
       }
       return "null";
     }

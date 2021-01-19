@@ -45,11 +45,11 @@ namespace SpaceCraft {
 		public bool Activate() {
 			if( Block == null || !Block.IsFunctional || Block.CubeGrid == null ) return false;
 
-			MatrixD matrix = Block.CubeGrid.WorldMatrix;
-			try {
-				MySimpleObjectDraw.DrawTransparentSphere(ref matrix, Block.CubeGrid.LocalVolume.Radius*1.1f, ref Blue, MySimpleObjectRasterizer.SolidAndWireframe, 20);
-			} catch( Exception e ) {
-			}
+			// MatrixD matrix = Block.CubeGrid.WorldMatrix;
+			// try {
+			// 	MySimpleObjectDraw.DrawTransparentSphere(ref matrix, Block.CubeGrid.LocalVolume.Radius*1.1f, ref Blue, MySimpleObjectRasterizer.SolidAndWireframe, 20);
+			// } catch( Exception e ) {
+			// }
 
 
 			return true;

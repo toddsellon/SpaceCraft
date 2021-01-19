@@ -52,10 +52,62 @@ SpaceCraft has a chat-based command interface that allows you to control SpaceCr
 	- Tells your faction to complete the current building project (super laggy)
 	- /sc complete
 - **pay**
-	- Pays off any outstanding balance for your faction. A balance is incurred whenever a construction project is started and the faction has to pay off the cost of one battery to avoid garbage collection.
+	- Pays off any outstanding balance for your faction. A balance is incurred whenever a construction project is started and
+	the faction has to pay off the cost of one battery to avoid garbage collection.
+	- /sc pay
+- **reset**
+	- Resets all quest progress
+	- /sc reset
+- **unlock**
+	- Unlocks all technology
+	- /sc unlock
+- **lock**
+	- Locks all technology
+	- /sc lock
+	
+## Settings
+These are the settings which can be changed
+- difficulty (float) Multiplier for AI gathered resources (default 1)
+- grids (int) Limit to how many grids each Faction will make (default 20)
+- engineers (int) Limit of how many engineers each Faction should have (default 1)
+- bots (int) Limit of how many bots each Faction should have (default 3)
+- manualkits (bool) Allows admins to disable the automatic functionality on survival kits (default false)
+- animations (bool) Enables or disables extra animations (default true)
+- quests (bool) Enables or disables the quest system (default true)
+
+Convars can also technically be changed inside your save folder in a file called "SCConvars.xml".
+
+## Default Prefabs
+- Terran Planet Pod
+- Terran SCV
+- Terran Outpost
+- Terran MAR-1NE
+- Terran Reaper
+- Terran SCV (Atmo)
+- Terran SCV (Space)
+- Terran Command Center
+- Terran Siege Tank
+- Terran Battlecruiser
+- Planetary Fortress
+- Terran Wraith
+- Protoss Outpost
+- Protoss Probe
+- Protoss Gateway
+- Protoss Scout
+- Protoss Nexus
+- Protoss Tempest
+- Protoss Stargate
+- Zerg Drop Site
+- Zerg Drone
+- Zerg Hatchery
+- Zerg Lair
+- Zerg Mutalusk
+- Zerg Hive
+- Zerg Corruptor
+(More to come, subject to change)
 
 
-# Factions
+# Creating Factions
 Factions are defined inside XML formated .sbc files *outside the SpaceCraft base mod*. Custom prefabs can also be added via XML.
 
 # Example
@@ -118,46 +170,6 @@ Faction parameters are still a work in progress but will allow factions to utili
 More to come!
 
 
-
-
-## Settings
-These are the settings which can be changed
-- difficulty (float) Multiplier for AI gathered resources (default 1)
-- grids (int) Limit to how many grids each Faction will make (default 20)
-- engineers (int) Limit of how many engineers each Faction should have (default 1)
-- bots (int) Limit of how many bots each Faction should have (default 3)
-- manualkits (bool) Allows admins to disable the automatic functionality on survival kits (default false)
-
-Convars can also technically be changed inside your save folder in a file called "SCConvars.xml".
-
-## Default Prefabs
-- Terran Planet Pod
-- Terran SCV
-- Terran Outpost
-- Terran MAR-1NE
-- Terran Reaper
-- Terran SCV (Atmo)
-- Terran SCV (Space)
-- Terran Command Center
-- Terran Siege Tank
-- Terran Battlecruiser
-- Planetary Fortress
-- Terran Wraith
-- Protoss Outpost
-- Protoss Probe
-- Protoss Gateway
-- Protoss Scout
-- Protoss Nexus
-- Protoss Tempest
-- Protoss Stargate
-- Zerg Drop Site
-- Zerg Drone
-- Zerg Hatchery
-- Zerg Lair
-- Zerg Mutalusk
-- Zerg Hive
-- Zerg Corruptor
-(More to come, subject to change)
 
 # Creating Prefabs
 In order for SpaceCraft to use a prefab, it must be contained in a &lt;SpawnGroup&gt;, and its **&lt;Description&gt;** must begin with the word "SpaceCraft". If the SpawnGroup is also a Faction, the Prefabs included within (except the Faction's first SpawnGroup, which defines its spawn ship), will be proprietary to that Faction (untested). I will later add a Faction Parameter which forces a Faction to only use it own proprietary prefabs. This would open the possibility of other races.

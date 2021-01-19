@@ -62,6 +62,7 @@ namespace SpaceCraft {
 
 
 		public ulong Current = 0;
+		public ushort Tick = 0;
     public string SaveName;
 		public bool Loaded = false;
 		public bool Spawned = false;
@@ -139,8 +140,9 @@ namespace SpaceCraft {
 			}
 		}
 
-		public static void SpawnBot( string subtype, Vector3D position, Action<IMyCharacter> callback ) {
-			SpawnActions.Push(callback);
+		public static void SpawnBot( string subtype, Vector3D position, Action<IMyCharacter> callback = null ) {
+			if( callback != null )
+				SpawnActions.Push(callback);
 			MyVisualScriptLogicProvider.SpawnBot( subtype, position );
 		}
 
@@ -330,22 +332,27 @@ namespace SpaceCraft {
 			if( !Loaded ) {
 				Preload();
 				MES.Init();
+				Quests.RemoveTechnology();
 			}
 
 			if( !Spawned ) {
 				SpawnFactions();
+				return;
 			}
 
 			foreach( Faction faction in Factions ) {
 				faction.UpdateBeforeSimulation();
 			}
 
+			Tick++;
+			if( Tick == 99 ) {
+				Tick = 0;
+				if( Convars.Static.Quests )
+					Quests.Static.HitCheck();
+			}
 
 			if( MyAPIGateway.Players.Count > NumPlayers ) {
-				List<IMyPlayer> players = new List<IMyPlayer>();
-				MyAPIGateway.Players.GetPlayers(players);
-				IMyPlayer player = players.Last();
-				SetReputation(player.PlayerID);
+				PlayerJoined();
 			}
 
 			NumPlayers = MyAPIGateway.Players.Count;
@@ -364,6 +371,25 @@ namespace SpaceCraft {
 				Settings.General.SaveSettings(Settings.General);
       }*/
     }
+
+		private void PlayerJoined() {
+			List<IMyPlayer> players = new List<IMyPlayer>();
+			MyAPIGateway.Players.GetPlayers(players);
+			if( !Convars.Static.Quests ) {
+				IMyPlayer player = players.Last();
+				SetReputation(player.PlayerID);
+				return;
+			}
+
+			foreach(IMyPlayer p in players) {
+				Quest quest = Quests.Static.GetQuest(p.SteamUserId,QuestId.StartingQuest);
+				if( quest == null ) {
+					SetReputation(p.PlayerID);
+					Quests.Static.SetQuestState(p.SteamUserId,QuestId.StartingQuest);
+					// Quests.LockTechnology( p.PlayerID );
+				}
+			}
+		}
 
 		// Destructor
 		protected override void UnloadData(){
@@ -725,8 +751,6 @@ namespace SpaceCraft {
 			if( !MyAPIGateway.Utilities.IsDedicated ) {
 				SetReputation(MyAPIGateway.Session.Player.PlayerID);
 			}
-
-			Convars.Static.Animations = true;
 
 			foreach( Faction faction in Factions ) {
 

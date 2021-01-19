@@ -29,16 +29,16 @@ namespace SpaceCraft {
 
 		public override void Init(MyObjectBuilder_EntityBase objectBuilder) {
 			if( !SpaceCraftSession.Server ) return;
-			
+
 			Block = Entity as IMyUserControllableGun;
 			if( Block == null ) return;
 
 			NeedsUpdate = MyEntityUpdateEnum.EACH_100TH_FRAME;
 
-			MyResourceSourceComponent source = Block.Components.Get<MyResourceSourceComponent>();
-			if( source != null ) {
-				source.Enabled = false;
-			}
+			// MyResourceSourceComponent source = Block.Components.Get<MyResourceSourceComponent>();
+			// if( source != null ) {
+			// 	source.Enabled = false;
+			// }
 			// SpaceCraftSession.SwitchToPsi(Block);
 		}
 

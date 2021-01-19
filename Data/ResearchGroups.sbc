@@ -5,7 +5,7 @@
     <ResearchGroup xsi:type="ResearchGroup">
       <Id Type="MyObjectBuilder_ResearchGroupDefinition" Subtype="7055" />
       <Members>
-        <BlockId Type="MyObjectBuilder_JumpDriveDefinition" Subtype="LargeJumpDrive" />
+        <Id Type="MyObjectBuilder_JumpDrive" Subtype="LargeJumpDrive" />
       </Members>
     </ResearchGroup>
 
@@ -13,15 +13,14 @@
     <ResearchGroup xsi:type="ResearchGroup">
       <Id Type="MyObjectBuilder_ResearchGroupDefinition" Subtype="645" />
       <Members>
-        <!-- <BlockId Type="MyObjectBuilder_Thrust" Subtype="LargeBlockLargeVespeneThrust" />
-        <BlockId Type="MyObjectBuilder_Thrust" Subtype="LargeBlockSmallVespeneThrust" />
-        <BlockId Type="MyObjectBuilder_Thrust" Subtype="SmallBlockLargeVespeneThrust" />
-        <BlockId Type="MyObjectBuilder_Thrust" Subtype="SmallBlockSmallVespeneThrust" /> -->
         <BlockId Type="MyObjectBuilder_OxygenFarm" Subtype="VespeneFarm" />
-        <BlockId Type="MyObjectBuilder_GasTank" Subtype="SmallVespeneTankSmall" />
-        <BlockId Type="MyObjectBuilder_GasTank" Subtype="SmallVespeneTank" />
-        <BlockId Type="MyObjectBuilder_GasTank" Subtype="LargeVespeneTankSmall" />
-        <BlockId Type="MyObjectBuilder_GasTank" Subtype="LargeVespeneTank" />
+        <BlockId Type="MyObjectBuilder_OxygenGenerator" Subtype="VespeneGenerator" />
+        <BlockId Type="MyObjectBuilder_OxygenGenerator" Subtype="VespeneGeneratorSmall" />
+        <BlockId Type="MyObjectBuilder_OxygenTank" Subtype="SmallVespeneTankSmall" />
+        <BlockId Type="MyObjectBuilder_OxygenTank" Subtype="SmallVespeneTank" />
+        <BlockId Type="MyObjectBuilder_OxygenTank" Subtype="LargeVespeneTankSmall" />
+        <BlockId Type="MyObjectBuilder_OxygenTank" Subtype="LargeVespeneTank" />
+
       </Members>
     </ResearchGroup>
 
@@ -29,7 +28,74 @@
     <ResearchGroup xsi:type="ResearchGroup">
       <Id Type="MyObjectBuilder_ResearchGroupDefinition" Subtype="5346" />
       <Members>
-        <BlockId Type="MyObjectBuilder_BatteryBlock" Subtype="LargeZergHeart" />
+        <!-- <BlockId Type="MyObjectBuilder_BatteryBlock" Subtype="ZergHeart" />
+        <BlockId Type="MyObjectBuilder_BatteryBlock" Subtype="SmallZergHeart" />
+        <BlockId Type="MyObjectBuilder_SurvivalKit" Subtype="ZergSurvivalKit" />
+        <BlockId Type="MyObjectBuilder_Assembler" Subtype="ZergAssembler" />
+        <BlockId Type="MyObjectBuilder_Assembler" Subtype="LargeZergAssembler" />
+        <BlockId Type="MyObjectBuilder_Refinery" Subtype="LargeZergRefinery" />
+        <BlockId Type="MyObjectBuilder_Refinery" Subtype="EvolutionChamber" />
+        <BlockId Type="MyObjectBuilder_LargeGatlingTurret" Subtype="SporeColony" />
+        <BlockId Type="MyObjectBuilder_LargeGatlingTurret" Subtype="SmallSporeColony" />
+        <BlockId Type="MyObjectBuilder_LargeMissileTurret" Subtype="SunkenColony" />
+        <BlockId Type="MyObjectBuilder_ShipDrill" Subtype="SmallDrillingClaws" />
+        <BlockId Type="MyObjectBuilder_ShipDrill" Subtype="LargeDrillingClaws" />
+        <BlockId Type="MyObjectBuilder_RemoteControl" Subtype="LargeZergRemoteControl" />
+        <BlockId Type="MyObjectBuilder_RemoteControl" Subtype="SmallZergRemoteControl" /> -->
+
+
+        <BlockId Type="MyObjectBuilder_BatteryBlock" Subtype="LargeProtossShield" />
+        <BlockId Type="MyObjectBuilder_BatteryBlock" Subtype="SmallProtossShield" />
+
+        <BlockId Type="MyObjectBuilder_BatteryBlock" Subtype="LargePylon" />
+        <BlockId Type="MyObjectBuilder_BatteryBlock" Subtype="SmallPylon" />
+
+        <BlockId Type="MyObjectBuilder_SmallGatlingGun" Subtype="SmallPhotonCannon" />
+        <BlockId Type="MyObjectBuilder_InteriorTurret" Subtype="PhotonCannon" />
+
+
+        <BlockId Type="MyObjectBuilder_SurvivalKit" Subtype="ProtossSurvivalKitLarge" />
+        <BlockId Type="MyObjectBuilder_SurvivalKit" Subtype="ProtossSurvivalKit" />
+        <BlockId Type="MyObjectBuilder_Refinery" Subtype="LargeProtossRefinery" />
+        <BlockId Type="MyObjectBuilder_Assembler" Subtype="LargeProtossAssembler" />
+        <BlockId Type="MyObjectBuilder_Assembler" Subtype="BasicProtossAssembler" />
+
+        <BlockId Type="MyObjectBuilder_ShipDrill" Subtype="SmallParticleBeam" />
+        <BlockId Type="MyObjectBuilder_ShipDrill" Subtype="LargeParticleBeam" />
+
+        <BlockId Type="MyObjectBuilder_Thrust" Subtype="SmallBlockSmallProtossThrust" />
+        <BlockId Type="MyObjectBuilder_Thrust" Subtype="SmallBlockLargeProtossThrust" />
+        <BlockId Type="MyObjectBuilder_Thrust" Subtype="LargeBlockSmallProtossThrust" />
+        <BlockId Type="MyObjectBuilder_Thrust" Subtype="LargeBlockLargeProtssThrust" />
+
+
+
+        <BlockId Type="MyObjectBuilder_BatteryBlock" Subtype="ZergHeart" />
+        <BlockId Type="MyObjectBuilder_BatteryBlock" Subtype="SmallZergHeart" />
+        <BlockId Type="MyObjectBuilder_SurvivalKit" Subtype="ZergSurvivalKit" />
+        <BlockId Type="MyObjectBuilder_Refinery" Subtype="EvolutionChamber" />
+        <BlockId Type="MyObjectBuilder_Refinery" Subtype="LargeZergRefinery" />
+        <BlockId Type="MyObjectBuilder_Assembler" Subtype="ZergAssembler" />
+        <BlockId Type="MyObjectBuilder_Assembler" Subtype="LargeZergAssembler" />
+        <BlockId Type="MyObjectBuilder_Thrust" Subtype="SmallBlockSmallZergThrust" />
+        <!-- <BlockId Type="MyObjectBuilder_Thrust" Subtype="SmallBlockLargeZergThrust" /> -->
+        <BlockId Type="MyObjectBuilder_Thrust" Subtype="LargeBlockSmallZergThrust" />
+        <!-- <BlockId Type="MyObjectBuilder_Thrust" Subtype="LargeBlockLargeZergThrust" /> -->
+        <BlockId Type="MyObjectBuilder_Gyro" Subtype="LargeZergGyro" />
+        <BlockId Type="MyObjectBuilder_Gyro" Subtype="SmallZergGyro" />
+        <BlockId Type="MyObjectBuilder_LargeGatlingTurret" Subtype="SporeColony" />
+        <BlockId Type="MyObjectBuilder_LargeGatlingTurret" Subtype="SmallSporeColony" />
+        <BlockId Type="MyObjectBuilder_ShipDrill" Subtype="SmallDrillingClaws" />
+        <BlockId Type="MyObjectBuilder_ShipDrill" Subtype="LargeDrillingClaws" />
+        <BlockId Type="MyObjectBuilder_RemoteControl" Subtype="LargeZergRemoteControl" />
+        <BlockId Type="MyObjectBuilder_RemoteControl" Subtype="SmallZergRemoteControl" />
+        <BlockId Type="MyObjectBuilder_LargeMissileTurret" Subtype="SunkenColony" />
+
+
+        <BlockId Type="MyObjectBuilder_Refinery" Subtype="LargeHybridRefinery" />
+        <BlockId Type="MyObjectBuilder_Assembler" Subtype="LargeHybridAssembler" />
+
+
       </Members>
     </ResearchGroup>
 

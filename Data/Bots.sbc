@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Bots>
+    <Bot xsi:type="MyObjectBuilder_AnimalBotDefinition">
+      <Id>
+        <TypeId>MyObjectBuilder_AnimalBot</TypeId>
+        <SubtypeId>ZergZergling</SubtypeId>
+      </Id>
+      <DisplayName>Zergling</DisplayName>
+      <Icon>Textures\GUI\Icons\Fake.dds</Icon>
+      <BotModel>Space_spider</BotModel>
+      <BotBehaviorTree Subtype="WolfBehavior" />
+      <BehaviorType>Wolf</BehaviorType>
+      <TargetType>Wolf</TargetType>
+      <Public>true</Public>
+      <AvailableInSurvival>true</AvailableInSurvival>
+      <RemoveAfterDeath>true</RemoveAfterDeath>
+      <InventoryContentGenerated>true</InventoryContentGenerated>
+      <InventoryContainerTypeId>
+        <TypeId>ContainerTypeDefinition</TypeId>
+        <SubtypeId>ZergLoot</SubtypeId>
+      </InventoryContainerTypeId>
+      <FactionTag>ZERG</FactionTag>
+    </Bot>
+
+  </Bots>
+</Definitions>

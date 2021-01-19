@@ -1,0 +1,167 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Sounds>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest0-pending</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest0-pending.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest0-commencing</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest0-commencing.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest0-started</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest0-started.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest1-commencing</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest1-commencing.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest1-pending</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest1-pending.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest1-started</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest1-started.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest2-started</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest2-started.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest2-pending</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest2-pending.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest2-commencing</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest2-commencing.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest2-challenge</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest2-challenge.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+
+  </Sounds>
+</Definitions>

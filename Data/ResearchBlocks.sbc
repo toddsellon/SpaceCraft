@@ -1,7 +1,13 @@
 <?xml version="1.0"?>
 <Definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <ResearchBlocks>
-    <!-- <GroupSubtype>23</GroupSubtype> Refinery -->
+
+    <!-- <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_JumpDriveDefinition" Subtype="LargeJumpDrive" />
+      <UnlockedByGroups>
+        <GroupSubtype>7055</GroupSubtype>
+      </UnlockedByGroups>
+    </ResearchBlock> -->
 
     <!-- Vespene tech -->
     <ResearchBlock xsi:type="ResearchBlock">
@@ -26,28 +32,28 @@
     </ResearchBlock>
 
     <ResearchBlock xsi:type="ResearchBlock">
-      <Id Type="MyObjectBuilder_OxygenTank" Subtype="SmallVespeneTankSmall" />
+      <Id Type="MyObjectBuilder_GasTank" Subtype="SmallVespeneTankSmall" />
       <UnlockedByGroups>
         <GroupSubtype>7055</GroupSubtype>
       </UnlockedByGroups>
     </ResearchBlock>
 
     <ResearchBlock xsi:type="ResearchBlock">
-      <Id Type="MyObjectBuilder_OxygenTank" Subtype="SmallVespeneTank" />
+      <Id Type="MyObjectBuilder_GasTank" Subtype="SmallVespeneTank" />
       <UnlockedByGroups>
         <GroupSubtype>7055</GroupSubtype>
       </UnlockedByGroups>
     </ResearchBlock>
 
     <ResearchBlock xsi:type="ResearchBlock">
-      <Id Type="MyObjectBuilder_OxygenTank" Subtype="LargeVespeneTankSmall" />
+      <Id Type="MyObjectBuilder_GasTank" Subtype="LargeVespeneTankSmall" />
       <UnlockedByGroups>
         <GroupSubtype>7055</GroupSubtype>
       </UnlockedByGroups>
     </ResearchBlock>
 
     <ResearchBlock xsi:type="ResearchBlock">
-      <Id Type="MyObjectBuilder_OxygenTank" Subtype="LargeVespeneTank" />
+      <Id Type="MyObjectBuilder_GasTank" Subtype="LargeVespeneTank" />
       <UnlockedByGroups>
         <GroupSubtype>7055</GroupSubtype>
       </UnlockedByGroups>
@@ -84,37 +90,36 @@
     </ResearchBlock>
 
 
-    <!-- Protoss Tech -->
+    <!-- Alien Tech (Locked) -->
     <ResearchBlock xsi:type="ResearchBlock">
+
+
       <Id Type="MyObjectBuilder_BatteryBlock" Subtype="LargeProtossShield" />
-      <UnlockedByGroups>
-        <GroupSubtype>7055</GroupSubtype>
-      </UnlockedByGroups>
-    </ResearchBlock>
-
-    <ResearchBlock xsi:type="ResearchBlock">
       <Id Type="MyObjectBuilder_BatteryBlock" Subtype="SmallProtossShield" />
-      <UnlockedByGroups>
-        <GroupSubtype>7055</GroupSubtype>
-      </UnlockedByGroups>
-    </ResearchBlock>
 
-    <ResearchBlock xsi:type="ResearchBlock">
       <Id Type="MyObjectBuilder_BatteryBlock" Subtype="LargePylon" />
-      <UnlockedByGroups>
-        <GroupSubtype>7055</GroupSubtype>
-      </UnlockedByGroups>
-    </ResearchBlock>
-
-    <ResearchBlock xsi:type="ResearchBlock">
       <Id Type="MyObjectBuilder_BatteryBlock" Subtype="SmallPylon" />
-      <UnlockedByGroups>
-        <GroupSubtype>7055</GroupSubtype>
-      </UnlockedByGroups>
-    </ResearchBlock>
 
-    <!-- Zerg Tech (Locked) -->
-    <ResearchBlock xsi:type="ResearchBlock">
+      <Id Type="MyObjectBuilder_SmallGatlingGun" Subtype="SmallPhotonCannon" />
+      <Id Type="MyObjectBuilder_InteriorTurret" Subtype="PhotonCannon" />
+
+
+      <Id Type="MyObjectBuilder_SurvivalKit" Subtype="ProtossSurvivalKitLarge" />
+      <Id Type="MyObjectBuilder_SurvivalKit" Subtype="ProtossSurvivalKit" />
+      <Id Type="MyObjectBuilder_Refinery" Subtype="LargeProtossRefinery" />
+      <Id Type="MyObjectBuilder_Assembler" Subtype="LargeProtossAssembler" />
+      <Id Type="MyObjectBuilder_Assembler" Subtype="BasicProtossAssembler" />
+
+      <Id Type="MyObjectBuilder_ShipDrill" Subtype="SmallParticleBeam" />
+      <Id Type="MyObjectBuilder_ShipDrill" Subtype="LargeParticleBeam" />
+
+      <Id Type="MyObjectBuilder_Thrust" Subtype="SmallBlockSmallProtossThrust" />
+      <Id Type="MyObjectBuilder_Thrust" Subtype="SmallBlockLargeProtossThrust" />
+      <Id Type="MyObjectBuilder_Thrust" Subtype="LargeBlockSmallProtossThrust" />
+      <Id Type="MyObjectBuilder_Thrust" Subtype="LargeBlockLargeProtssThrust" />
+
+
+
       <Id Type="MyObjectBuilder_BatteryBlock" Subtype="ZergHeart" />
       <Id Type="MyObjectBuilder_BatteryBlock" Subtype="SmallZergHeart" />
       <Id Type="MyObjectBuilder_SurvivalKit" Subtype="ZergSurvivalKit" />

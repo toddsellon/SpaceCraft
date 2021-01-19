@@ -319,7 +319,7 @@
           <TypeId>OxygenFarm</TypeId>
           <SubtypeId>VespeneFarm</SubtypeId>
       </Id>
-      <DisplayName>Terran Vespene Farm</DisplayName>
+      <DisplayName>Vespene Farm</DisplayName>
       <Icon>Textures\GUI\Icons\Cubes\SolarHydroponics.dds</Icon>
       <Description>Creates Vespene Gas when exposed to sunlight. We require more vespene gas!</Description>
       <CubeSize>Large</CubeSize>
@@ -386,7 +386,7 @@
           <TypeId>OxygenGenerator</TypeId>
           <SubtypeId>VespeneGenerator</SubtypeId>
       </Id>
-      <DisplayName>Terran Vespene Refinery</DisplayName>
+      <DisplayName>Vespene Refinery</DisplayName>
       <Icon>Textures\GUI\Icons\Cubes\OxygenGenerator.dds</Icon>
       <Description>Description_OxygenGenerator</Description>
       <CubeSize>Large</CubeSize>

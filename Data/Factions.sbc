@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+<Factions>
+  <Faction Tag="ZERG" Founder="Sarah Kerrigan">
+    <Id>
+      <TypeId>MyObjectBuilder_FactionDefinition</TypeId>
+      <SubtypeId>Zerg</SubtypeId>
+    </Id>
+    <DisplayName>The Swarm</DisplayName>
+    <IsDefault>true</IsDefault>
+    <DefaultRelation>Enemies</DefaultRelation>
+    <AcceptHumans>false</AcceptHumans>
+    <AutoAcceptMember>false</AutoAcceptMember>
+  	<DiscoveredByDefault>true</DiscoveredByDefault>
+  </Faction>
+
+  <Faction Tag="????" Founder="????">
+    <Id>
+      <TypeId>MyObjectBuilder_FactionDefinition</TypeId>
+      <SubtypeId>????</SubtypeId>
+    </Id>
+    <DisplayName>????</DisplayName>
+    <IsDefault>true</IsDefault>
+    <DefaultRelation>Friends</DefaultRelation>
+    <AcceptHumans>false</AcceptHumans>
+    <AutoAcceptMember>false</AutoAcceptMember>
+  	<DiscoveredByDefault>false</DiscoveredByDefault>
+  </Faction>
+
+</Factions>
+
+</Definitions>

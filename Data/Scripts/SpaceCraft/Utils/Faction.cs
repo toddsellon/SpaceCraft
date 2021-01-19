@@ -1113,7 +1113,7 @@ namespace SpaceCraft.Utils {
         //translation.X += 5;
 
         //return MatrixD.CreateWorld( translation + (forward*3) );
-        return MatrixD.CreateWorld( matrix.Translation + (forward*grid.LocalAABB.Width*1.05), matrix.Forward, matrix.Up );
+        return MatrixD.CreateWorld( matrix.Translation + (forward*grid.LocalAABB.Width*1.05) + (matrix.Up*3f), matrix.Forward, matrix.Up );
       } else {
         Mulligan("Failed to get spawn location");
       }

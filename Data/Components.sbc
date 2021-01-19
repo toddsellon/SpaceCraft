@@ -19,7 +19,7 @@
     <PhysicalMaterial>Glass</PhysicalMaterial>
     <MaxIntegrity>30</MaxIntegrity>
     <DropProbability>0</DropProbability>
-    <Health>18</Health>
+    <Health>14</Health>
     <MinimumOfferAmount>1000</MinimumOfferAmount>
     <MaximumOfferAmount>5000</MaximumOfferAmount>
     <MinimumOrderAmount>100</MinimumOrderAmount>
@@ -191,9 +191,9 @@
     <Volume>3</Volume>
     <Model>Models\Components\steel_plate_component.mwm</Model>
     <PhysicalMaterial>Metal</PhysicalMaterial>
-    <MaxIntegrity>100</MaxIntegrity>
+    <MaxIntegrity>80</MaxIntegrity>
     <DropProbability>0</DropProbability>
-    <Health>53</Health>
+    <Health>25</Health>
     <MinimumOfferAmount>250</MinimumOfferAmount>
     <MaximumOfferAmount>2500</MaximumOfferAmount>
     <MinimumOrderAmount>100</MinimumOrderAmount>
