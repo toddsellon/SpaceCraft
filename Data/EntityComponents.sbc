@@ -1,0 +1,25 @@
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<EntityComponents>
+
+		<EntityComponent xsi:type="MyObjectBuilder_ModStorageComponentDefinition">
+			<Id>
+				<TypeId>ModStorageComponent</TypeId>
+				<SubtypeId>SpaceCraftQuestGrid</SubtypeId>
+			</Id>
+			<RegisteredStorageGuids>
+				<guid>50977CCF-2DC8-4839-AA38-0509FE383D0B</guid>
+			</RegisteredStorageGuids>
+		</EntityComponent>
+
+		<EntityComponent xsi:type="MyObjectBuilder_ModStorageComponentDefinition">
+			<Id>
+				<TypeId>ModStorageComponent</TypeId>
+				<SubtypeId>SpaceCraftFactionTag</SubtypeId>
+			</Id>
+			<RegisteredStorageGuids>
+				<guid>420E2CAB-0947-4E2C-A8E2-41D96806E22D</guid>
+			</RegisteredStorageGuids>
+		</EntityComponent>
+
+	</EntityComponents>
+</Definitions>

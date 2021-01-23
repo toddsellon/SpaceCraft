@@ -373,8 +373,11 @@ namespace SpaceCraft.Utils {
           break;
 
         case QuestState.Started:
-          for( int i = 0; i < 5; i++)
-            SpaceCraftSession.SpawnBot( "ZergZergling", quest.Position.Value );
+          Vector3D[] offsets = {new Vector3D(10f,10f,0),new Vector3D(0,10f,10f),new Vector3D(10f,0,10f),new Vector3D(-10f,-10f,0),new Vector3D(0,-10f,-10f),new Vector3D(-10f,0,-10f)};
+          for( int i = 0; i < 5; i++) {
+            // SpaceCraftSession.SpawnBot( "ZergZergling", quest.Position.Value );
+            SpaceCraftSession.SpawnBot( "ZergZergling", closest.GetClosestSurfacePointGlobal(quest.Position.Value + offsets[i]) );
+          }
 
           CLI.SendMessageToClient( new Message {
             Sender = "Adjutant",
@@ -708,11 +711,13 @@ namespace SpaceCraft.Utils {
 
     private static void EnemiesSpawned() {
       if( CurrentQuest == null || SpawnedGrids == null ) return;
-
+      IMyPlayer player = SpaceCraftSession.GetPlayer(CurrentQuest.SteamUserId);
       CurrentQuest.Enemies = CurrentQuest.Enemies ?? new List<long>();
       foreach( IMyCubeGrid grid in SpawnedGrids ) {
         CurrentQuest.Enemies.Add(grid.EntityId);
+
         MyVisualScriptLogicProvider.SetName(grid.EntityId, grid.EntityId.ToString());
+        MyVisualScriptLogicProvider.SetGPSHighlight(grid.EntityId.ToString(),grid.DisplayName,"Destroy this enemy", default(Color), playerId: player.PlayerID );
         MyVisualScriptLogicProvider.SetDroneBehaviourFull(grid.EntityId.ToString(), "Default", true, false, null, false, null, 10, PlayerDistance);
       }
 

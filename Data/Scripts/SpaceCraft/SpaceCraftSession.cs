@@ -438,6 +438,12 @@ namespace SpaceCraft {
 			HashSet<IMyEntity> entities = new HashSet<IMyEntity>();
 			MyAPIGateway.Entities.GetEntities(entities);
 
+			Dictionary<Faction,List<IMyCubeGrid>> Owned = new Dictionary<Faction,List<IMyCubeGrid>>();
+
+			foreach( Faction faction in Factions ) {
+				Owned[faction] = new List<IMyCubeGrid>();
+			}
+
 			foreach( IMyEntity entity in entities ) {
 				if( entity is MyPlanet ) {
 					Planets.Add( entity as MyPlanet );
@@ -475,45 +481,82 @@ namespace SpaceCraft {
 						//Faction faction = GetFaction( owner ); // This should have worked but didn't, assuming the NPC owner ids get jumbled?
 
 						Faction faction = entity.Storage != null && entity.Storage.ContainsKey(GuidFaction) ? GetFaction( entity.Storage[GuidFaction] ) : GetFaction( grid.DisplayName.Split(' ')[0] ); // Use first word in grid name, not ideal but it works
-						if( faction != null && !faction.IsSubgrid(grid) ) {
-							if( faction.MyFaction != null ) {
-								grid.ChangeGridOwnership(faction.MyFaction.FounderId, MyOwnershipShareModeEnum.Faction);
-								//grid.UpdateOwnership(faction.MyFaction.FounderId, true);
-							}
+						if( faction == null ) continue;
 
-							CubeGrid g = faction.TakeControl( new CubeGrid(grid) ) as CubeGrid;
-							g.FindSubgrids();
-							//MyAPIGateway.Utilities.ShowMessage( "TakeControl", faction.Name );
-							g.CheckFlags();
+						Owned[faction].Add(grid);
+						grid.ChangeGridOwnership(faction.MyFaction == null ? 0 : faction.MyFaction.FounderId, MyOwnershipShareModeEnum.Faction);
 
-							// if( g.IsStatic ) {
-							// 	faction.Colonize( GetClosestPlanet(g.Entity.WorldMatrix.Translation) );
-							// }
-							if( faction.MainBase == null ) // Until Cargo Ships, this is how resources are transferred
-								faction.MainBase = g;
-							else
-								faction.MainBase.ToggleDocked(g);
-
-							//break;
-						}
-					//}
+						// if( faction.MyFaction != null ) {
+						// 	grid.ChangeGridOwnership(faction.MyFaction.FounderId, MyOwnershipShareModeEnum.Faction);
+						// 	//grid.UpdateOwnership(faction.MyFaction.FounderId, true);
+						// }
+						//
+						// if( !faction.IsSubgrid(grid) ) {
+						//
+						//
+						// 	CubeGrid g = faction.TakeControl( new CubeGrid(grid) ) as CubeGrid;
+						// 	g.FindSubgrids();
+						// 	g.CheckFlags();
+						//
+						// 	if( faction.MainBase == null ) // Until Cargo Ships, this is how resources are transferred
+						// 		faction.MainBase = g;
+						// 	else
+						// 		faction.MainBase.ToggleDocked(g);
+						// }
 
 				}
 
-				// if( entity is IMyCharacter ) {
-				// 	IMyCharacter character = entity as IMyCharacter;
-				// 	//Faction faction = GetFactionByFounder(entity.DisplayName);
-				// 	if( character.IsBot ) {
-				// 		Faction faction = GetFaction(entity.DisplayName);
-				// 		if( faction != null ) {
-				// 			faction.TakeControl( new Engineer(faction, entity as IMyCharacter) );
-				// 		}
-				// 	}
-				// }
+			}
+
+			foreach( Faction faction in Factions ) {
+				Dictionary<IMyCubeGrid,List<IMyCubeGrid>> subgrids = new Dictionary<IMyCubeGrid,List<IMyCubeGrid>>();
+
+				foreach( IMyCubeGrid grid in Owned[faction] ) {
+					IMyCubeGrid parent = GetParentGrid(grid);
+					if( parent == null ) {
+						CubeGrid g = faction.TakeControl( new CubeGrid(grid) ) as CubeGrid;
+						// g.FindSubgrids();
+						g.CheckFlags();
+						if( faction.MainBase == null ) // Until Cargo Ships, this is how resources are transferred
+							faction.MainBase = g;
+						else
+							faction.MainBase.ToggleDocked(g);
+					} else {
+						if(!subgrids.ContainsKey(parent))
+							subgrids[parent] = new List<IMyCubeGrid>();
+
+						subgrids[parent].Add(grid);
+					}
+				}
+
+				foreach( IMyCubeGrid grid in subgrids.Keys ) {
+					CubeGrid g = faction.GetControllable(grid) as CubeGrid;
+					if( g == null ) continue;
+					g.Subgrids = subgrids[grid];
+					g.CheckFlags();
+					//List<IMyCubeGrid> sg = subgrids[grid];
+				}
 			}
 
 			// HealZergBlocks();
 
+		}
+
+		public IMyCubeGrid GetParentGrid( IMyCubeGrid grid ) {
+
+			List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+			grid.GetBlocks(blocks);
+
+			foreach(IMySlimBlock block in blocks ) {
+				if( block.FatBlock == null ) continue;
+				IMyMotorStator stator = block.FatBlock as IMyMotorStator;
+				if( stator != null ) {
+					return stator.RotorGrid;
+				}
+
+			}
+
+			return null;
 		}
 
 		public void CheckMods() {

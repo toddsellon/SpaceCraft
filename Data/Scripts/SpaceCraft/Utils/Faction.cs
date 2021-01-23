@@ -76,7 +76,7 @@ namespace SpaceCraft.Utils {
     private static readonly List<string> DefaultResources = new List<string>(){"Stone","Iron","Silicon","Nickel"};
     //private List<string> Resources = new List<string>(){"Stone","Iron","Silicon","Nickel"};
     public List<string> Resources = DefaultResources.ToList();
-    protected static Random Randy = new Random();
+    public static Random Randy = new Random();
     protected int Tick = 0;
     public MyPlanet Homeworld;
     public List<MyPlanet> Colonized = new List<MyPlanet>();
@@ -97,9 +97,9 @@ namespace SpaceCraft.Utils {
     public void UpdateBeforeSimulation() {
       Tick++;
 
-      if( Targets.Count > 0 && (Targets[0] == null || Targets[0].MarkedForClose) ) {
-        Targets.RemoveAt(0);
-      }
+      // if( Targets.Count > 0 && (Targets[0] == null || Targets[0].MarkedForClose) ) {
+      //   Targets.RemoveAt(0);
+      // }
 
       if( MainBase != null && (MainBase.Grid == null || MainBase.Grid.Closed || MainBase.Grid.MarkedForClose) ) {
         RemapDocking();
@@ -113,7 +113,8 @@ namespace SpaceCraft.Utils {
 
       Controllable remove = null;
       foreach( Controllable c in Controlled ) {
-        if( c is CubeGrid && (c.Entity == null || c.Entity.Closed || c.Entity.MarkedForClose)  )
+        // if( c is CubeGrid && (c.Entity == null || c.Entity.Closed || c.Entity.MarkedForClose)  )
+        if( c is CubeGrid && (c.Entity == null || c.Entity.Closed)  )
           remove = c;
         else
           c.UpdateBeforeSimulation();
@@ -781,7 +782,7 @@ namespace SpaceCraft.Utils {
           if( Race == Races.Terran )
             resources.Add("Ice",(VRage.MyFixedPoint)12*Convars.Static.Difficulty);
 
-          resources.Add("Cobalt",(VRage.MyFixedPoint)(Race == Races.Terran ? 0.4 : 0.2)*Convars.Static.Difficulty);
+          resources.Add("Cobalt",(VRage.MyFixedPoint)(Race == Races.Protoss ? 0.2 : 0.4)*Convars.Static.Difficulty);
 
           if( Race != Races.Zerg ) {
             resources.Add("Iron",(VRage.MyFixedPoint)2*Convars.Static.Difficulty);
@@ -1023,15 +1024,39 @@ namespace SpaceCraft.Utils {
     }
 
     public void Mulligan( string reason = "No reason specified", bool remove = false, MyPlanet planet = null, uint attempt = 0 ) {
+      if( MyFaction != null && planet == null && attempt == 0 ) {
+        CLI.SendMessageToAll( new Message {
+          Sender = MyFaction.Name,
+          Text = "GG"
+        });
+      }
       if( Convars.Static.Debug )
         MyAPIGateway.Utilities.ShowMessage( "Mulligan", Name + " took a mulligan:" + reason );
-      if( remove )
-        foreach( Controllable c in Controlled ) {
-          if( c.Entity == null ) continue;
+
+      foreach( Controllable c in Controlled ) {
+        if( c == null || c.Entity == null ) continue;
+        if( remove )
           MyAPIGateway.Entities.RemoveEntity( c.Entity );
+        else {
+          c.Entity.DisplayName = c.Entity.DisplayName.Replace(Name,"");
+          if( c.Entity.Storage != null && c.Entity.Storage.ContainsKey(SpaceCraftSession.GuidFaction) )
+            c.Entity.Storage.Remove(SpaceCraftSession.GuidFaction);
         }
+        CubeGrid grid = c as CubeGrid;
+        if( grid == null ) continue;
+        foreach( IMyCubeGrid g in grid.Subgrids ) {
+          if( g == null ) continue;
+          if( remove )
+            MyAPIGateway.Entities.RemoveEntity( g );
+          else {
+            g.DisplayName = g.DisplayName.Replace(Name,"");
+            if( g.Storage != null && g.Storage.ContainsKey(SpaceCraftSession.GuidFaction) )
+              g.Storage.Remove(SpaceCraftSession.GuidFaction);
+          }
+        }
+      }
       Resources = DefaultResources.ToList();
-      if( Race == Races.Zerg )
+      if( Race == Races.Zerg || Race == Races.Hybrid )
         Resources.Add("Organic");
       Controlled = new List<Controllable>();
       Colonized = new List<MyPlanet>();

@@ -76,6 +76,7 @@ namespace SpaceCraft.Utils {
 		public string Prefab;
 		public IMyCubeGrid SuperGrid;
 		protected static int NumGrids = 0;
+		private static int LastTick = 0;
 		public int Tick = 0;
 		public IMyRemoteControl Remote;
 		public Dictionary<string,int> Balance = null;
@@ -155,7 +156,11 @@ namespace SpaceCraft.Utils {
 
 		public CubeGrid( IMyCubeGrid grid ) {
 			Grid = grid;
-
+			Tick = LastTick;
+			LastTick++;
+			if( LastTick == 99 ) {
+				LastTick = 0;
+			}
 			Entity = Grid;
 			if( grid != null )
 				CheckFlags();
@@ -210,7 +215,7 @@ namespace SpaceCraft.Utils {
 				Vector3D direction = Vector3D.Normalize(hit.Value - Grid.WorldMatrix.Translation);
 				Vector3D up = Vector3D.Normalize(Grid.WorldMatrix.Translation - planet.WorldMatrix.Translation);
 				// Remote.AddWaypoint( hit+(Grid.WorldMatrix.Forward*1000), "Detour" );
-				Remote.AddWaypoint( Grid.WorldMatrix.Translation+(direction*1000)+(up*1000), "Detour" );
+				Remote.AddWaypoint( Grid.WorldMatrix.Translation+(direction*1000)+(up*2000), "Detour" );
 			}
 
 			if( Owner.Following != null && Owner.FollowDistance > 0 ) {
@@ -1420,7 +1425,8 @@ namespace SpaceCraft.Utils {
 
 					if( suspension.RotorGrid != null ) {
 						suspension.RotorGrid.DisplayName = Owner.Name + " Subgrid";
-						Subgrids.Add(suspension.RotorGrid);
+						AddSubgrid(suspension.RotorGrid);
+						// Subgrids.Add(suspension.RotorGrid);
 					}
 				}
 
@@ -1430,7 +1436,8 @@ namespace SpaceCraft.Utils {
 					IMyMotorStator stator = block.FatBlock as IMyMotorStator;
 					stator.Attach();
 					if( stator.RotorGrid != null ) {
-						Subgrids.Add(stator.RotorGrid);
+						// Subgrids.Add(stator.RotorGrid);
+						AddSubgrid(stator.RotorGrid);
 						stator.RotorGrid.GetBlocks(subblocks);
 					}
 				}
@@ -1440,6 +1447,13 @@ namespace SpaceCraft.Utils {
 				SetToConstructionSite(subblocks);
 			else
 				FindConstructionSite();
+		}
+
+		public void AddSubgrid( IMyCubeGrid grid ) {
+			if( grid == null ) return;
+			grid.Storage = grid.Storage ?? new MyModStorageComponent();
+			grid.Storage.Add(SpaceCraftSession.GuidFaction,Owner.Name);
+			Subgrids.Add(grid);
 		}
 
 		protected void StopProduction() {
@@ -1456,7 +1470,8 @@ namespace SpaceCraft.Utils {
 			foreach( IMySlimBlock slim in motors ) {
 				IMyMotorStator motor = slim.FatBlock as IMyMotorStator;
 				if( motor.RotorGrid != null ) {
-					Subgrids.Add(motor.RotorGrid);
+					// Subgrids.Add(motor.RotorGrid);
+					AddSubgrid(motor.RotorGrid);
 					motor.RotorGrid.ChangeGridOwnership(Owner.MyFaction.FounderId, MyOwnershipShareModeEnum.Faction);
 					//motor.RotorGrid.UpdateOwnership(Owner.MyFaction.FounderId, true);
 				}

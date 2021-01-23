@@ -120,6 +120,19 @@ namespace SpaceCraft.Utils {
       return MyAPIGateway.Multiplayer.SendMessageTo(Id, data, message.SteamUserId);
     }
 
+    public static bool SendMessageToAll(Message message) {
+      if( message == null ) return false;
+      List<IMyPlayer> players = new List<IMyPlayer>();
+			MyAPIGateway.Players.GetPlayers(players);
+
+			foreach(IMyPlayer player in players) {
+        message.SteamUserId = player.SteamUserId;
+        message.PlayerID = player.PlayerID;
+        SendMessageToClient(message);
+      }
+      return true;
+    }
+
     public void Respond( string sender, string text, Message message = null ) {
       if( message == null )
         MyAPIGateway.Utilities.ShowMessage( sender, text );
@@ -134,12 +147,23 @@ namespace SpaceCraft.Utils {
       if( SoundEmitter != null ) {
         SoundEmitter.StopSound(true);
       }
+      IMyEntity ent;
 
-      var ent = MyAPIGateway.Session.Player.Controller?.ControlledEntity?.Entity;
-      if( ent == null ) return;
-      SoundEmitter = new MyEntity3DSoundEmitter(ent as MyEntity);
-      SoundEmitter.StopSound(true);
-      SoundEmitter.PlaySingleSound( new MySoundPair(sound) );
+      try {
+        ent = MyAPIGateway.Session.Player.Controller?.ControlledEntity?.Entity;
+      } catch( Exception e ) {
+        return;
+      }
+      MyEntity ment = ent as MyEntity;
+      if( ent == null || ment == null ) return;
+      try {
+        SoundEmitter = new MyEntity3DSoundEmitter(ment);
+        SoundEmitter.StopSound(true);
+        SoundEmitter.PlaySingleSound( new MySoundPair(sound) );
+      } catch( Exception e ) {
+        return;
+      }
+
       // MyVisualScriptLogicProvider.MusicPlayMusicCue(sound);
       // IMyEntity entity = MyAPIGateway.Session.ControlledObject as IMyEntity;
       // MyVisualScriptLogicProvider.SetName(entity.EntityId, entity.EntityId.ToString());
@@ -165,7 +189,7 @@ namespace SpaceCraft.Utils {
 
       faction.Mulligan("User chat command", !cmd.Switch("remain"), planet );
 
-      Respond("Respawn", "Attempted to respawn " + faction.Name, message);
+      // Respond("Respawn", "Attempted to respawn " + faction.Name, message);
     }
 
     public void Donate( MyCommandLine cmd, Message message ) {

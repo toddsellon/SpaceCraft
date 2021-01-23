@@ -112,7 +112,43 @@
               <ShowInInventory>true</ShowInInventory>
               <Enabled>true</Enabled>
             </MyObjectBuilder_CubeBlock>
-            <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_CargoContainer">
+            <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_OxygenTank">
+              <SubtypeName>LargeHydrogenTank</SubtypeName>
+              <EntityId>111118970712625871</EntityId>
+              <Min x="-1" y="-7" z="-1" />
+              <BlockOrientation Forward="Left" Up="Down" />
+              <ColorMaskHSV x="0" y="-0.8" z="-0.45" />
+              <Owner>144115188075855897</Owner>
+              <BuiltBy>144115188075855897</BuiltBy>
+              <ShareMode>Faction</ShareMode>
+              <ComponentContainer>
+                <Components>
+                  <ComponentData>
+                    <TypeId>MyInventoryBase</TypeId>
+                    <Component xsi:type="MyObjectBuilder_Inventory">
+                      <Items />
+                      <nextItemId>0</nextItemId>
+                      <Volume>0.75</Volume>
+                      <Mass>9223372036854.775807</Mass>
+                      <MaxItemCount>2147483647</MaxItemCount>
+                      <Size xsi:nil="true" />
+                      <InventoryFlags>CanReceive</InventoryFlags>
+                      <RemoveEntityOnEmpty>false</RemoveEntityOnEmpty>
+                    </Component>
+                  </ComponentData>
+                </Components>
+              </ComponentContainer>
+              <CustomName>Hydrogen Tank 2</CustomName>
+              <ShowOnHUD>false</ShowOnHUD>
+              <ShowInTerminal>true</ShowInTerminal>
+              <ShowInToolbarConfig>true</ShowInToolbarConfig>
+              <ShowInInventory>true</ShowInInventory>
+              <Enabled>true</Enabled>
+              <IsStockpiling>false</IsStockpiling>
+              <FilledRatio>1</FilledRatio>
+              <AutoRefill>false</AutoRefill>
+            </MyObjectBuilder_CubeBlock>
+            <!-- <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_CargoContainer">
               <SubtypeName>LargeBlockLargeContainer</SubtypeName>
               <EntityId>111118970712625871</EntityId>
               <Min x="-1" y="-7" z="-1" />
@@ -143,7 +179,7 @@
               <ShowInTerminal>true</ShowInTerminal>
               <ShowInToolbarConfig>true</ShowInToolbarConfig>
               <ShowInInventory>true</ShowInInventory>
-            </MyObjectBuilder_CubeBlock>
+            </MyObjectBuilder_CubeBlock> -->
             <MyObjectBuilder_CubeBlock xsi:type="MyObjectBuilder_Assembler">
               <SubtypeName>LargeAssembler</SubtypeName>
               <EntityId>110653720869721710</EntityId>
