@@ -483,6 +483,7 @@ namespace SpaceCraft.Utils {
 
 			if( ent != null ) {
         ent.Flags &= ~EntityFlags.Save;
+				ent.Flags &= ~EntityFlags.Sync;
         //ent.Flags &= ~EntityFlags.NeedsUpdate;
         ent.Render.Visible = true;
         ent.NeedsUpdate = MyEntityUpdateEnum.EACH_FRAME;

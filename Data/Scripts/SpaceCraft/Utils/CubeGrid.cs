@@ -172,7 +172,7 @@ namespace SpaceCraft.Utils {
 
 			Tick++;
 			CheckOrder();
-			if( DockedTo != null && ConstructionSite != null ) {
+			if( (DockedTo != null && ConstructionSite != null) || (CurrentOrder != null && CurrentOrder.Type == Orders.Drill) ) {
 				Grid.Physics.ClearSpeed();
 			}
 
@@ -1205,10 +1205,12 @@ namespace SpaceCraft.Utils {
 				// entity.Storage.Add(GuidEndCoords,matrix.Translation.ToString());
 
         entity.Flags &= ~EntityFlags.Save;
+				entity.Flags &= ~EntityFlags.Sync;
 				entity.Save = true;
 
+				//entity.Render.NearFlag = false;
 
-        entity.Render.Visible = true;
+				entity.Render.Visible = true;
         entity.WorldMatrix = matrix;
         MyAPIGateway.Entities.AddEntity(entity);
 
@@ -1466,9 +1468,9 @@ namespace SpaceCraft.Utils {
 		}
 
 		public void FindSubgrids() {
-			List<IMySlimBlock> motors = GetBlocks<IMyMotorStator>();
+			List<IMySlimBlock> motors = GetBlocks<IMyMotorSuspension>();
 			foreach( IMySlimBlock slim in motors ) {
-				IMyMotorStator motor = slim.FatBlock as IMyMotorStator;
+				IMyMotorSuspension motor = slim.FatBlock as IMyMotorSuspension;
 				if( motor.RotorGrid != null ) {
 					// Subgrids.Add(motor.RotorGrid);
 					AddSubgrid(motor.RotorGrid);

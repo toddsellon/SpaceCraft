@@ -93,7 +93,7 @@ namespace SpaceCraft {
 
 				//MyAPIGateway.Utilities.GetVariable<bool>("SC-Spawned", out Spawned);
 				Spawned = Convars.Static.Spawned;
-				//SaveName = MyAPIGateway.Session.Name;
+				SaveName = MyAPIGateway.Session.Name;
 				MyAPIGateway.Session.SessionSettings.EnableRemoteBlockRemoval = false;
 				NumPlayers = MyAPIGateway.Players.Count;
 				MyAPIGateway.Session.DamageSystem.RegisterBeforeDamageHandler(0, DamageHandler);
@@ -347,6 +347,12 @@ namespace SpaceCraft {
 			Tick++;
 			if( Tick == 99 ) {
 				Tick = 0;
+
+				if(SaveName != MyAPIGateway.Session.Name) {// Saved
+	        SaveName = MyAPIGateway.Session.Name;
+					Convars.Static.Save();
+	      }
+
 				if( Convars.Static.Quests )
 					Quests.Static.HitCheck();
 			}
@@ -365,11 +371,7 @@ namespace SpaceCraft {
 				HealZergBlocks();
 			}
 			//MyAPIGateway.Players.NewPlayerRequestSucceeded += NewPlayerAdded;
-      /*if(SaveName != MyAPIGateway.Session.Name) {
-        // Saved
-        SaveName = MyAPIGateway.Session.Name;
-				Settings.General.SaveSettings(Settings.General);
-      }*/
+
     }
 
 		private void PlayerJoined() {
@@ -482,7 +484,6 @@ namespace SpaceCraft {
 
 						Faction faction = entity.Storage != null && entity.Storage.ContainsKey(GuidFaction) ? GetFaction( entity.Storage[GuidFaction] ) : GetFaction( grid.DisplayName.Split(' ')[0] ); // Use first word in grid name, not ideal but it works
 						if( faction == null ) continue;
-
 						Owned[faction].Add(grid);
 						grid.ChangeGridOwnership(faction.MyFaction == null ? 0 : faction.MyFaction.FounderId, MyOwnershipShareModeEnum.Faction);
 
@@ -508,14 +509,19 @@ namespace SpaceCraft {
 
 			}
 
+
+
 			foreach( Faction faction in Factions ) {
+
+				// MyAPIGateway.Utilities.ShowMessage( "Owned[faction]", faction.Name + " " + Owned[faction].Count.ToString() );
+
 				Dictionary<IMyCubeGrid,List<IMyCubeGrid>> subgrids = new Dictionary<IMyCubeGrid,List<IMyCubeGrid>>();
 
 				foreach( IMyCubeGrid grid in Owned[faction] ) {
 					IMyCubeGrid parent = GetParentGrid(grid);
 					if( parent == null ) {
 						CubeGrid g = faction.TakeControl( new CubeGrid(grid) ) as CubeGrid;
-						// g.FindSubgrids();
+						g.FindSubgrids();
 						g.CheckFlags();
 						if( faction.MainBase == null ) // Until Cargo Ships, this is how resources are transferred
 							faction.MainBase = g;
@@ -531,11 +537,18 @@ namespace SpaceCraft {
 
 				foreach( IMyCubeGrid grid in subgrids.Keys ) {
 					CubeGrid g = faction.GetControllable(grid) as CubeGrid;
-					if( g == null ) continue;
-					g.Subgrids = subgrids[grid];
+					if( g == null ) {
+						continue;
+					}
+					foreach( IMyCubeGrid cg in subgrids[grid] ) {
+						g.Subgrids.Add(cg);
+					}
+					// g.Subgrids = subgrids[grid];
 					g.CheckFlags();
 					//List<IMyCubeGrid> sg = subgrids[grid];
 				}
+
+
 			}
 
 			// HealZergBlocks();
@@ -550,10 +563,20 @@ namespace SpaceCraft {
 			foreach(IMySlimBlock block in blocks ) {
 				if( block.FatBlock == null ) continue;
 				IMyMotorStator stator = block.FatBlock as IMyMotorStator;
-				if( stator != null ) {
+				if( stator != null && stator.RotorGrid != null ) {
 					return stator.RotorGrid;
 				}
-
+				IMyWheel wheel = block.FatBlock as IMyWheel;
+				if( wheel != null ) {
+					return wheel.CubeGrid;
+				}
+				// if( wheel != null && wheel.Stator != null && wheel.Stator.CubeGrid != null ) {
+				// 	return wheel.Stator.CubeGrid;
+				// }
+				// IMyMotorSuspension sus = block.FatBlock as IMyMotorSuspension;
+				// if( sus != null && sus.RotorGrid != null ) {
+				// 	return sus.RotorGrid;
+				// }
 			}
 
 			return null;

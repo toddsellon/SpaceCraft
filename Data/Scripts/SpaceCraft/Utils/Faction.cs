@@ -101,7 +101,8 @@ namespace SpaceCraft.Utils {
       //   Targets.RemoveAt(0);
       // }
 
-      if( MainBase != null && (MainBase.Grid == null || MainBase.Grid.Closed || MainBase.Grid.MarkedForClose) ) {
+      //if( MainBase != null && (MainBase.Grid == null || MainBase.Grid.Closed || MainBase.Grid.MarkedForClose) ) {
+      if( MainBase != null && (MainBase.Grid == null || MainBase.Grid.Closed ) ) {
         RemapDocking();
         if( MainBase == null ) {
           Mulligan();
@@ -214,6 +215,7 @@ namespace SpaceCraft.Utils {
       if(Convars.Static.Debug) MyAPIGateway.Utilities.ShowMessage( "PrefabSpawned", "Success" );
       CubeGrid grid = new CubeGrid(SpawnedGrids[0]);
       foreach( IMyCubeGrid g in SpawnedGrids ) {
+        g.Flags &= ~EntityFlags.Sync;
         //g.Storage.Add(SpaceCraftSession.GuidIgnoreCleanup,"true"); // MES
         g.Storage = g.Storage ?? new MyModStorageComponent();
 				g.Storage.Add(SpaceCraftSession.GuidSpawnType,"true"); // MES
@@ -477,6 +479,7 @@ namespace SpaceCraft.Utils {
             Vector3D towards = Vector3D.Normalize(enemy.GetPosition() - p);
             p = Vector3D.Distance(enemy.GetPosition(),p) < 140 ? enemy.GetPosition() - (towards*5) : enemy.GetPosition() - (towards*140);
           }
+          planet = SpaceCraftSession.GetClosestPlanet(p);
         } else if( prefab.IsStatic ) {
           p = p + (m.Forward*100) + (m.Up*100);
         } else {
