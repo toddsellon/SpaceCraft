@@ -84,6 +84,7 @@ namespace SpaceCraft.Utils {
     public Tech Tier = Tech.Primitive;
     public IMyFaction MyFaction;
     public IMyIdentity Founder;
+    public bool Established = false;
     public string StartingPrefab;
     public Stats MyStats = new Stats();
     public Vector3D Origin = Vector3D.Zero;
@@ -340,10 +341,15 @@ namespace SpaceCraft.Utils {
       if( CurrentGoal.Step == Steps.Pending ) {
         if( MainBase.Grid.GridSizeEnum == MyCubeSize.Small ) {
 
-          if( MainBase.AddLargeGridConverter() ) {
-            CurrentGoal.Progress();
+          if( MainBase.Grid.DisplayName.EndsWith("Planet Pod") ) {
+            if( MainBase.AddLargeGridConverter() ) {
+              CurrentGoal.Progress();
+            } else {
+              Mulligan("Could not add large grid converter", true);
+            }
           } else {
-            Mulligan("Could not add large grid converter", true);
+            MainBase.FindConstructionSite();
+            CurrentGoal.Complete();
           }
         } else {
           MainBase.FindConstructionSite();
@@ -1055,6 +1061,15 @@ namespace SpaceCraft.Utils {
             g.DisplayName = g.DisplayName.Replace(Name,"");
             if( g.Storage != null && g.Storage.ContainsKey(SpaceCraftSession.GuidFaction) )
               g.Storage.Remove(SpaceCraftSession.GuidFaction);
+          }
+        }
+        if( grid.SuperGrid != null ) {
+          if( remove )
+            MyAPIGateway.Entities.RemoveEntity( grid.SuperGrid );
+          else {
+            grid.SuperGrid.DisplayName = grid.SuperGrid.DisplayName.Replace(Name,"");
+            if( grid.SuperGrid.Storage != null && grid.SuperGrid.Storage.ContainsKey(SpaceCraftSession.GuidFaction) )
+              grid.SuperGrid.Storage.Remove(SpaceCraftSession.GuidFaction);
           }
         }
       }

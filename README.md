@@ -33,6 +33,9 @@ SpaceCraft has a chat-based command interface that allows you to control SpaceCr
 - **spawn** "Prefab Name" [faction]
 	- Spawns a completed prefab for specified faction or your faction if one is not specified.
 	- /sc spawn "Terran Battlecruiser" ARC
+- **establish**
+	- Establishes your faction as an AI controlled faction or whichever faction you specify. Faction must already exist. Add any faction specific flags after establish and/or include the -nodonate flag to donate all grids manually
+	- /sc establish -aggressive
 - **donate**
 	- Donates the grid you're currently controlling to your faction. Be warned that the grid will count towards your Faction's grid limits and will impact its decision making.
 	- /sc donate

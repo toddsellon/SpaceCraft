@@ -48,6 +48,7 @@ namespace SpaceCraft.Utils {
       Actions.Add("reset",Reset);
       Actions.Add("unlock",Unlock);
       Actions.Add("lock",Lock);
+      Actions.Add("establish",Establish);
 
       MyAPIGateway.Utilities.MessageEntered += MessageEntered;
       MyAPIGateway.Multiplayer.RegisterMessageHandler(Id, MessageHandler);
@@ -190,6 +191,93 @@ namespace SpaceCraft.Utils {
       faction.Mulligan("User chat command", !cmd.Switch("remain"), planet );
 
       // Respond("Respawn", "Attempted to respawn " + faction.Name, message);
+    }
+
+    public void Establish( MyCommandLine cmd, Message message ) {
+
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+
+      if( player == null ) {
+        Respond("Error", "Player not found", message);
+        return;
+      }
+
+      Faction scFaction = SpaceCraftSession.GetFactionContaining(player.PlayerID);
+      if( scFaction != null ) {
+        Respond("Error", "You already belong to a SpaceCraft faction", message);
+        return;
+      }
+      //Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(2)) ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(2).ToUpper());
+      IMyFaction faction = String.IsNullOrWhiteSpace(cmd.Argument(2)) ? MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.PlayerID) : MyAPIGateway.Session.Factions.TryGetFactionByTag(cmd.Argument(2).ToUpper());
+      if( faction == null ) {
+        Respond("Error", "Faction not found", message);
+        return;
+      }
+
+      string command = String.IsNullOrWhiteSpace(cmd.Argument(2)) ? "-spawned " : "";
+      foreach(string s in cmd.Switches) {
+        if( s != "nodonate")
+        command += "-" + s + " ";
+      }
+
+      scFaction = Factions.Static.Establish(faction.Tag,command);
+      if( scFaction == null ) {
+        Respond("Error", "Failed to establish faction", message);
+        return;
+      }
+
+      if( !cmd.Switch("nodonate") ) {
+
+        Dictionary<IMyCubeGrid,List<IMyCubeGrid>> subgrids = new Dictionary<IMyCubeGrid,List<IMyCubeGrid>>();
+        HashSet<IMyEntity> entities = new HashSet<IMyEntity>();
+  			MyAPIGateway.Entities.GetEntities(entities);
+
+        foreach( IMyEntity entity in entities ) {
+          IMyCubeGrid grid = entity as IMyCubeGrid;
+          if( grid == null ) continue;
+          List<long> owners = grid.GridSizeEnum == MyCubeSize.Large ? grid.BigOwners : grid.SmallOwners;
+          // if( !owners.Contains(player.PlayerID) ) continue;
+          if( !owners.Contains(faction.FounderId) ) continue;
+
+          IMyCubeGrid parent = SpaceCraftSession.GetParentGrid(grid);
+
+          if( parent == null ) {
+            CubeGrid g = new CubeGrid(grid);
+            g.FindSubgrids();
+            // g.CheckFlags();
+            scFaction.TakeControl( g );
+            if( scFaction.MainBase == null ) {
+              scFaction.MainBase = g;
+            } else {
+              scFaction.MainBase.ToggleDocked(g);
+            }
+          } else {
+            if(!subgrids.ContainsKey(parent))
+              subgrids[parent] = new List<IMyCubeGrid>();
+
+            subgrids[parent].Add(grid);
+          }
+
+        }
+
+        foreach( IMyCubeGrid grid in subgrids.Keys ) {
+          CubeGrid g = scFaction.GetControllable(grid) as CubeGrid;
+          if( g == null ) continue;
+          foreach( IMyCubeGrid cg in subgrids[grid] ) {
+            g.Subgrids.Add(cg);
+          }
+          g.CheckFlags();
+        }
+      }
+
+      scFaction.DetermineTechTier();
+
+      if( scFaction.Tier != Tech.Primitive )
+        scFaction.DetermineNextGoal();
+
+
+      Respond("Established", "Your faction has now been established with SpaceCraft", message);
+
     }
 
     public void Donate( MyCommandLine cmd, Message message ) {

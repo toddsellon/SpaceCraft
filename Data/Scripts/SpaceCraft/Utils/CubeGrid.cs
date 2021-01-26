@@ -172,7 +172,7 @@ namespace SpaceCraft.Utils {
 
 			Tick++;
 			CheckOrder();
-			if( (DockedTo != null && ConstructionSite != null) || (CurrentOrder != null && CurrentOrder.Type == Orders.Drill) ) {
+			if( (DockedTo != null && ConstructionSite != null) || Drills ) {
 				Grid.Physics.ClearSpeed();
 			}
 

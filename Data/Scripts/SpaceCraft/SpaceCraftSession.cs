@@ -67,7 +67,7 @@ namespace SpaceCraft {
 		public bool Loaded = false;
 		public bool Spawned = false;
 		public static bool Server = false;
-    public static List<Faction> Factions = new List<Faction>();
+    public static List<Faction> SCFactions = new List<Faction>();
 		public static List<MyPlanet> Planets = new List<MyPlanet>();
 		public static MyPlanet ClosestPlanet { get; protected set; }
 		public static CLI MyCLI;
@@ -340,7 +340,7 @@ namespace SpaceCraft {
 				return;
 			}
 
-			foreach( Faction faction in Factions ) {
+			foreach( Faction faction in SCFactions ) {
 				faction.UpdateBeforeSimulation();
 			}
 
@@ -351,6 +351,8 @@ namespace SpaceCraft {
 				if(SaveName != MyAPIGateway.Session.Name) {// Saved
 	        SaveName = MyAPIGateway.Session.Name;
 					Convars.Static.Save();
+					Factions.Static.Save();
+					Quests.Static.Save();
 	      }
 
 				if( Convars.Static.Quests )
@@ -442,7 +444,7 @@ namespace SpaceCraft {
 
 			Dictionary<Faction,List<IMyCubeGrid>> Owned = new Dictionary<Faction,List<IMyCubeGrid>>();
 
-			foreach( Faction faction in Factions ) {
+			foreach( Faction faction in SCFactions ) {
 				Owned[faction] = new List<IMyCubeGrid>();
 			}
 
@@ -511,7 +513,7 @@ namespace SpaceCraft {
 
 
 
-			foreach( Faction faction in Factions ) {
+			foreach( Faction faction in SCFactions ) {
 
 				// MyAPIGateway.Utilities.ShowMessage( "Owned[faction]", faction.Name + " " + Owned[faction].Count.ToString() );
 
@@ -537,9 +539,7 @@ namespace SpaceCraft {
 
 				foreach( IMyCubeGrid grid in subgrids.Keys ) {
 					CubeGrid g = faction.GetControllable(grid) as CubeGrid;
-					if( g == null ) {
-						continue;
-					}
+					if( g == null ) continue;
 					foreach( IMyCubeGrid cg in subgrids[grid] ) {
 						g.Subgrids.Add(cg);
 					}
@@ -555,7 +555,7 @@ namespace SpaceCraft {
 
 		}
 
-		public IMyCubeGrid GetParentGrid( IMyCubeGrid grid ) {
+		public static IMyCubeGrid GetParentGrid( IMyCubeGrid grid ) {
 
 			List<IMySlimBlock> blocks = new List<IMySlimBlock>();
 			grid.GetBlocks(blocks);
@@ -631,7 +631,15 @@ namespace SpaceCraft {
 
       }
 
-			foreach( Faction faction in Factions ) {
+			foreach( EstablishedFaction f in Factions.Static.Established ) {
+				MyCommandLine cmd = new MyCommandLine();
+				if( !cmd.TryParse("SpaceCraft F " + f.Command) ) continue;
+				Faction faction = CreateIfNotExists( f.Tag, cmd );
+				if( faction == null ) continue;
+				faction.Established = true;
+			}
+
+			foreach( Faction faction in SCFactions ) {
 				if( faction.CommandLine.Switch("aggressive") )
 					faction.DeclareWar();
 			}
@@ -639,7 +647,7 @@ namespace SpaceCraft {
 			List<IMyIdentity> identities = new List<IMyIdentity>();
 			MyAPIGateway.Players.GetAllIdentites(identities);
 			foreach( IMyIdentity identity in identities) {
-				foreach( Faction faction in Factions ) {
+				foreach( Faction faction in SCFactions ) {
 					if( faction.MyFaction == null ) continue;
 
 					if( faction.MyFaction.FounderId == identity.IdentityId ) {
@@ -679,7 +687,7 @@ namespace SpaceCraft {
 
 			if( Spawned ) {
 				if( ClosestPlanet == null ) ClosestPlanet = GetClosestPlanet( MyAPIGateway.Utilities.IsDedicated ? Vector3D.Zero : MyAPIGateway.Session.Player.GetPosition() );
-				foreach( Faction faction in Factions ) {
+				foreach( Faction faction in SCFactions ) {
 					if( faction.MainBase != null ) {
 						faction.MainBase.FindConstructionSite();
 						//if( faction.MainBase.ConstructionSite != null )
@@ -696,7 +704,7 @@ namespace SpaceCraft {
     }
 
 		public static Faction GetFactionByFounder( string founder ) {
-			foreach( Faction f in Factions) {
+			foreach( Faction f in SCFactions) {
 				if( f.Founder == null ) continue;
 				if( f.Founder.DisplayName == founder )
 					return f;
@@ -706,7 +714,7 @@ namespace SpaceCraft {
 		}
 
 		public static Faction GetFaction( long owner ) {
-			foreach( Faction f in Factions) {
+			foreach( Faction f in SCFactions) {
 				if( f.MyFaction == null ) continue;
 				if( f.MyFaction.FounderId == owner )
 					return f;
@@ -716,7 +724,7 @@ namespace SpaceCraft {
 		}
 
 		public static Faction GetFactionContaining( long member ) {
-			foreach( Faction f in Factions) {
+			foreach( Faction f in SCFactions) {
 				if( f.MyFaction == null ) continue;
 				if( f.MyFaction.IsMember(member) )
 					return f;
@@ -725,7 +733,7 @@ namespace SpaceCraft {
 			return null;
 		}
 
-		public Faction CreateIfNotExists( string tag, MyCommandLine cmd ) {
+		public static Faction CreateIfNotExists( string tag, MyCommandLine cmd ) {
 			Faction faction = GetFaction(tag);
 			if( faction != null ) return faction;
 
@@ -760,7 +768,7 @@ namespace SpaceCraft {
 					//LoadIdentities (List< MyObjectBuilder_Identity > list)
 			}
 
-			Factions.Add(faction);
+			SCFactions.Add(faction);
 
 			// Make peace with existing factions
 			MyObjectBuilder_FactionCollection fc = MyAPIGateway.Session.Factions.GetObjectBuilder();
@@ -773,7 +781,7 @@ namespace SpaceCraft {
 		}
 
 		public static Faction GetFaction( string tag ) {
-			foreach( Faction f in Factions) {
+			foreach( Faction f in SCFactions) {
 				if( f.Name == tag ) {
 					return f;
 				}
@@ -784,7 +792,7 @@ namespace SpaceCraft {
 		// public void NewPlayerAdded( int playerId ) {
 		// 	MyAPIGateway.Utilities.ShowMessage( "NewPlayerAdded", playerId.ToString() );
 		// 	IMyPlayer player = MyAPIGateway.Players.GetPlayerById(playerId);
-		// 	foreach( Faction faction in Factions ) {
+		// 	foreach( Faction faction in SCFactions ) {
 		// 		if( !faction.CommandLine.Switch("aggressive") ) {
 		// 			faction.SetReputation(player.PlayerID);
 		// 		}
@@ -803,7 +811,7 @@ namespace SpaceCraft {
 		// }
 
 		public void SetReputation(long playerID) {
-			foreach( Faction faction in Factions ) {
+			foreach( Faction faction in SCFactions ) {
 				if( !faction.CommandLine.Switch("aggressive") ) {
 					faction.SetReputation(playerID);
 				}
@@ -818,7 +826,7 @@ namespace SpaceCraft {
 				SetReputation(MyAPIGateway.Session.Player.PlayerID);
 			}
 
-			foreach( Faction faction in Factions ) {
+			foreach( Faction faction in SCFactions ) {
 
 				if( ClosestPlanet == null ) {
 					Vector3D position = MyAPIGateway.Session.Player.GetPosition();
