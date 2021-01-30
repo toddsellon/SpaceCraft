@@ -94,6 +94,8 @@ namespace SpaceCraft.Utils {
     public bool Spawning = false;
     public bool Building = false;
 
+    // public Vector3D SearchOffset = Vector3D.Zero;
+
     // Main loop
     public void UpdateBeforeSimulation() {
       Tick++;
@@ -327,6 +329,8 @@ namespace SpaceCraft.Utils {
       //   Mulligan();
       //   return;
       // }
+
+
       List<IMySlimBlock> batteries = MainBase.GetBlocks<IMyBatteryBlock>();
       if( batteries.Count == 0 || batteries[0].IsDestroyed ) {
         Mulligan("No batteries or batteries destroyed", true);
@@ -343,6 +347,8 @@ namespace SpaceCraft.Utils {
 
           if( MainBase.Grid.DisplayName.EndsWith("Planet Pod") ) {
             if( MainBase.AddLargeGridConverter() ) {
+            // if( MainBase.AddLargeGridConverter( !CommandLine.Switch("aggressive") ) ) {
+              MainBase.Grid.Physics.ClearSpeed();
               CurrentGoal.Progress();
             } else {
               Mulligan("Could not add large grid converter", true);
@@ -355,9 +361,12 @@ namespace SpaceCraft.Utils {
           MainBase.FindConstructionSite();
           CurrentGoal.Complete();
         }
+
       } else {
+        MyVisualScriptLogicProvider.SetGridGeneralDamageModifier(MainBase.Grid.EntityId.ToString());
+
         List<IMySlimBlock> assemblers = MainBase.GetBlocks<IMyAssembler>();
-        if( MainBase.SuperGrid == null || MainBase.SuperGrid.MarkedForClose || MainBase.SuperGrid.Closed || assemblers.Count < 2 ) {
+        if( MainBase.SuperGrid == null || MainBase.SuperGrid.MarkedForClose || MainBase.SuperGrid.Closed || assemblers.Count < 2 || !MyVisualScriptLogicProvider.HasPower(MainBase.SuperGrid.EntityId.ToString()) ) {
           Mulligan("Failed to add large grid convreter", true);
         } else {
           CurrentGoal.Complete();
@@ -371,6 +380,126 @@ namespace SpaceCraft.Utils {
       Bots.Add(bot);
       Spawning = false;
       CurrentGoal.Complete();
+    }
+
+    private static readonly float HIT_SIZE = 3f;
+    private static readonly float ACCEPTABLE_HEIGHT = 5f;
+
+    public static bool IsFlat( Vector3D point, MyPlanet planet, float multiplier = 1f ) {
+      Vector3D up = Vector3D.Normalize(point - planet.WorldMatrix.Translation);
+      Vector3D forward = Vector3D.CalculatePerpendicularVector(up);
+      Vector3D right = Vector3D.Cross(forward, up);
+
+      return Math.Abs(Vector3D.Distance(planet.GetClosestSurfacePointGlobal(point+(forward*HIT_SIZE)),planet.WorldMatrix.Translation)
+        - Vector3D.Distance(planet.GetClosestSurfacePointGlobal(point-(forward*HIT_SIZE)),planet.WorldMatrix.Translation)) <= (ACCEPTABLE_HEIGHT*multiplier)
+        &&
+        Math.Abs(Vector3D.Distance(planet.GetClosestSurfacePointGlobal(point+(right*HIT_SIZE)),planet.WorldMatrix.Translation)
+          - Vector3D.Distance(planet.GetClosestSurfacePointGlobal(point-(right*HIT_SIZE)),planet.WorldMatrix.Translation)) <= (ACCEPTABLE_HEIGHT*multiplier);
+    }
+
+
+    private int SearchOffset = 0;
+    private static readonly int SEARCH_STEP = 5;
+    private static readonly int SEARCH_MAX = 600;
+
+    public bool GetSafeLocation( Prefab prefab, out MatrixD location ) {
+      CubeGrid last = GetLastCreated();
+
+      MatrixD matrix = last.Grid.WorldMatrix;
+      Vector3D position = matrix.Translation;
+      MyPlanet planet = SpaceCraftSession.GetClosestPlanet(position);
+      Vector3D start = position + (matrix.Forward * SearchOffset);
+      int step = (int)HIT_SIZE * 2;
+      float multiplier = SearchOffset > 1000 ? 3f : 1f;
+      // Vector3D[] directions = { matrix.Forward, matrix.Left, matrix.Right };
+      Vector3D[] directions = { matrix.Left, matrix.Right };
+      for( int offset = 1; offset < SEARCH_MAX; offset+=step ) {
+        foreach( Vector3D direction in directions ) {
+          MatrixD l = GetPlacementLocation( prefab, start + (direction * offset) );
+
+          if( SearchOffset > 1500 ) { // Give up
+            location = l;
+            return true;
+          }
+
+          if( !IsFlat(l.Translation, planet, multiplier) )
+            continue;
+
+          BoundingSphereD sphere = new BoundingSphereD(l.Translation, prefab.Definition == null ? 1 : prefab.Definition.BoundingBox.Width/2 );
+
+          List<IMyEntity> entities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
+
+          if( ContainsGrids(entities) ) continue;
+
+          location = l;
+          return true;
+        }
+      }
+
+      location = MatrixD.Zero;
+      return false;
+
+    }
+
+    // public bool IsSafeLocation( Vector3D location, Prefab prefab, MyPlanet planet = null ) {
+    //   planet = planet ?? SpaceCraftSession.GetClosestPlanet(location);
+    //
+    //   if( !IsFlat(location, planet) )
+    //     return false;
+    //
+    //   BoundingSphereD sphere = new BoundingSphereD(location, prefab.Definition == null ? 1 : prefab.Definition.BoundingBox.Width/2 );
+    //
+    //   List<IMyEntity> entities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
+    //
+    //   if( ContainsGrids(entities) ) return false;
+    //
+    //   return true;
+    // }
+
+    public bool GetSafeLocation_old( Prefab prefab, Vector3D start, out MatrixD location ) {
+
+      MyPlanet planet = null;
+      double max = start.X + 10;
+      for( start.X = start.X; start.X < max; start.X++ ) {
+        for( start.Y = start.X; start.Y < max; start.Y++ ) {
+          for( start.Z = start.X; start.Z < max; start.Z++ ) {
+            MatrixD l = GetPlacementLocation( prefab, start );
+            planet = planet ?? SpaceCraftSession.GetClosestPlanet(l.Translation);
+            if( !IsFlat(l.Translation, planet) )
+              continue;
+
+              // BoundingBox box = prefab.Definition == null ? new BoundingBox(Vector3.Zero,new Vector3(1,1,1)) : prefab.Definition.BoundingBox; // box around prefab
+
+            BoundingSphereD sphere = new BoundingSphereD(l.Translation, prefab.Definition == null ? 1 : prefab.Definition.BoundingBox.Width/2 );
+
+            List<IMyEntity> entities = MyAPIGateway.Entities.GetEntitiesInSphere(ref sphere);
+
+            if( ContainsGrids(entities) ) continue;
+
+            // Vector3D? position = MyAPIGateway.Entities.FindFreePlace(l.Translation, prefab.Definition == null ? 1f : prefab.Definition.BoundingSphere.Radius );
+            //
+            // if( !position.HasValue ) continue;
+            //
+            //
+            // l.Translation = position.Value;
+            location = l;
+            return true;
+
+          }
+        }
+      }
+
+      location = MatrixD.CreateWorld(start);
+      return false;
+    }
+
+    public static bool ContainsGrids( List<IMyEntity> entities ) {
+      foreach( IMyEntity entity in entities ) {
+        if( entity is IMyCubeGrid )
+          return true;
+      }
+
+      return false;
     }
 
     public void Construct() {
@@ -405,7 +534,13 @@ namespace SpaceCraft.Utils {
         if( CurrentGoal.Balance != null && CurrentGoal.Balance.Count > 0 ) return;
 
         Building = true;
-        MatrixD location = GetPlacementLocation( CurrentGoal.Prefab );
+        MatrixD location = MatrixD.Zero;
+
+        if( !GetSafeLocation( CurrentGoal.Prefab, out location ) ) {
+          SearchOffset += SEARCH_STEP;
+          return; // Try again next frame
+        }
+        SearchOffset = 0;
 
         if( CurrentGoal.Prefab.Bot ) {
           Spawning = true;
@@ -445,10 +580,13 @@ namespace SpaceCraft.Utils {
 
     public Prefab GetConstructionProject() {
       Prefab best = null;
+      CubeGrid last = GetLastCreated();
+      MyPlanet planet = SpaceCraftSession.GetClosestPlanet(last.Entity.WorldMatrix.Translation);
+      SearchOffset = 0;
       float priority = 0f;
       // MyAPIGateway.Utilities.ShowMessage( "GetConstructionProject", String.Join(",",Resources) );
       foreach( Prefab prefab in Prefab.Prefabs ) {
-        float p = Prioritize(prefab);
+        float p = Prioritize(prefab, planet.HasAtmosphere);
         // MyAPIGateway.Utilities.ShowMessage( "GetConstructionProject", prefab.SubtypeId + ": " + p.ToString() );
         if( best == null || p > priority ) {
           best = prefab;
@@ -461,8 +599,8 @@ namespace SpaceCraft.Utils {
 
 
     // https://github.com/KeenSoftwareHouse/SpaceEngineers/blob/a109106fc0ded66bdd5da70e099646203c56550f/Sources/Sandbox.Game/Game/Entities/Blocks/MyOreDetectorComponent.cs
-    public MatrixD GetPlacementLocation( Prefab prefab, CubeGrid last = null ) {
-      if( last == null ) last = GetLastCreated();
+    public MatrixD GetPlacementLocation( Prefab prefab, Vector3D search ) {
+      CubeGrid last = GetLastCreated();
       //Dictionary<string, byte[]> maps = MyAPIGateway.Session.GetVoxelMapsArray();
 
       //if( maps[Homeworld] )
@@ -477,7 +615,7 @@ namespace SpaceCraft.Utils {
         BoundingBox box = prefab.Definition == null ? new BoundingBox(Vector3.Zero,new Vector3(1,1,1)) : prefab.Definition.BoundingBox; // box around prefab
         // BoundingBox box = prefab.Definition.BoundingBox; // box around prefab
 
-        Vector3D offset = m.Forward + m.Up;
+        Vector3D offset = m.Forward + m.Up + (search*HIT_SIZE);
         if( prefab.Bot ) {
           // IMyEntity enemy = GetClosestEnemy(p);
           IMyPlayer enemy = GetClosestEnemy(p);
@@ -508,8 +646,8 @@ namespace SpaceCraft.Utils {
             position = position + (up * (box.Height *.05) );
           else
           // if( !prefab.IsStatic )
-            //position = position + (up * (box.Height*.75) );
-            position = position + (up * (box.Width) );
+            position = position + (up * (box.Height*1.5) );
+            // position = position + (up * (box.Width) );
         }
         MatrixD reference = planet.WorldMatrix;
 
@@ -961,7 +1099,7 @@ namespace SpaceCraft.Utils {
       MyStats.Ratio.Add("Static", MyStats.Static/MyStats.Grids);
 
       MyStats.Desired.Add("Workers", .5f);
-      MyStats.Desired.Add("Fighters", CommandLine.Switch("aggressive") ? .75f : .5f );
+      MyStats.Desired.Add("Fighters", CommandLine.Switch("aggressive") ? .5f : .25f );
       MyStats.Desired.Add("Factories", .45f);
       MyStats.Desired.Add("Refineries", .45f);
       //MyStats.Desired.Add("Static", CommandLine.Switch("aggressive") ? .75f : .5f );
@@ -1266,12 +1404,21 @@ namespace SpaceCraft.Utils {
         if( Homeworld == null ) return false;
         // Colonized.Add( Homeworld );
         //int rand = Randy.Next(Homeworld.Size.X);
-        Vector3 p = new Vector3(Randy.Next(-Homeworld.Size.X,Homeworld.Size.X),Randy.Next(-Homeworld.Size.Y,Homeworld.Size.Y),Randy.Next(-Homeworld.Size.Z,Homeworld.Size.Z)) + Homeworld.WorldMatrix.Translation;
-        // Vector3 p = new Vector3(Randy.Next(Homeworld.Size.X),Randy.Next(Homeworld.Size.Y),Randy.Next(Homeworld.Size.Z)) + Vector3.Normalize(Homeworld.PositionLeftBottomCorner);
+        bool flat = false;
 
-        position = Homeworld.GetClosestSurfacePointGlobal( p );
-        //Homeworld.CorrectSpawnLocation(ref position,250f);
-        Homeworld.CorrectSpawnLocation(ref position,15f);
+
+        while( !flat ) {
+
+          Vector3 p = new Vector3(Randy.Next(-Homeworld.Size.X,Homeworld.Size.X),Randy.Next(-Homeworld.Size.Y,Homeworld.Size.Y),Randy.Next(-Homeworld.Size.Z,Homeworld.Size.Z)) + Homeworld.WorldMatrix.Translation;
+          // Vector3 p = new Vector3(Randy.Next(Homeworld.Size.X),Randy.Next(Homeworld.Size.Y),Randy.Next(Homeworld.Size.Z)) + Vector3.Normalize(Homeworld.PositionLeftBottomCorner);
+
+          position = Homeworld.GetClosestSurfacePointGlobal( p );
+          //Homeworld.CorrectSpawnLocation(ref position,250f);
+          Homeworld.CorrectSpawnLocation(ref position,15f);
+
+          flat = IsFlat(position, Homeworld);
+        }
+
       }
 
       if( CommandLine.Switch("nuclear") && !Resources.Contains("Uranium") ) {
@@ -1315,6 +1462,9 @@ namespace SpaceCraft.Utils {
 
       TakeControl( MainBase );
       RespawnPoint = MainBase.GetRespawnBlock();
+
+      MyVisualScriptLogicProvider.SetName(MainBase.Grid.EntityId, MainBase.Grid.EntityId.ToString());
+      MyVisualScriptLogicProvider.SetGridGeneralDamageModifier(MainBase.Grid.EntityId.ToString(),0);
       //
       // if( MainBase.Grid == null ) {
       //   //Mulligan();
@@ -1360,9 +1510,11 @@ namespace SpaceCraft.Utils {
     // }
 
 
-    protected float Prioritize( Prefab prefab ) {
+    protected float Prioritize( Prefab prefab, bool atmo = true ) {
       if( prefab.Race != Race ) return 0;
       if( !String.IsNullOrWhiteSpace(prefab.Faction) && prefab.Faction != Name ) return 0;
+
+      if( !atmo && prefab.Atmosphere && !prefab.Spacecraft ) return 0;
 
       foreach( string resource in prefab.Cost.Keys ) {
         // Doesn't have access to resources
@@ -1414,7 +1566,7 @@ namespace SpaceCraft.Utils {
       }
 
       if( prefab.Worker ) {
-        priority *= MyStats.Ratio["Workers"] < MyStats.Desired["Workers"] ? (prefab.IsStatic ? 1f : 25f) : 1f;
+        priority *= MyStats.Ratio["Workers"] < MyStats.Desired["Workers"] ? (prefab.IsStatic ? 1f : 25f) : 0;
       } else {
         priority *= MyStats.Ratio["Workers"] < MyStats.Desired["Workers"] ? 0 : 1f;
       }
@@ -1425,13 +1577,13 @@ namespace SpaceCraft.Utils {
 
       if( prefab.Fighter ) {
 
-          priority *= MyStats.Ratio["Fighters"] <= MyStats.Desired["Fighters"] ? 1.5f : 1f;
+          priority *= MyStats.Ratio["Fighters"] <= MyStats.Desired["Fighters"] ? (CommandLine.Switch("aggressive") ? 2.5f : 1f) : .5f;
 
       }
 
       if( prefab.IsStatic ) {
           // priority *= MyStats.Ratio["Static"] < MyStats.Desired["Static"] ? 2f : .5f;
-          priority *= MyStats.Ratio["Static"] < MyStats.Desired["Static"] ? 2f : .25f;
+          priority *= MyStats.Ratio["Static"] < MyStats.Desired["Static"] ? 3f : .25f;
       }
 
 

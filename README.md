@@ -86,6 +86,7 @@ Convars can also technically be changed inside your save folder in a file called
 - Terran Outpost
 - Terran MAR-1NE
 - Terran Reaper
+- Terran Cyclone
 - Terran SCV (Atmo)
 - Terran SCV (Space)
 - Terran Command Center

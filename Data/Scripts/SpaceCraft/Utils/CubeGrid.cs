@@ -1320,7 +1320,7 @@ namespace SpaceCraft.Utils {
 				if( grid == null ) {
 					return false;
 				} else {
-
+					MyVisualScriptLogicProvider.SetName(grid.EntityId, grid.EntityId.ToString());
 					IMyMotorAdvancedStator stator = grid.GetCubeBlock( Vector3I.Zero ).FatBlock as IMyMotorAdvancedStator;
 					if( stator == null ) {
 						return false;

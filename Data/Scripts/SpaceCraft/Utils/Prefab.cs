@@ -282,7 +282,7 @@ namespace SpaceCraft.Utils {
 
 
 
-      if( Worker ) Fighter = false;
+      if( Worker || IsStatic ) Fighter = false;
       if( !IsStatic && Flying && !Spacecraft ) Atmosphere = true;
     }
 

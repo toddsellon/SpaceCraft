@@ -64,7 +64,16 @@
 				<Z>0.0</Z>
 			</Position>
 			<BeaconText>Terran Reaper</BeaconText>
-			<Speed>0.0</Speed>
+			<Speed>100.0</Speed>
+		</Prefab>
+		<Prefab SubtypeId="Terran Cyclone">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Terran Cyclone</BeaconText>
+			<Speed>50.0</Speed>
 		</Prefab>
 		<Prefab SubtypeId="Terran Battlecruiser">
 			<Position>

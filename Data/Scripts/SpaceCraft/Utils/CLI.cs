@@ -24,6 +24,8 @@ namespace SpaceCraft.Utils {
     protected Dictionary<string,Action<MyCommandLine,Message>> Actions = new Dictionary<string,Action<MyCommandLine,Message>>(StringComparer.OrdinalIgnoreCase);
     protected MyEntity3DSoundEmitter SoundEmitter;
 
+    protected Queue<Message> QueuedMessages = new Queue<Message>();
+
     public CLI(bool server) {
       Server = server;
 
@@ -54,6 +56,18 @@ namespace SpaceCraft.Utils {
       MyAPIGateway.Multiplayer.RegisterMessageHandler(Id, MessageHandler);
     }
 
+    public bool IsPlaying { get { return SoundEmitter != null && SoundEmitter.IsPlaying; } }
+
+    public void CheckSoundQueue() {
+
+      if( !IsPlaying && QueuedMessages.Count > 0 ) {
+        Message message = QueuedMessages.Dequeue();
+        PlaySound(message.Sound);
+        MyAPIGateway.Utilities.ShowMessage( message.Sender, message.Text );
+      }
+
+    }
+
     public void Destroy() {
       MyAPIGateway.Utilities.MessageEntered -= MessageEntered;
       MyAPIGateway.Multiplayer.UnregisterMessageHandler(Id, MessageHandler);
@@ -80,15 +94,22 @@ namespace SpaceCraft.Utils {
 
       Message message = MyAPIGateway.Utilities.SerializeFromBinary<Message>(data);
 
+
+      if( !String.IsNullOrWhiteSpace(message.Sound) ) {
+        if( IsPlaying ) {
+          QueuedMessages.Enqueue(message);
+           return;
+        } else
+          PlaySound(message.Sound);
+      }
+
       if( Server && String.IsNullOrWhiteSpace(message.Sender) ) {
         ParseMessage(message.Text,message);
       } else {
         MyAPIGateway.Utilities.ShowMessage( message.Sender, message.Text );
       }
 
-      if( !String.IsNullOrWhiteSpace(message.Sound) ) {
-        PlaySound(message.Sound);
-      }
+
 
 		}
 
@@ -491,7 +512,7 @@ namespace SpaceCraft.Utils {
         Respond("Error", "Prefab not found " + cmd.Argument(2), message);
         return;
       }
-      CubeGrid grid = new CubeGrid( CubeGrid.Spawn(prefab, faction.GetPlacementLocation(prefab), faction) );
+      CubeGrid grid = new CubeGrid( CubeGrid.Spawn(prefab, faction.GetPlacementLocation(prefab, Vector3D.Zero), faction) );
 
       if( grid == null && grid.Grid == null ) {
           Respond("Error", "Failed to spawn " + cmd.Argument(2), message);

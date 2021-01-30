@@ -327,6 +327,8 @@ namespace SpaceCraft {
 		// Main loop
     public override void UpdateBeforeSimulation() {
 
+			MyCLI.CheckSoundQueue();
+
 			if( !Server ) return;
 
 			if( !Loaded ) {
@@ -456,14 +458,6 @@ namespace SpaceCraft {
 
 
 				if( entity is IMyCubeGrid ) {
-					// Remove Pirates
-					// if( entity.DisplayName.Substring(0,6) == "Pirate" ) {
-					// 	MyAPIGateway.Entities.RemoveEntity(entity);
-					// 	continue;
-					// }
-
-
-
 					IMyCubeGrid grid = entity as IMyCubeGrid;
 
 					List<IMySlimBlock> blocks = new List<IMySlimBlock>();
