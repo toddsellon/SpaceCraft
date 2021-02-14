@@ -21,5 +21,15 @@
 			</RegisteredStorageGuids>
 		</EntityComponent>
 
+		<EntityComponent xsi:type="MyObjectBuilder_ModStorageComponentDefinition">
+			<Id>
+				<TypeId>ModStorageComponent</TypeId>
+				<SubtypeId>SpaceCraftBuffs</SubtypeId>
+			</Id>
+			<RegisteredStorageGuids>
+				<guid>22886351-E7FA-4DB2-9783-138637404D45</guid>
+			</RegisteredStorageGuids>
+		</EntityComponent>
+
 	</EntityComponents>
 </Definitions>

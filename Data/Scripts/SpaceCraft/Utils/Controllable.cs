@@ -110,18 +110,16 @@ namespace SpaceCraft.Utils {
       string subtypeName = slim.BlockDefinition.Id.SubtypeName;
 
 
-
-      if( block is IMyBatteryBlock ) {
+      if( subtypeName == "LargeBlockWindTurbine" ) {
         return 101;
       }
 
-      if( block is IMySolarPanel || subtypeName == "LargeBlockWindTurbine" ) {
-        return 100;
-      }
 
       if( block is IMyRefinery ) {
         //return 48;
-        return subtypeName == "LargeRefinery" || subtypeName == "LargeProtossRefinery" || subtypeName == "LargeZergRefinery" ? 99 : 50;
+        if( subtypeName == "LargeProtossRefinery" )
+          return 100;
+        return subtypeName == "LargeRefinery" || subtypeName == "LargeZergRefinery" ? 99 : 50;
       }
       if( block is IMyAssembler ) {
         //switch( slim.BlockDefinition.DisplayNameString ) {
@@ -143,20 +141,26 @@ namespace SpaceCraft.Utils {
       }
 
       if( block is IMyReactor ) {
-        return 97;
+        return 47;
       }
 
-      if( block is IMyOxygenGenerator || block is IMyOxygenTank ) return 47;
+      if( block is IMyBatteryBlock || block is IMySolarPanel ) {
+        return 46;
+      }
 
-      if( block is IMyProductionBlock ) return 46;
 
-      if( block is IMyMedicalRoom ) return 45;
+
+      if( block is IMyOxygenGenerator || block is IMyOxygenTank ) return 45;
+
+      if( block is IMyProductionBlock ) return 44;
+
+      if( block is IMyMedicalRoom ) return 43;
 
 
 
 
       //if( block is IMyShipDrill || block is IMyUserControllableGun ) return 45;
-      if( block is IMyShipDrill ) return 44;
+      if( block is IMyShipDrill ) return 42;
 
       if( block is IMyMotorSuspension || block is IMyWheel ) return 30;
 
@@ -199,7 +203,7 @@ namespace SpaceCraft.Utils {
         return false;
       }
 
-      if( CurrentOrder == null ) {
+      if( CurrentOrder == null || force ) {
         CurrentOrder = order;
         return true;
       } else {

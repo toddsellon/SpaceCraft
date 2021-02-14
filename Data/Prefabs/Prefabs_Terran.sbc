@@ -75,15 +75,6 @@
 			<BeaconText>Terran Cyclone</BeaconText>
 			<Speed>50.0</Speed>
 		</Prefab>
-		<Prefab SubtypeId="Terran Battlecruiser">
-			<Position>
-				<X>0.0</X>
-				<Y>0.0</Y>
-				<Z>0.0</Z>
-			</Position>
-			<BeaconText>Terran Battlecruiser</BeaconText>
-			<Speed>0.0</Speed>
-		</Prefab>
 		<Prefab SubtypeId="Terran SCV (Space)">
 			<Position>
 				<X>0.0</X>

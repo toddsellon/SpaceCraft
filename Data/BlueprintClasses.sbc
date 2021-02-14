@@ -17,6 +17,20 @@
     <Class>
         <Id>
             <TypeId>BlueprintClassDefinition</TypeId>
+            <SubtypeId>Terrazine</SubtypeId>
+        </Id>
+        <DisplayName>Terrazine Gas</DisplayName>
+        <Description>Terrazine Gas</Description>
+        <Icon>Textures\GUI\Icons\component\gravity_generator_components_component.dds</Icon>
+        <HighlightIcon>Textures\GUI\Icons\buttons\large_block.dds</HighlightIcon>
+        <FocusIcon>Textures\GUI\Icons\buttons\large_block_focus.dds</FocusIcon>
+        <InputConstraintIcon>Textures\GUI\Icons\filter_ore.dds</InputConstraintIcon>
+        <OutputConstraintIcon>Textures\GUI\Icons\filter_ingot.dds</OutputConstraintIcon>
+    </Class>
+
+    <Class>
+        <Id>
+            <TypeId>BlueprintClassDefinition</TypeId>
             <SubtypeId>VespeneBottles</SubtypeId>
         </Id>
         <DisplayName>Vespene Bottles</DisplayName>
@@ -257,5 +271,9 @@
     <Entry Class="Vespene" BlueprintSubtypeId="RawToVespene" />
     <Entry Class="VespeneBottles" BlueprintSubtypeId="VespeneBottlesRefill" />
     <Entry Class="Organic" BlueprintSubtypeId="Organic" />
+
+
+    <Entry Class="Terrazine" BlueprintSubtypeId="RawToTerrazine" />
+
   </BlueprintClassEntries>
 </Definitions>

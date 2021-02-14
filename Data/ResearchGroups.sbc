@@ -5,7 +5,7 @@
     <ResearchGroup xsi:type="ResearchGroup">
       <Id Type="MyObjectBuilder_ResearchGroupDefinition" Subtype="7055" />
       <Members>
-        <Id Type="MyObjectBuilder_JumpDrive" Subtype="LargeJumpDrive" />
+        <BlockId Type="MyObjectBuilder_JumpDrive" Subtype="LargeJumpDrive" />
       </Members>
     </ResearchGroup>
 

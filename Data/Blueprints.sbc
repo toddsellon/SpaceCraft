@@ -179,6 +179,20 @@
     <Blueprint>
       <Id>
         <TypeId>BlueprintDefinition</TypeId>
+        <SubtypeId>RawToTerrazine</SubtypeId>
+      </Id>
+      <DisplayName>Refine terrazine gas</DisplayName>
+      <Icon>Textures\GUI\Icons\ingot\gravel_ingot.dds</Icon>
+      <Prerequisites>
+        <Item Amount="1" TypeId="Ore" SubtypeId="Terrazine" />
+      </Prerequisites>
+      <Result Amount="0.9" TypeId="Ingot" SubtypeId="Stone" />
+      <BaseProductionTimeInSeconds>0.1</BaseProductionTimeInSeconds>
+    </Blueprint>
+
+    <Blueprint>
+      <Id>
+        <TypeId>BlueprintDefinition</TypeId>
         <SubtypeId>PsionicLink</SubtypeId>
       </Id>
       <DisplayName>Psionic Link</DisplayName>
@@ -222,6 +236,15 @@
       </Id>
       <EnergyDensity>0.01556</EnergyDensity>
     </Gas>
+
+    <Gas>
+      <Id>
+        <TypeId>MyObjectBuilder_GasProperties</TypeId>
+        <SubtypeId>Terrazine</SubtypeId>
+      </Id>
+      <EnergyDensity>0.01556</EnergyDensity>
+    </Gas>
+
     <Gas>
       <Id>
         <TypeId>MyObjectBuilder_GasProperties</TypeId>

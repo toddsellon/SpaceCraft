@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<SpawnGroups>
+
+<SpawnGroup>
+	<Id>
+		<TypeId>SpawnGroupDefinition</TypeId>
+		<SubtypeId>TerranPrefabsFlipped</SubtypeId>
+	</Id>
+	<Description>SpaceCraft -forward Forward -up Down</Description>
+	<Icon>Textures\GUI\Icons\Fake.dds</Icon>
+	<Frequency>1.0</Frequency>
+	<IsPirate>true</IsPirate>
+	<Prefabs>
+		<Prefab SubtypeId="Terran Battlecruiser">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Terran Battlecruiser</BeaconText>
+			<Speed>0.0</Speed>
+		</Prefab>
+	</Prefabs>
+</SpawnGroup>
+
+<SpawnGroup>
+	<Id>
+		<TypeId>SpawnGroupDefinition</TypeId>
+		<SubtypeId>TerranPrefabsFlipped 2</SubtypeId>
+	</Id>
+	<Description>SpaceCraft -forward Backward -up Left</Description>
+	<Icon>Textures\GUI\Icons\Fake.dds</Icon>
+	<Frequency>1.0</Frequency>
+	<IsPirate>true</IsPirate>
+	<Prefabs>
+
+		<Prefab SubtypeId="Terran Outpost">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Terran Outpost</BeaconText>
+			<Speed>0.0</Speed>
+		</Prefab>
+
+		<Prefab SubtypeId="Terran Command Center">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Terran Command Center</BeaconText>
+			<Speed>0.0</Speed>
+		</Prefab>
+
+		<Prefab SubtypeId="Planetary Fortress">
+			<Position>
+				<X>0.0</X>
+				<Y>0.0</Y>
+				<Z>0.0</Z>
+			</Position>
+			<BeaconText>Planetary Fortress</BeaconText>
+			<Speed>0.0</Speed>
+		</Prefab>
+
+	</Prefabs>
+</SpawnGroup>
+
+</SpawnGroups>
+</Definitions>

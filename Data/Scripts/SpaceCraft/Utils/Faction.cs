@@ -65,7 +65,7 @@ namespace SpaceCraft.Utils {
     public MyCommandLine CommandLine = new MyCommandLine();
     public List<MySpawnGroupDefinition> Groups = new List<MySpawnGroupDefinition>();
     public bool Spawned = false;
-    private static Vector3 DefaultColor = new Vector3(0.575f,0.150000036f,0.199999958f);
+    public static readonly Vector3 DefaultColor = new Vector3(0.575f,0.150000036f,0.199999958f);
     public SerializableVector3 Color = new SerializableVector3(0f,-0.8f,-0.306840628f);
     public Goal CurrentGoal = new Goal{ Type = Goals.Stabilize };
     private IMyCubeBlock RespawnPoint;
@@ -363,7 +363,8 @@ namespace SpaceCraft.Utils {
         }
 
       } else {
-        MyVisualScriptLogicProvider.SetGridGeneralDamageModifier(MainBase.Grid.EntityId.ToString());
+        // MyVisualScriptLogicProvider.SetGridGeneralDamageModifier(MainBase.Grid.EntityId.ToString());
+        MyVisualScriptLogicProvider.SetGridDestructible(MainBase.Grid.EntityId.ToString(),true);
 
         List<IMySlimBlock> assemblers = MainBase.GetBlocks<IMyAssembler>();
         if( MainBase.SuperGrid == null || MainBase.SuperGrid.MarkedForClose || MainBase.SuperGrid.Closed || assemblers.Count < 2 || !MyVisualScriptLogicProvider.HasPower(MainBase.SuperGrid.EntityId.ToString()) ) {
@@ -385,7 +386,8 @@ namespace SpaceCraft.Utils {
     private static readonly float HIT_SIZE = 3f;
     private static readonly float ACCEPTABLE_HEIGHT = 5f;
 
-    public static bool IsFlat( Vector3D point, MyPlanet planet, float multiplier = 1f ) {
+    public static bool IsFlat( Vector3D point, MyPlanet planet = null, float multiplier = 1f ) {
+      planet = planet ?? SpaceCraftSession.GetClosestPlanet(point);
       Vector3D up = Vector3D.Normalize(point - planet.WorldMatrix.Translation);
       Vector3D forward = Vector3D.CalculatePerpendicularVector(up);
       Vector3D right = Vector3D.Cross(forward, up);
@@ -503,8 +505,17 @@ namespace SpaceCraft.Utils {
     }
 
     public void Construct() {
+      if( CurrentGoal == null ) return;
 
-      if( Spawning || CurrentGoal == null ) return;
+      if( Spawning ) {
+        CurrentGoal.Tick++;
+        if( CurrentGoal.Tick >= 100 ) {
+          Spawning = false;
+          CurrentGoal.Complete();
+        }
+        return;
+      }
+
 
       if( CurrentGoal.Prefab == null && CurrentGoal.Entity == null && MyStats.Grids < Convars.Static.Grids ) {
 
@@ -515,15 +526,19 @@ namespace SpaceCraft.Utils {
         MainBase = MainBase ?? GetBestRefinery();
         if( MainBase == null ) return;
 
-        if( MainBase.DockedTo == null ) {
-          MainBase.Balance = CurrentGoal.Balance;
-          // MainBase.AddQueueItems(CurrentGoal.Prefab.GetBattery(),true);
-          MainBase.AddQueueItems(CurrentGoal.Balance,true);
-        } else {
-          MainBase.DockedTo.Balance = CurrentGoal.Balance;
-          // MainBase.DockedTo.AddQueueItems(CurrentGoal.Prefab.GetBattery(),true);
-          MainBase.DockedTo.AddQueueItems(CurrentGoal.Balance,true);
-        }
+        CubeGrid target = MainBase.DockedTo == null ? MainBase : MainBase.DockedTo;
+        target.Balance = CurrentGoal.Balance;
+        target.AddQueueItems(CurrentGoal.Balance,true);
+
+        // if( MainBase.DockedTo == null ) {
+        //   MainBase.Balance = CurrentGoal.Balance;
+        //   // MainBase.AddQueueItems(CurrentGoal.Prefab.GetBattery(),true);
+        //   MainBase.AddQueueItems(CurrentGoal.Balance,true);
+        // } else {
+        //   MainBase.DockedTo.Balance = CurrentGoal.Balance;
+        //   // MainBase.DockedTo.AddQueueItems(CurrentGoal.Prefab.GetBattery(),true);
+        //   MainBase.DockedTo.AddQueueItems(CurrentGoal.Balance,true);
+        // }
 
 
       }
@@ -531,7 +546,12 @@ namespace SpaceCraft.Utils {
       if( CurrentGoal.Step == Steps.Pending && CurrentGoal.Prefab != null ) {
 
         // Wait for balance to be paid
+        // if( CurrentGoal.Balance != null )
+        //   MyAPIGateway.Utilities.ShowMessage( Name, "Balance: " + String.Join(",",CurrentGoal.Balance.Keys) );
+        // else
+        //   MyAPIGateway.Utilities.ShowMessage( Name, "Balance paid" );
         if( CurrentGoal.Balance != null && CurrentGoal.Balance.Count > 0 ) return;
+        CurrentGoal.Balance = null;
 
         Building = true;
         MatrixD location = MatrixD.Zero;
@@ -546,7 +566,7 @@ namespace SpaceCraft.Utils {
           Spawning = true;
           SpaceCraftSession.SpawnBot( CurrentGoal.Prefab.BotDefinition.Id.SubtypeName, location.Translation, BotSpawned );
 
-        } else if( CurrentGoal.Prefab.IsStatic ) { // Haven't gotten static alignment to work yet
+        } else if( CurrentGoal.Prefab.IsStatic ) { // Haven't gotten static alignment to work yet with SpawnPrefab
           CubeGrid grid = new CubeGrid( CubeGrid.Spawn( CurrentGoal.Prefab, location, this) );
           if( grid == null || grid.Grid == null ) {
             CurrentGoal.Complete();
@@ -646,7 +666,7 @@ namespace SpaceCraft.Utils {
             position = position + (up * (box.Height *.05) );
           else
           // if( !prefab.IsStatic )
-            position = position + (up * (box.Height*1.5) );
+            position = position + (up * (box.Height*2) );
             // position = position + (up * (box.Width) );
         }
         MatrixD reference = planet.WorldMatrix;
@@ -668,15 +688,12 @@ namespace SpaceCraft.Utils {
         //   matrix = MatrixD.CreateWorld( position, matrix.Right, matrix.Down );
         // else if( prefab.IsStatic )
   			//   matrix = MatrixD.CreateWorld(position, matrix.Backward, matrix.Left);
-        if( prefab.IsStatic && (prefab.SubtypeId == "Planetary Fortress" || prefab.SubtypeId.StartsWith("Terran")) ) {
-          //position = position + (up * (box.Height *.5) );
-          //matrix = MatrixD.CreateWorld(position, matrix.Backward, matrix.Left);
-          // Vector3D.CalculatePerpendicularVector(matrix.Forward);
-          // Vector3D.CalculatePerpendicularVector(matrix.Up);
-          //matrix = MatrixD.CreateWorld( position, perp* 45, up* 45 );
-          matrix = MatrixD.CreateWorld(position, matrix.Backward, matrix.Left);
-          //matrix = MatrixD.CreateWorld(position, matrix.Backward*45, matrix.Left*45);
-        }
+
+        matrix = prefab.Reorient(matrix);
+
+        // if( prefab.IsStatic && (prefab.SubtypeId == "Planetary Fortress" || prefab.SubtypeId.StartsWith("Terran")) ) {
+        //   matrix = MatrixD.CreateWorld(position, matrix.Backward, matrix.Left);
+        // }
 
 
         //matrix = MatrixD.CreateWorld( position, rotation.Forward, rotation.Up );
@@ -1416,7 +1433,7 @@ namespace SpaceCraft.Utils {
           //Homeworld.CorrectSpawnLocation(ref position,250f);
           Homeworld.CorrectSpawnLocation(ref position,15f);
 
-          flat = IsFlat(position, Homeworld);
+          flat = IsFlat(position, Homeworld, .5f);
         }
 
       }
@@ -1464,7 +1481,8 @@ namespace SpaceCraft.Utils {
       RespawnPoint = MainBase.GetRespawnBlock();
 
       MyVisualScriptLogicProvider.SetName(MainBase.Grid.EntityId, MainBase.Grid.EntityId.ToString());
-      MyVisualScriptLogicProvider.SetGridGeneralDamageModifier(MainBase.Grid.EntityId.ToString(),0);
+      // MyVisualScriptLogicProvider.SetGridGeneralDamageModifier(MainBase.Grid.EntityId.ToString(),0);
+      MyVisualScriptLogicProvider.SetGridDestructible(MainBase.Grid.EntityId.ToString(),false);
       //
       // if( MainBase.Grid == null ) {
       //   //Mulligan();
@@ -1646,8 +1664,8 @@ namespace SpaceCraft.Utils {
       //return planet.GetAirDensity(pos) == 0f;
     }
 
-    public void BlockCompleted( IMySlimBlock block ) {
-      if( block.FatBlock == null ) return;
+    public bool BlockCompleted( IMySlimBlock block ) {
+      if( block.FatBlock == null ) return false;
       if( block.FatBlock is IMyRefinery ) {
         string subtypeName = block.BlockDefinition.Id.SubtypeName;
         if( Tier == Tech.Primitive ) {
@@ -1670,7 +1688,11 @@ namespace SpaceCraft.Utils {
             }
           }
         }
+
+        return true;
       }
+
+      return false;
     }
 
 

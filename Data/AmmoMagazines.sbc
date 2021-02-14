@@ -15,6 +15,7 @@
     </BasicProperties>
     <ProjectileProperties>
       <ProjectileTrailScale>0.05</ProjectileTrailScale>
+      <ProjectileTrailColor x="0.2745098" y="0.4090196" z="0.6505882" />
       <ProjectileHitImpulse>1</ProjectileHitImpulse>
       <ProjectileMassDamage>30</ProjectileMassDamage>
       <ProjectileHealthDamage>24</ProjectileHealthDamage>
@@ -37,6 +38,7 @@
     <ProjectileProperties>
       <ProjectileTrailScale>0.05</ProjectileTrailScale>
       <ProjectileHitImpulse>1</ProjectileHitImpulse>
+      <ProjectileTrailColor x="0" y="-0.8" z="-0.3" />
       <ProjectileMassDamage>30</ProjectileMassDamage>
       <ProjectileHealthDamage>24</ProjectileHealthDamage>
       <HeadShot>true</HeadShot>

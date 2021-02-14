@@ -474,7 +474,7 @@
           <TypeId>OxygenGenerator</TypeId>
           <SubtypeId>VespeneGeneratorSmall</SubtypeId>
       </Id>
-      <DisplayName>Terran Vespene Refinery</DisplayName>
+      <DisplayName>Vespene Refinery</DisplayName>
       <Icon>Textures\GUI\Icons\Cubes\OxygenGeneratorSmall.dds</Icon>
       <Description>Description_OxygenGenerator</Description>
       <CubeSize>Small</CubeSize>

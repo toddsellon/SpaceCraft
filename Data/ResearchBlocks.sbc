@@ -32,28 +32,28 @@
     </ResearchBlock>
 
     <ResearchBlock xsi:type="ResearchBlock">
-      <Id Type="MyObjectBuilder_GasTank" Subtype="SmallVespeneTankSmall" />
+      <Id Type="MyObjectBuilder_OxygenTank" Subtype="SmallVespeneTankSmall" />
       <UnlockedByGroups>
         <GroupSubtype>7055</GroupSubtype>
       </UnlockedByGroups>
     </ResearchBlock>
 
     <ResearchBlock xsi:type="ResearchBlock">
-      <Id Type="MyObjectBuilder_GasTank" Subtype="SmallVespeneTank" />
+      <Id Type="MyObjectBuilder_OxygenTank" Subtype="SmallVespeneTank" />
       <UnlockedByGroups>
         <GroupSubtype>7055</GroupSubtype>
       </UnlockedByGroups>
     </ResearchBlock>
 
     <ResearchBlock xsi:type="ResearchBlock">
-      <Id Type="MyObjectBuilder_GasTank" Subtype="LargeVespeneTankSmall" />
+      <Id Type="MyObjectBuilder_OxygenTank" Subtype="LargeVespeneTankSmall" />
       <UnlockedByGroups>
         <GroupSubtype>7055</GroupSubtype>
       </UnlockedByGroups>
     </ResearchBlock>
 
     <ResearchBlock xsi:type="ResearchBlock">
-      <Id Type="MyObjectBuilder_GasTank" Subtype="LargeVespeneTank" />
+      <Id Type="MyObjectBuilder_OxygenTank" Subtype="LargeVespeneTank" />
       <UnlockedByGroups>
         <GroupSubtype>7055</GroupSubtype>
       </UnlockedByGroups>

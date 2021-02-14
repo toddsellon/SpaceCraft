@@ -434,8 +434,8 @@ namespace SpaceCraft.Utils {
         DisplayName = Owner.Founder == null ? Owner.Name : Owner.Founder.DisplayName,
 				ColorMaskHSV = Color.Gold.ToVector3(),
 				//PlayerSteamId = (ulong)(Owner == null || Owner.MyFaction == null ? 0 : Owner.MyFaction.FounderId),
-				PlayerSteamId = Owner.MyFaction == null ? 0 : MyAPIGateway.Players.TryGetSteamId(Owner.MyFaction.FounderId),
-				PlayerSerialId = (int)(Owner == null || Owner.MyFaction == null ? 0 : Owner.MyFaction.FounderId),
+				// PlayerSteamId = Owner.MyFaction == null ? 0 : MyAPIGateway.Players.TryGetSteamId(Owner.MyFaction.FounderId),
+				// PlayerSerialId = (int)(Owner == null || Owner.MyFaction == null ? 0 : Owner.MyFaction.FounderId),
         Inventory = new MyObjectBuilder_Inventory(){
 					Items = new List<MyObjectBuilder_InventoryItem>(){
 						new MyObjectBuilder_InventoryItem() {

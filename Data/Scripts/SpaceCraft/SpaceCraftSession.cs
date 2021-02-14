@@ -72,6 +72,7 @@ namespace SpaceCraft {
 		public static MyPlanet ClosestPlanet { get; protected set; }
 		public static CLI MyCLI;
 		public static long NumPlayers = 0;
+		public static readonly string[] Directions = {"Up","Down","Left","Right","Forward","Backward"};
 		protected static ConcurrentDictionary<ProtossShield,IMyCubeGrid> ShieldedGrids = new ConcurrentDictionary<ProtossShield,IMyCubeGrid>();
 		protected static List<IMySlimBlock> ZergBlocks = new List<IMySlimBlock>();
 		public static Dictionary<string,MyBlueprintDefinitionBase> Components = new Dictionary<string,MyBlueprintDefinitionBase>();
@@ -350,6 +351,8 @@ namespace SpaceCraft {
 			if( Tick == 99 ) {
 				Tick = 0;
 
+				Buffs.Update();
+
 				if(SaveName != MyAPIGateway.Session.Name) {// Saved
 	        SaveName = MyAPIGateway.Session.Name;
 					Convars.Static.Save();
@@ -393,7 +396,14 @@ namespace SpaceCraft {
 					SetReputation(p.PlayerID);
 					Quests.Static.SetQuestState(p.SteamUserId,QuestId.StartingQuest);
 					// Quests.LockTechnology( p.PlayerID );
-				}
+				}/* else {
+					quest = Quests.Static.GetQuest(p.SteamUserId,QuestId.FindStation);
+					if( quest.State == QuestState.Completed && null == Quests.Static.GetQuest(p.SteamUserId,QuestId.Drill) ) {
+						Quests.Static.SetQuestState(p.SteamUserId, QuestId.Drill);
+	          Quests.Static.SetQuestState(p.SteamUserId, QuestId.Grinder);
+	          Quests.Static.SetQuestState(p.SteamUserId, QuestId.Welder);
+					}
+				}*/
 			}
 		}
 
@@ -456,6 +466,10 @@ namespace SpaceCraft {
 					continue;
 				}
 
+				if( entity is IMyCharacter ) {
+					Buffs.Restore( entity as IMyCharacter);
+					continue;
+				}
 
 				if( entity is IMyCubeGrid ) {
 					IMyCubeGrid grid = entity as IMyCubeGrid;
@@ -605,13 +619,36 @@ namespace SpaceCraft {
 						if( cmd.Switch("zerg") ) race = Races.Zerg;
 						if( cmd.Switch("hybrid") ) race = Races.Hybrid;
 
+						Base6Directions.Direction forward = Base6Directions.Direction.Forward;
+						Base6Directions.Direction up = Base6Directions.Direction.Up;
+
+						if( cmd.Switch("forward") ) {
+
+							Base6Directions.Direction.TryParse(cmd.Switch("forward",0), out forward);
+
+						}
+
+						if( cmd.Switch("up") ) {
+
+							Base6Directions.Direction.TryParse(cmd.Switch("up",0), out up);
+
+						}
+
+
+
 						// if( first == String.Empty && Name != String.Empty ) first = prefab.SubtypeId;
 						// else Prefab.Add(prefab.SubtypeId, Name, race);
-						if( prefab.SubtypeId != "Terran Planet Pod" ) // This needs fixing
-							Prefab.Add(prefab.SubtypeId, race, Name);
+						if( prefab.SubtypeId != "Terran Planet Pod" ) { // This needs fixing
+							Prefab p = Prefab.Add(prefab.SubtypeId, race, Name);
+
+							if( p == null ) continue;
+							p.Forward = forward;
+							p.Up = up;
+
+						}
 					}
 
-          if( !String.IsNullOrWhiteSpace(Name) ) {
+          if( !String.IsNullOrWhiteSpace(Name) && !Directions.Contains(Name) ) {
 
 						Name = Name.ToUpper();
 
@@ -697,6 +734,42 @@ namespace SpaceCraft {
 
     }
 
+		public static IMyPlayer GetPlayer( IMyCharacter character ) {
+      List<IMyPlayer> players = new List<IMyPlayer>();
+			MyAPIGateway.Players.GetPlayers(players);
+			foreach( IMyPlayer player in players) {
+				if( player.GetPosition() == character.GetPosition() ) {
+          return player;
+        }
+			}
+
+      return null;
+    }
+
+		public static ulong GetSteamId( IMyCharacter character ) {
+      List<IMyPlayer> players = new List<IMyPlayer>();
+			MyAPIGateway.Players.GetPlayers(players);
+			foreach( IMyPlayer player in players) {
+				if( player.GetPosition() == character.GetPosition() ) {
+          return player.SteamUserId;
+        }
+			}
+
+      return 0;
+    }
+
+		public static long GetPlayerId( IMyCharacter character ) {
+      List<IMyPlayer> players = new List<IMyPlayer>();
+			MyAPIGateway.Players.GetPlayers(players);
+			foreach( IMyPlayer player in players) {
+				if( player.GetPosition() == character.GetPosition() ) {
+          return player.PlayerID;
+        }
+			}
+
+      return 0;
+    }
+
 		public static Faction GetFactionByFounder( string founder ) {
 			foreach( Faction f in SCFactions) {
 				if( f.Founder == null ) continue;
@@ -757,7 +830,11 @@ namespace SpaceCraft {
 			}
 			if( !String.IsNullOrWhiteSpace(cmd.Argument(2)) ) {
 				string[] colors = cmd.Argument(2).Split(',');
-				faction.Color = new SerializableVector3(float.Parse(colors[0]),float.Parse(colors[1]),float.Parse(colors[2]));
+				try {
+					faction.Color = new SerializableVector3(float.Parse(colors[0]),float.Parse(colors[1]),float.Parse(colors[2]));
+				} catch( Exception e ) {
+					faction.Color = Faction.DefaultColor;
+				}
 					//RequestNewPlayer (int serialNumber, string playerName, string characterModel)
 					//LoadIdentities (List< MyObjectBuilder_Identity > list)
 			}

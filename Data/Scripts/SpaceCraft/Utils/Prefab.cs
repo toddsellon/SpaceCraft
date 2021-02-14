@@ -30,10 +30,35 @@ namespace SpaceCraft.Utils {
     public Races Race = Races.Terran;
     public static readonly SerializableVector3 DefaultColor = new SerializableVector3(0.575f,0.150000036f,0.199999958f);
 
+    public Base6Directions.Direction Forward = Base6Directions.Direction.Forward;
+    public Base6Directions.Direction Up = Base6Directions.Direction.Up;
+
     public MyPrefabDefinition Definition;
     public MyPositionAndOrientation? PositionAndOrientation;
 
     public static List<Prefab> Prefabs = new List<Prefab>();
+
+    public MatrixD Reorient( MatrixD matrix ) {
+      if( Forward == Base6Directions.Direction.Forward && Up == Base6Directions.Direction.Up ) return matrix;
+      return MatrixD.CreateWorld(matrix.Translation, GetDirection(ref matrix,Forward), GetDirection(ref matrix,Up) );
+    }
+
+    public static Vector3D GetDirection( ref MatrixD matrix, Base6Directions.Direction direction ) {
+      switch( direction ) {
+        case Base6Directions.Direction.Up:
+          return matrix.Up;
+        case Base6Directions.Direction.Left:
+          return matrix.Left;
+        case Base6Directions.Direction.Right:
+          return matrix.Right;
+        case Base6Directions.Direction.Down:
+          return matrix.Down;
+        case Base6Directions.Direction.Backward:
+          return matrix.Backward;
+      }
+
+      return matrix.Forward;
+    }
 
     public void ChangeColor( SerializableVector3 color ) {
       ChangeColor( color, DefaultColor );
@@ -139,7 +164,11 @@ namespace SpaceCraft.Utils {
               Price += component.Count;
               string subtype = component.Definition.Id.SubtypeName;
               MyBlueprintDefinitionBase blueprint = null;
-      				MyDefinitionManager.Static.TryGetComponentBlueprintDefinition(component.Definition.Id, out blueprint);
+              try {
+      				  MyDefinitionManager.Static.TryGetComponentBlueprintDefinition(component.Definition.Id, out blueprint);
+              } catch( Exception e ) {
+                continue;
+        			}
               if( blueprint == null )
                 blueprint = SpaceCraftSession.GetBlueprintDefinition(component.Definition.Id.SubtypeName);
 

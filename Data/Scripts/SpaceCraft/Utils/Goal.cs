@@ -29,6 +29,7 @@ namespace SpaceCraft.Utils {
     public Prefab Prefab;
     public Controllable Entity;
     public Dictionary<string,int> Balance = null;
+    public int Tick = 0;
 
     public void Progress() {
       if( Step < Steps.Completed )

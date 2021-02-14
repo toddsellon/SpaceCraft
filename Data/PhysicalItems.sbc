@@ -60,6 +60,32 @@
 
         <PhysicalItem>
             <Id>
+                <TypeId>Ore</TypeId>
+                <SubtypeId>Terrazine</SubtypeId>
+            </Id>
+            <DisplayName>Terrazine Gas</DisplayName>
+            <Icon>Textures\GUI\Icons\component\gravity_generator_components_component.dds</Icon>
+            <Size>
+                <X>0.07</X>
+                <Y>0.07</Y>
+                <Z>0.07</Z>
+            </Size>
+            <Mass>1</Mass>
+            <Volume>0.37</Volume>
+            <Model>Models\Components\gravity_generator_components_component.mwm</Model>
+            <PhysicalMaterial>Metal</PhysicalMaterial>
+            <IconSymbol>IconSymbol_Ice</IconSymbol>
+
+            <MinimalPricePerUnit>5000</MinimalPricePerUnit>
+            <MinimumOfferAmount>10000</MinimumOfferAmount>
+            <MaximumOfferAmount>100000</MaximumOfferAmount>
+            <MinimumOrderAmount>10000</MinimumOrderAmount>
+            <MaximumOrderAmount>200000</MaximumOrderAmount>
+            <CanPlayerOrder>true</CanPlayerOrder>
+        </PhysicalItem>
+
+        <PhysicalItem>
+            <Id>
                 <TypeId>Ingot</TypeId>
                 <SubtypeId>Organic</SubtypeId>
             </Id>

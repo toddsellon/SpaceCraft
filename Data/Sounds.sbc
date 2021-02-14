@@ -5,6 +5,54 @@
     <Sound>
       <Id>
         <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>terrazine-start</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\terrazine-start.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>terrazine-complete</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\terrazine-complete.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>terrazine-error</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\terrazine-error.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
         <SubtypeId>quest0-pending</SubtypeId>
       </Id>
       <MaxDistance>1</MaxDistance>
@@ -158,6 +206,151 @@
       <Waves>
         <Wave Type="D2">
           <Start>Data\Audio\quest2-challenge.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest3-pending-a</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest3-pending-a.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest3-pending-b</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest3-pending-b.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest3-pending-c</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest3-pending-c.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest3-pending-d</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest3-pending-d.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest3-pending-e</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest3-pending-e.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest3-pending-f</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest3-pending-f.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest3-pending-g</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest3-pending-g.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest3-pending-h</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest3-pending-h.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest3-pending-i</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest3-pending-i.xwm</Start>
         </Wave>
       </Waves>
     </Sound>
