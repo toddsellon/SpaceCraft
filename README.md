@@ -111,6 +111,8 @@ Convars can also technically be changed inside your save folder in a file called
 - Zerg Mutalusk
 - Zerg Hive
 - Zerg Corruptor
+- Xel'Naga Monolith
+- Xel'Naga Destroyer
 (More to come, subject to change)
 
 
@@ -165,10 +167,10 @@ The &lt;SpawnGroup&gt; **&lt;Description&gt;** is parsed using a Command Line sy
 Faction parameters are still a work in progress but will allow factions to utilize different playstyles.
 * protoss (Spawn as a Protoss)
 * zerg (Spawn as a Zerg)
+* hybrid (Spawn as a Hybrid)
 * aggressive (More likely to attack and build fighting units)
 * defensive (Less likely to attack or build fighting units)
-* outsider (Spawns on a different planet than the player)
-* scavenger (Uses a grinder rather than drilling to aquire resources (not implemented yet))
+* outsider (Spawns on a random planet)
 * grounded (Does not build flying units (untested))
 * static (Only builds static prefabs)
 * nobuild (Does not build new prefabs and just does the best it can with existing prefabs)
