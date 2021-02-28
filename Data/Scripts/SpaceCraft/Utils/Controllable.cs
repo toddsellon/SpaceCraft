@@ -117,13 +117,26 @@ namespace SpaceCraft.Utils {
 
       if( block is IMyRefinery ) {
         //return 48;
-        if( subtypeName == "LargeProtossRefinery" )
-          return 100;
-        return subtypeName == "LargeRefinery" || subtypeName == "LargeZergRefinery" ? 99 : 50;
+        switch(subtypeName) {
+          case "LargeHybridRefinery":
+            return 102;
+          case "LargeProtossRefinery":
+            return 101;
+          case "LargeRefinery":
+          case "LargeZergRefinery":
+            return 100;
+          default:
+            return 50;
+        }
+        // if( subtypeName == "LargeProtossRefinery" )
+        //   return 101;
+        // return subtypeName == "LargeRefinery" || subtypeName == "LargeZergRefinery" ? 100 : 50;
       }
       if( block is IMyAssembler ) {
         //switch( slim.BlockDefinition.DisplayNameString ) {
         switch(subtypeName) {
+          case "LargeHybridAssembler":
+            return 99;
           case "LargeAssembler":
           case "LargeProtossAssembler":
           case "LargeZergAssembler":

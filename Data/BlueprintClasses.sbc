@@ -159,6 +159,33 @@
         <InputConstraintIcon>Textures\GUI\Icons\filter_ore.dds</InputConstraintIcon>
     </Class>
 
+    <Class>
+        <Id>
+            <TypeId>BlueprintClassDefinition</TypeId>
+            <SubtypeId>HybridIngots</SubtypeId>
+        </Id>
+        <DisplayName>DisplayName_BlueprintClass_BasicComponents</DisplayName>
+        <Description>Description_BlueprintClass_BasicComponents</Description>
+        <Icon>Textures\GUI\Icons\buttons\component.dds</Icon>
+        <HighlightIcon>Textures\GUI\Icons\buttons\component.dds</HighlightIcon>
+        <FocusIcon>Textures\GUI\Icons\buttons\component_focus.dds</FocusIcon>
+        <InputConstraintIcon>Textures\GUI\Icons\filter_ore.dds</InputConstraintIcon>
+    </Class>
+
+
+    <Class>
+        <Id>
+            <TypeId>BlueprintClassDefinition</TypeId>
+            <SubtypeId>HybridComponents</SubtypeId>
+        </Id>
+        <DisplayName>DisplayName_BlueprintClass_BasicComponents</DisplayName>
+        <Description>Description_BlueprintClass_BasicComponents</Description>
+        <Icon>Textures\GUI\Icons\buttons\component.dds</Icon>
+        <HighlightIcon>Textures\GUI\Icons\buttons\component.dds</HighlightIcon>
+        <FocusIcon>Textures\GUI\Icons\buttons\component_focus.dds</FocusIcon>
+        <InputConstraintIcon>Textures\GUI\Icons\filter_ore.dds</InputConstraintIcon>
+    </Class>
+
 
   </BlueprintClasses>
 
@@ -244,6 +271,40 @@
     <Entry Class="ZergComponents" BlueprintSubtypeId="ComputerComponent" />
     <Entry Class="ZergComponents" BlueprintSubtypeId="Missile200mm" />
 
+    <Entry Class="HybridComponents" BlueprintSubtypeId="ConstructionComponent" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="GirderComponent" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="MetalGrid" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="InteriorPlate" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="Adanium" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="SteelPlate" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="SmallTube" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="LargeTube" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="MotorComponent" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="Display" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="BulletproofGlass" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="ComputerComponent" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="ReactorComponent" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="ThrustComponent" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="GravityGeneratorComponent" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="MedicalComponent" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="PsionicLink" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="RadioCommunicationComponent" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="DetectorComponent" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="ExplosivesComponent" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="NATO_5p56x45mmMagazine" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="NATO_25x184mmMagazine" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="Missile200mm" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="SolarCell" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="Crystal" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="PowerCell" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="Superconductor" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="Canvas" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="MetabolicGlands" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="VentralSacks" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="ZergCarapace" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="ControlUnit" />
+    <Entry Class="HybridComponents" BlueprintSubtypeId="Organic" />
+
     <Entry Class="SimpleZergComponents" BlueprintSubtypeId="ZergCarapace" />
     <Entry Class="SimpleZergComponents" BlueprintSubtypeId="ControlUnit" />
     <Entry Class="SimpleZergComponents" BlueprintSubtypeId="ComputerComponent" />
@@ -264,6 +325,19 @@
     <Entry Class="ZergIngots" BlueprintSubtypeId="GoldOreToIngot" />
     <Entry Class="ZergIngots" BlueprintSubtypeId="PlatinumOreToIngot" />
     <Entry Class="ZergIngots" BlueprintSubtypeId="UraniumOreToIngot" />
+
+    <Entry Class="HybridIngots" BlueprintSubtypeId="StoneOreToHybrid" />
+    <Entry Class="HybridIngots" BlueprintSubtypeId="IronOreToIngot" />
+    <Entry Class="HybridIngots" BlueprintSubtypeId="ScrapToIronIngot" />
+    <Entry Class="HybridIngots" BlueprintSubtypeId="ScrapIngotToIronIngot" />
+    <Entry Class="HybridIngots" BlueprintSubtypeId="NickelOreToIngot" />
+    <Entry Class="HybridIngots" BlueprintSubtypeId="MagnesiumOreToIngot" />
+    <Entry Class="HybridIngots" BlueprintSubtypeId="SiliconOreToIngot" />
+    <Entry Class="HybridIngots" BlueprintSubtypeId="CobaltOreToIngot" />
+    <Entry Class="HybridIngots" BlueprintSubtypeId="SilverOreToIngot" />
+    <Entry Class="HybridIngots" BlueprintSubtypeId="GoldOreToIngot" />
+    <Entry Class="HybridIngots" BlueprintSubtypeId="PlatinumOreToIngot" />
+    <Entry Class="HybridIngots" BlueprintSubtypeId="UraniumOreToIngot" />
 
     <!-- <Entry Class="Ammo" BlueprintSubtypeId="PhotonRounds" />
     <Entry Class="EliteTools" BlueprintSubtypeId="PhotonRifle" /> -->

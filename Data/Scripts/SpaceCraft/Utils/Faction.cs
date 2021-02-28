@@ -657,7 +657,7 @@ namespace SpaceCraft.Utils {
         Vector3D up = Vector3D.Normalize(position - planet.WorldMatrix.Translation);
         Vector3D perp = Vector3D.CalculatePerpendicularVector(up);
 
-        if( Tier >= Tech.Advanced && (prefab.IsStatic || prefab.Spacecraft) && !CommandLine.Switch("grounded") ) {
+        if( Race != Races.Hybrid && Tier >= Tech.Advanced && (prefab.IsStatic || prefab.Spacecraft) && !CommandLine.Switch("grounded") ) {
           position = position + ( up * (planet.AtmosphereAltitude*3.5) );
         }
 
@@ -1115,7 +1115,7 @@ namespace SpaceCraft.Utils {
       MyStats.Ratio.Add("Refineries", MyStats.Refineries/MyStats.Grids);
       MyStats.Ratio.Add("Static", MyStats.Static/MyStats.Grids);
 
-      MyStats.Desired.Add("Workers", .5f);
+      MyStats.Desired.Add("Workers", Race == Races.Hybrid ? 0f : .5f);
       MyStats.Desired.Add("Fighters", CommandLine.Switch("aggressive") ? .5f : .25f );
       MyStats.Desired.Add("Factories", .45f);
       MyStats.Desired.Add("Refineries", .45f);
@@ -1406,6 +1406,19 @@ namespace SpaceCraft.Utils {
       return Spawn( Vector3D.Zero );
     }
 
+    public static string GetDefaultPrefab( Races race ) {
+      switch( race ) {
+        case Races.Protoss:
+          return "Protoss Outpost";
+        case Races.Zerg:
+          return "Zerg Drop Site";
+        case Races.Hybrid:
+          return "Xel'Naga Monolith";
+      }
+
+      return "Terran Planet Pod";
+    }
+
     public bool Spawn( Vector3D position, MyPlanet planet = null ) {
       Homeworld = planet;
 
@@ -1450,7 +1463,7 @@ namespace SpaceCraft.Utils {
       // Vector3D.CalculatePerpendicularVector(perp);
       //position = position + (up * 150);
 
-      string subtypeId = String.IsNullOrWhiteSpace(StartingPrefab) ? "Terran Planet Pod" : StartingPrefab;
+      string subtypeId = String.IsNullOrWhiteSpace(StartingPrefab) ? GetDefaultPrefab(Race) : StartingPrefab;
       Prefab prefab = Prefab.Get(subtypeId);
 
       // if( prefab == null ) return false;
@@ -1479,6 +1492,7 @@ namespace SpaceCraft.Utils {
 
       TakeControl( MainBase );
       RespawnPoint = MainBase.GetRespawnBlock();
+      Refill( MainBase.Grid );
 
       MyVisualScriptLogicProvider.SetName(MainBase.Grid.EntityId, MainBase.Grid.EntityId.ToString());
       // MyVisualScriptLogicProvider.SetGridGeneralDamageModifier(MainBase.Grid.EntityId.ToString(),0);
@@ -1496,6 +1510,18 @@ namespace SpaceCraft.Utils {
       // TakeControl( new Engineer(this) );
 
       return true;
+    }
+
+    public static void Refill( IMyCubeGrid grid ) {
+
+      List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+      grid.GetBlocks(blocks);
+      foreach( IMySlimBlock slim in blocks ) {
+        IMyGasTank tank = slim.FatBlock as IMyGasTank;
+        if( tank == null ) continue;
+        MyResourceSinkComponent sink = tank.Components.Get<MyResourceSinkComponent>();
+        sink.SetInputFromDistributor((slim.BlockDefinition as MyGasTankDefinition).StoredGasId,10000000000,true,true);
+      }
     }
 
     public bool IsSubgrid( IMyCubeGrid grid ) {

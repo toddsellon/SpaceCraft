@@ -355,6 +355,326 @@
       </Waves>
     </Sound>
 
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest4-commencing</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest4-commencing.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest4-started</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest4-started.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest7-pending</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest7-pending.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest7-started-d1</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest7-started-d1.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest7-started-d2</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest7-started-d2.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest7-started-jo0</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest7-started-jo0.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest7-started-jo1</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest7-started-jo1.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest7-started-jo2</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest7-started-jo2.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest7-started-jo3</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest7-started-jo3.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest7-started-jo4</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest7-started-jo4.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>battlecruiser-spawned</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\battlecruiser-spawned.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest7-started</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest7-started.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest8-started</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest8-started.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest8-commencing</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest8-commencing.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest8-challenge</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest8-challenge.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>detected</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\detected.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest9-started</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest9-started.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest9-commencing</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest9-commencing.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest9-challenge</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest9-challenge.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
+
+    <Sound>
+      <Id>
+        <TypeId>MyObjectBuilder_AudioDefinition</TypeId>
+        <SubtypeId>quest7-started-jo5</SubtypeId>
+      </Id>
+      <MaxDistance>1</MaxDistance>
+      <Volume>1</Volume>
+      <Loopable>false</Loopable>
+      <Pitch>0</Pitch>
+      <Waves>
+        <Wave Type="D2">
+          <Start>Data\Audio\quest7-started-jo5.xwm</Start>
+        </Wave>
+      </Waves>
+    </Sound>
 
   </Sounds>
 </Definitions>

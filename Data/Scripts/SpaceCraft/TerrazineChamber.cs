@@ -85,7 +85,6 @@ namespace SpaceCraft {
 				MyGasTankDefinition def = MyDefinitionManager.Static.GetCubeBlockDefinition(tank.BlockDefinition) as MyGasTankDefinition;
 				if( def == null ) continue;
 				if( def.StoredGasId != Terrazine ) {
-					MyAPIGateway.Utilities.ShowMessage( "GetTank", "Non-terrazine" );
 					continue;
 				}
 				return tank;

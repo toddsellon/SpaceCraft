@@ -51,6 +51,7 @@ namespace SpaceCraft.Utils {
       Actions.Add("unlock",Unlock);
       Actions.Add("lock",Lock);
       Actions.Add("establish",Establish);
+      Actions.Add("dissolve",Dissolve);
 
       MyAPIGateway.Utilities.MessageEntered += MessageEntered;
       MyAPIGateway.Multiplayer.RegisterMessageHandler(Id, MessageHandler);
@@ -298,6 +299,34 @@ namespace SpaceCraft.Utils {
 
 
       Respond("Established", "Your faction has now been established with SpaceCraft", message);
+
+    }
+
+    public void Dissolve( MyCommandLine cmd, Message message ) {
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+
+      if( player == null || (player.PromoteLevel != MyPromoteLevel.Admin && player.PromoteLevel != MyPromoteLevel.Owner) ) {
+        Respond("Error","You don't have permission", message);
+        return;
+      }
+      string tag = cmd.Argument(2).ToUpper();
+      Faction faction = SpaceCraftSession.GetFaction(tag);
+      if( faction != null ) {
+        Respond("Error", "Faction " + tag + " not found", message);
+        return;
+      }
+
+      if( !faction.Established ) {
+        Respond("Error", "Faction is not an established faction. The faction's mod must be removed from the game settings.", message);
+        return;
+      }
+
+      if( !Factions.Static.Dissolve(tag) ) {
+        Respond("Error", "Could not dissolve faction", message);
+        return;
+      }
+
+      Respond("Error", tag + " has been dissolved", message);
 
     }
 

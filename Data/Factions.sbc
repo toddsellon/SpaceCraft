@@ -12,7 +12,7 @@
     <DefaultRelation>Enemies</DefaultRelation>
     <AcceptHumans>false</AcceptHumans>
     <AutoAcceptMember>false</AutoAcceptMember>
-  	<DiscoveredByDefault>true</DiscoveredByDefault>
+  	<DiscoveredByDefault>false</DiscoveredByDefault>
   </Faction>
 
   <Faction Tag="????" Founder="????">
@@ -27,6 +27,34 @@
     <AutoAcceptMember>false</AutoAcceptMember>
   	<DiscoveredByDefault>false</DiscoveredByDefault>
   </Faction>
+
+
+  <Faction Tag="AMON" Founder="Emil Narud">
+    <Id>
+      <TypeId>MyObjectBuilder_FactionDefinition</TypeId>
+      <SubtypeId>AMON</SubtypeId>
+    </Id>
+    <DisplayName>Servants of Amon</DisplayName>
+    <IsDefault>true</IsDefault>
+    <DefaultRelation>Enemies</DefaultRelation>
+    <AcceptHumans>false</AcceptHumans>
+    <AutoAcceptMember>false</AutoAcceptMember>
+  	<DiscoveredByDefault>false</DiscoveredByDefault>
+  </Faction>
+
+  <Faction Tag="DMNN" Founder="Arcturus Mengsk">
+    <Id>
+      <TypeId>MyObjectBuilder_FactionDefinition</TypeId>
+      <SubtypeId>DMNN</SubtypeId>
+    </Id>
+    <DisplayName>Terran Dominion</DisplayName>
+    <IsDefault>true</IsDefault>
+    <DefaultRelation>Enemies</DefaultRelation>
+    <AcceptHumans>false</AcceptHumans>
+    <AutoAcceptMember>false</AutoAcceptMember>
+  	<DiscoveredByDefault>false</DiscoveredByDefault>
+  </Faction>
+
 
 </Factions>
 

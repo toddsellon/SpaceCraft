@@ -9,7 +9,7 @@
       </Id>
       <DisplayName>Terrazine Chamber</DisplayName>
       <Icon>Textures\GUI\Icons\Cubes\CryoPod.dds</Icon>
-      <Description>Infuses your character with psionic energy giving them incredible power.</Description>
+      <Description>Infuses your character with psionic energy giving them incredible power. Terrazine must come from a tank on the same grid as this chamber.</Description>
       <CubeSize>Large</CubeSize>
         <GuiVisible>false</GuiVisible>
       <BlockTopology>TriangleMesh</BlockTopology>
@@ -85,7 +85,7 @@
       </Id>
       <DisplayName>Terrazine Chamber</DisplayName>
       <Icon>Textures\GUI\Icons\Cubes\CryoPod.dds</Icon>
-      <Description>Infuses your character with psionic energy giving them incredible power.</Description>
+      <Description>Infuses your character with psionic energy giving them incredible power. Terrazine must come from a tank on the same grid as this chamber.</Description>
       <CubeSize>Small</CubeSize>
         <GuiVisible>false</GuiVisible>
       <BlockTopology>TriangleMesh</BlockTopology>
@@ -474,7 +474,7 @@
       </Id>
       <DisplayName>Terrazine Refinery</DisplayName>
       <Icon>Textures\GUI\Icons\Cubes\OxygenGenerator.dds</Icon>
-      <Description>Description_OxygenGenerator</Description>
+      <Description>Refines raw terrazine into a usable gas.</Description>
       <CubeSize>Large</CubeSize>
       <BlockTopology>TriangleMesh</BlockTopology>
       <Size x="1" y="2" z="1" />
@@ -561,7 +561,7 @@
       </Id>
       <DisplayName>Terrazine Refinery</DisplayName>
       <Icon>Textures\GUI\Icons\Cubes\OxygenGeneratorSmall.dds</Icon>
-      <Description>Description_OxygenGenerator</Description>
+      <Description>Refines raw terrazine into a usable gas.</Description>
       <CubeSize>Small</CubeSize>
       <BlockTopology>TriangleMesh</BlockTopology>
       <Size x="3" y="3" z="2" />
@@ -713,10 +713,9 @@
       <BlueprintClasses>
         <Class>LargeBlocks</Class>
         <Class>SmallBlocks</Class>
-        <Class>ProtossComponents</Class>
         <Class>EliteTools</Class>
         <Class>BuildPlanner</Class>
-        <Class>ZergComponents</Class>
+        <Class>HybridComponents</Class>
       </BlueprintClasses>
       <DamageEffectName>Damage_HeavyMech_Damaged</DamageEffectName>
       <DamagedSound>ParticleHeavyMech</DamagedSound>
@@ -742,7 +741,7 @@
       </Id>
       <DisplayName>Hybrid Refinery</DisplayName>
       <Icon>Textures\GUI\Icons\Cubes\nuclear_reactor_large.dds</Icon>
-      <Description>Description_Refinery</Description>
+      <Description>Refines ores into ingots faster and more efficiently than a normal refinery. Also produces zerg organic matter and trace amounts of cobalt from stone.</Description>
       <CubeSize>Large</CubeSize>
       <BlockTopology>TriangleMesh</BlockTopology>
       <Size x="3" y="3" z="3" />
@@ -794,8 +793,7 @@
       <StandbyPowerConsumption>0.0005</StandbyPowerConsumption>
       <OperationalPowerConsumption>0.28</OperationalPowerConsumption>
       <BlueprintClasses>
-          <Class>Ingots</Class>
-          <Class>ZergIngots</Class>
+          <Class>HybridIngots</Class>
       </BlueprintClasses>
       <RefineSpeed>5.2</RefineSpeed>
       <MaterialEfficiency>1.5</MaterialEfficiency>

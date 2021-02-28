@@ -37,6 +37,29 @@
     </Blueprint>
 
     <Blueprint>
+      <Id>
+        <TypeId>BlueprintDefinition</TypeId>
+        <SubtypeId>StoneOreToHybrid</SubtypeId>
+      </Id>
+      <DisplayName>DisplayName_BlueprintClass_Ingots</DisplayName>
+      <Icon>Textures\GUI\Icons\ingot\ingot_class.dds</Icon>
+      <Prerequisites>
+        <Item Amount="1000" TypeId="Ore" SubtypeId="Stone" />
+      </Prerequisites>
+      <Results>
+        <Item Amount="20" TypeId="Ingot" SubtypeId="Organic" />
+        <Item Amount="14" TypeId="Ingot" SubtypeId="Stone" />
+        <Item Amount="30" TypeId="Ingot" SubtypeId="Iron" />
+        <Item Amount="2.4" TypeId="Ingot" SubtypeId="Nickel" />
+        <Item Amount="4.0" TypeId="Ingot" SubtypeId="Silicon" />
+        <Item Amount="0.5" TypeId="Ingot" SubtypeId="Cobalt" />
+      </Results>
+      <BaseProductionTimeInSeconds>10</BaseProductionTimeInSeconds>
+    </Blueprint>
+
+
+
+    <Blueprint>
         <Id>
             <TypeId>BlueprintDefinition</TypeId>
             <SubtypeId>Organic</SubtypeId>

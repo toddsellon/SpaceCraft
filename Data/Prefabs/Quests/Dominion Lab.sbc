@@ -45,7 +45,7 @@
               <ShowInInventory>true</ShowInInventory>
               <Enabled>true</Enabled>
               <TopBlockId>99683757447119560</TopBlockId>
-              <ShareInertiaTensor>true</ShareInertiaTensor>
+              <ShareInertiaTensor>false</ShareInertiaTensor>
               <SafetyDetach>5</SafetyDetach>
               <Velocity>0.1</Velocity>
               <MaxLimit>1</MaxLimit>
@@ -1943,9 +1943,37 @@
                   <ComponentData>
                     <TypeId>MySafeZoneComponent</TypeId>
                     <Component xsi:type="MyObjectBuilder_SafeZoneComponent">
-                      <UpkeepTime>-447764</UpkeepTime>
+                      <UpkeepTime>2571737</UpkeepTime>
                       <Activating>false</Activating>
-                      <ActivationTime>-447764</ActivationTime>
+                      <ActivationTime>-676064</ActivationTime>
+                      <SafeZoneOb xsi:type="MyObjectBuilder_SafeZone">
+                        <SubtypeName />
+                        <EntityId>86750197120286034</EntityId>
+                        <PersistentFlags>CastShadows InScene</PersistentFlags>
+                        <Name>86750197120286034</Name>
+                        <Radius>100.000008</Radius>
+                        <Enabled>false</Enabled>
+                        <SafeZoneBlockId>90978985643665075</SafeZoneBlockId>
+                        <AccessTypePlayers>Whitelist</AccessTypePlayers>
+                        <AccessTypeFactions>Whitelist</AccessTypeFactions>
+                        <AccessTypeGrids>Whitelist</AccessTypeGrids>
+                        <AccessTypeFloatingObjects>Whitelist</AccessTypeFloatingObjects>
+                        <AllowedActions />
+                        <Factions />
+                        <Players>
+                          <long>144115188075855897</long>
+                        </Players>
+                        <Entities />
+                        <Size>
+                          <X>100</X>
+                          <Y>75</Y>
+                          <Z>100</Z>
+                        </Size>
+                        <Shape>Sphere</Shape>
+                        <IsVisible>true</IsVisible>
+                        <ModelColor x="0.5294118" y="0.807843149" z="0.921568632" />
+                        <Texture>SafeZone_Texture_Default</Texture>
+                      </SafeZoneOb>
                     </Component>
                   </ComponentData>
                   <ComponentData>

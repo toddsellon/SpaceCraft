@@ -120,6 +120,18 @@ namespace SpaceCraft {
 			return null;
 		}
 
+		public static bool RemoveFaction( string tag ) {
+			tag = tag.ToUpper();
+			foreach( Faction faction in SCFactions ) {
+				if( faction.Name == tag ) {
+					SCFactions.Remove(faction);
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		public void EntityAdded( IMyEntity entity ) {
 			IMyCubeGrid grid = entity as IMyCubeGrid;
 			IMyCharacter character = entity as IMyCharacter;
@@ -391,19 +403,20 @@ namespace SpaceCraft {
 			}
 
 			foreach(IMyPlayer p in players) {
+
 				Quest quest = Quests.Static.GetQuest(p.SteamUserId,QuestId.StartingQuest);
 				if( quest == null ) {
 					SetReputation(p.PlayerID);
 					Quests.Static.SetQuestState(p.SteamUserId,QuestId.StartingQuest);
 					// Quests.LockTechnology( p.PlayerID );
-				}/* else {
+				} else {
 					quest = Quests.Static.GetQuest(p.SteamUserId,QuestId.FindStation);
-					if( quest.State == QuestState.Completed && null == Quests.Static.GetQuest(p.SteamUserId,QuestId.Drill) ) {
+					if( quest != null && quest.State == QuestState.Completed && null == Quests.Static.GetQuest(p.SteamUserId,QuestId.Drill) ) {
 						Quests.Static.SetQuestState(p.SteamUserId, QuestId.Drill);
 	          Quests.Static.SetQuestState(p.SteamUserId, QuestId.Grinder);
 	          Quests.Static.SetQuestState(p.SteamUserId, QuestId.Welder);
 					}
-				}*/
+				}
 			}
 		}
 
@@ -665,7 +678,7 @@ namespace SpaceCraft {
 			foreach( EstablishedFaction f in Factions.Static.Established ) {
 				MyCommandLine cmd = new MyCommandLine();
 				if( !cmd.TryParse("SpaceCraft F " + f.Command) ) continue;
-				Faction faction = CreateIfNotExists( f.Tag, cmd );
+				Faction faction = CreateIfNotExists( f.Tag, cmd, f.Prefab );
 				if( faction == null ) continue;
 				faction.Established = true;
 			}
@@ -800,14 +813,15 @@ namespace SpaceCraft {
 			return null;
 		}
 
-		public static Faction CreateIfNotExists( string tag, MyCommandLine cmd ) {
+		public static Faction CreateIfNotExists( string tag, MyCommandLine cmd, string prefab = "" ) {
 			Faction faction = GetFaction(tag);
 			if( faction != null ) return faction;
 
 			faction = new Faction{
 				Name = tag,
 				MyFaction = MyAPIGateway.Session.Factions.TryGetFactionByTag(tag),
-				CommandLine = cmd
+				CommandLine = cmd,
+				StartingPrefab = prefab
 			};
 
 			if( cmd.Switch("toss") ) faction.Race = Races.Protoss;
@@ -899,13 +913,19 @@ namespace SpaceCraft {
 
 			foreach( Faction faction in SCFactions ) {
 
-				if( ClosestPlanet == null ) {
-					Vector3D position = MyAPIGateway.Session.Player.GetPosition();
-					position.Y -= 500;
-					position.Z += 100;
-					faction.Spawn(position);
-				} else {
-					faction.Spawn(Vector3D.Zero);
+				try {
+
+					if( ClosestPlanet == null ) {
+						Vector3D position = MyAPIGateway.Session.Player.GetPosition();
+						position.Y -= 500;
+						position.Z += 100;
+						faction.Spawn(position);
+					} else {
+						faction.Spawn(Vector3D.Zero);
+					}
+
+				} catch( Exception e ) {
+					// Let them respawn themselves
 				}
 
 				// faction.Spawn(position);

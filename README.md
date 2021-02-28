@@ -36,6 +36,9 @@ SpaceCraft has a chat-based command interface that allows you to control SpaceCr
 - **establish**
 	- Establishes your faction as an AI controlled faction or whichever faction you specify. Faction must already exist. Add any faction specific flags after establish and/or include the -nodonate flag to donate all grids manually
 	- /sc establish -aggressive
+- **dissolve**
+	- Removes an established faction
+	- /sc dissolve factiontag
 - **donate**
 	- Donates the grid you're currently controlling to your faction. Be warned that the grid will count towards your Faction's grid limits and will impact its decision making.
 	- /sc donate

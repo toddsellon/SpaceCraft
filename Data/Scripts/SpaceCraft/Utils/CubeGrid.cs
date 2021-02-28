@@ -575,7 +575,10 @@ namespace SpaceCraft.Utils {
 
 			// List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
 			List<IMySlimBlock> blocks = Job.Blocks;
-			if( blocks == null ) return;
+			if( blocks == null ) {
+				Job = null;
+				return;
+			}
 			IMyAssembler main = GetAssembler(blocks);
 
 			if( Job.Needs == null )

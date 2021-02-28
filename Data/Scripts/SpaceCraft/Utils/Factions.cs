@@ -10,6 +10,7 @@ namespace SpaceCraft.Utils {
   public class EstablishedFaction {
     public string Tag;
     public string Command;
+    public string Prefab;
   }
 
   public sealed class Factions {
@@ -35,7 +36,7 @@ namespace SpaceCraft.Utils {
 
     protected static string File = "SCFactions.xml";
 
-    public Faction Establish( string tag, string command ) {
+    public Faction Establish( string tag, string command, string startingPrefab = "" ) {
 
       MyCommandLine cmd = new MyCommandLine();
 
@@ -43,7 +44,8 @@ namespace SpaceCraft.Utils {
 
       Established.Add( new EstablishedFaction{
         Tag = tag,
-        Command = command
+        Command = command,
+        Prefab = startingPrefab
       } );
       Save();
 
@@ -51,6 +53,18 @@ namespace SpaceCraft.Utils {
       Faction faction = SpaceCraftSession.CreateIfNotExists( tag, cmd );
 
       return faction;
+    }
+
+    public bool Dissolve( string tag ) {
+      foreach( EstablishedFaction faction in Established ) {
+        if( faction.Tag == tag ) {
+          Established.Remove(faction);
+          Save();
+          return SpaceCraftSession.RemoveFaction(tag);
+        }
+      }
+
+      return false;
     }
 
     private static Factions Open() {
