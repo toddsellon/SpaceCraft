@@ -718,12 +718,15 @@ namespace SpaceCraft.Utils {
         return;
       }
       Faction faction = SpaceCraftSession.GetFaction(cmd.Argument(2).ToUpper());
-      if( faction == null ) {
+      if( faction == null || faction.MyFaction == null ) {
         Respond("Error", cmd.Argument(2) + " faction could not be found", message);
         return;
       }
 
-      MyAPIGateway.Session.Factions.KickPlayerFromFaction(player.PlayerID);
+      IMyFaction current = MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.PlayerID);
+      if( current != null )
+        MyAPIGateway.Session.Factions.KickPlayerFromFaction(player.PlayerID);
+        
       if( message == null ) // Force join (I think)
         MyAPIGateway.Session.Factions.AddPlayerToFaction(player.PlayerID,faction.MyFaction.FactionId);
       else {
@@ -731,7 +734,7 @@ namespace SpaceCraft.Utils {
         MyAPIGateway.Session.Factions.AcceptJoin(faction.MyFaction.FactionId, player.PlayerID);
       }
 
-      IMyFaction current = MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.PlayerID);
+      current = MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.PlayerID);
       Respond("Join", current == faction.MyFaction ? "Joined faction " + cmd.Argument(2) : "Failed to join faction", message);
     }
 

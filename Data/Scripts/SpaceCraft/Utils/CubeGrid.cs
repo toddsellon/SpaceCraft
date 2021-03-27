@@ -743,11 +743,13 @@ namespace SpaceCraft.Utils {
 			IMyInventory inventory = null;
 			List<IMyInventoryItem> items = null;
 			if( block is IMyAssembler ) {
-				if( block.BlockDefinition.TypeIdString == "MyObjectBuilder_SurvivalKit" )
-						//|| block.BlockDefinition.SubtypeName == "ProtossSurvivalKit"	|| block.BlockDefinition.SubtypeName == "ProtossSurvivalKitLarge"	|| block.BlockDefinition.SubtypeName == "ZergSurvivalKit" )
-				{
+				if( block.BlockDefinition.TypeIdString == "MyObjectBuilder_SurvivalKit" ) {
 					IMyProductionBlock kit = block as IMyProductionBlock;
+					inventory = kit.GetInventory(1);
 					//if( Convars.Static.ManualKits && (kit.IsQueueEmpty || !kit.IsProducing) )
+					if( inventory.CurrentVolume > MyFixedPoint.MultiplySafe(inventory.MaxVolume, 0.94f) ) {
+						DiscardComponents(inventory);
+					}
 					if( kit.IsQueueEmpty || !kit.IsProducing )
 						kit.AddQueueItem( OBTypes.StoneToOre, (VRage.MyFixedPoint)1 );
 					return new CubeGrid.Item {
@@ -757,6 +759,10 @@ namespace SpaceCraft.Utils {
 				}
 
 				IMyAssembler ass = block as IMyAssembler;
+				inventory = ass.GetInventory(1);
+				if( inventory.CurrentVolume > MyFixedPoint.MultiplySafe(inventory.MaxVolume, 0.94f) ) {
+					DiscardComponents(inventory);
+				}
 				if( ass.IsQueueEmpty ) return null;
 				List<MyProductionQueueItem> queue = ass.GetQueue();
 				if( queue.Count == 0 ) return null;
@@ -840,6 +846,22 @@ namespace SpaceCraft.Utils {
 			}
 
 			return null;
+		}
+
+		public void DiscardComponents( IMyInventory inventory ) {
+			List<IMyInventoryItem> items = inventory.GetItems();
+			for( int j = items.Count-1; j >= 0; j-- ) {
+				IMyInventoryItem item = items[j];
+
+				if( item.Content.SubtypeName != "SteelPlate" && item.Content.SubtypeName != "Adanium" && item.Content.SubtypeName != "Organic" )
+					continue;
+
+				//if( item.Amount > 10 ) {
+					//item.Amount -= 10;
+				//} else {
+					inventory.RemoveItemsAt(j);
+				//}
+			}
 		}
 
 		public void AllocateResources(IMyCubeBlock block) {
