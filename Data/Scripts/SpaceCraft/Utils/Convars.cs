@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using VRage.Game.ModAPI;
 using SpaceCraft;
+using SpaceCraft.Utils;
 
 namespace SpaceCraft.Utils {
 
@@ -34,6 +35,7 @@ namespace SpaceCraft.Utils {
     public bool Spawned = false;
     public bool Animations = true;
     public bool Quests = true;
+    public TargetMethod Target = TargetMethod.Reputation;
 
     protected static string File = "SCConvars.xml";
 
@@ -99,6 +101,17 @@ namespace SpaceCraft.Utils {
           }
           Save();
           break;
+        case "target":
+          TargetMethod method = Target;
+          value = char.ToUpper(value[0]) + value.Substring(1).ToLower();
+          if( TargetMethod.TryParse(value, out method) ) {
+            Target = method;
+
+            foreach( Faction faction in SpaceCraftSession.SCFactions )
+              faction.TargetMethodChanged();
+            Save();
+          }
+          break;
       }
 
       return Get(convar);
@@ -113,6 +126,7 @@ namespace SpaceCraft.Utils {
         case "manualkits": return ManualKits.ToString();
         case "animations": return Animations.ToString();
         case "quests": return Quests.ToString();
+        case "target": return Target.ToString();
       }
       return "null";
     }

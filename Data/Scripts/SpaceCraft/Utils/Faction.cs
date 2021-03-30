@@ -39,6 +39,13 @@ namespace SpaceCraft.Utils {
     Future
   };
 
+  public enum TargetMethod {
+    Reputation,
+    Player,
+    Closest,
+    Random
+  };
+
 
   //[MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
   //public class Faction:MySessionComponentBase {
@@ -306,14 +313,9 @@ namespace SpaceCraft.Utils {
           if( Tick == 99 )
             Stabilize();
           break;
-        case Goals.Attack:
-        case Goals.Defend:
-        case Goals.Construct:
+        default:
           Construct();
           break;
-        // case Goals.Colonize:
-        //   Colonize();
-        //   break;
       }
 
     }
@@ -1318,6 +1320,139 @@ namespace SpaceCraft.Utils {
 
 
       return MatrixD.Zero;
+    }
+
+    public IMyEntity ResolveReputationTarget( Vector3D point ) {
+      Dictionary<IMyEntity,IMyFaction> enemies = GetPossibleEnemies();
+
+      IMyEntity best = null;
+      int rep = 0;
+      double distance = 0.0f;
+
+      foreach( IMyEntity entity in enemies.Keys ) {
+        IMyFaction faction = enemies[entity];
+
+        int r = faction == null ? 0 : MyAPIGateway.Session.Factions.GetReputationBetweenPlayerAndFaction(faction.FounderId, MyFaction.FactionId);
+        double d = Vector3D.Distance( entity.WorldMatrix.Translation, point );
+
+        if( best == null || r < rep || (r == rep && d < distance) ) {
+          best = entity;
+          rep = r;
+          distance = d;
+        }
+
+      }
+
+      return best;
+    }
+
+    public IMyEntity ResolvePlayerTarget( Vector3D point ) {
+      Dictionary<IMyEntity,IMyFaction> enemies = GetPossibleEnemies();
+
+      IMyEntity best = null;
+      double distance = 0.0f;
+      foreach( IMyEntity entity in enemies.Keys ) {
+        if( !(entity is IMyCharacter) ) continue;
+
+        double d = Vector3D.Distance( entity.WorldMatrix.Translation, point );
+        if( best == null || d < distance ) {
+          best = entity;
+          distance = d;
+        }
+      }
+
+      return best;
+    }
+
+    public IMyEntity ResolveClosestTarget( Vector3D point ) {
+      Dictionary<IMyEntity,IMyFaction> enemies = GetPossibleEnemies();
+
+      IMyEntity best = null;
+      double distance = 0.0f;
+      foreach( IMyEntity entity in enemies.Keys ) {
+
+        double d = Vector3D.Distance( entity.WorldMatrix.Translation, point );
+        if( best == null || d < distance ) {
+          best = entity;
+          distance = d;
+        }
+      }
+
+      return best;
+    }
+
+    public IMyEntity ResolveRandomTarget( Vector3D point ) {
+      Dictionary<IMyEntity,IMyFaction> enemies = GetPossibleEnemies();
+      return new List<IMyEntity>(enemies.Keys)[Randy.Next(enemies.Keys.Count)];
+      // List<IMyEntity> enemies = GetPossibleEnemies();
+      // return enemies[Randy.Next(enemies.Count)];
+    }
+
+    public void TargetMethodChanged() {
+      foreach( Controllable c in Controlled ) {
+        CubeGrid grid = c as CubeGrid;
+        if( grid == null ) continue;
+
+        grid.Target = null;
+      }
+    }
+
+    public IMyEntity ResolveTarget( Vector3D point ) {
+      switch(Convars.Static.Target) {
+        case TargetMethod.Reputation:
+          return ResolveReputationTarget(point);
+        case TargetMethod.Random:
+          return ResolveRandomTarget(point);
+        case TargetMethod.Player:
+          return ResolvePlayerTarget(point);
+      }
+      return ResolveClosestTarget( point );
+    }
+
+    public Dictionary<IMyEntity,IMyFaction> GetPossibleEnemies() {
+      Dictionary<IMyEntity,IMyFaction> enemies = new Dictionary<IMyEntity,IMyFaction>();
+
+      HashSet<IMyEntity> entities = new HashSet<IMyEntity>();
+			MyAPIGateway.Entities.GetEntities(entities);
+
+      foreach( IMyEntity entity in entities ) {
+        IMyFaction owner = null;
+
+        IMyCubeGrid grid = entity as IMyCubeGrid;
+
+        if( grid != null ) {
+          List<long> owners = grid.GridSizeEnum == MyCubeSize.Large ? grid.BigOwners : grid.SmallOwners;
+
+          if( owners == null || owners.Count == 0 ) continue;
+
+          owner = MyAPIGateway.Session.Factions.TryGetPlayerFaction(owners[0]);
+
+          if( owner != null && MyRelationsBetweenFactions.Enemies != MyAPIGateway.Session.Factions.GetRelationBetweenFactions(owner.FactionId, MyFaction.FactionId))
+            continue;
+
+          enemies[entity] = owner;
+
+          continue;
+        }
+
+        IMyCharacter character = entity as IMyCharacter;
+
+        if( character == null ) continue;
+
+        IMyPlayer player = MyAPIGateway.Players.GetPlayerControllingEntity(character);
+
+        if( player == null ) continue;
+
+        owner = MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.PlayerID);
+
+        if( owner != null && MyRelationsBetweenFactions.Enemies != MyAPIGateway.Session.Factions.GetRelationBetweenFactions(owner.FactionId, MyFaction.FactionId))
+          continue;
+
+        enemies[entity] = owner;
+
+      }
+
+      return enemies;
     }
 
     public IMyPlayer GetClosestEnemy( Vector3D point, IMyFaction faction = null ) {

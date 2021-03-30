@@ -87,9 +87,11 @@ namespace SpaceCraft.Utils {
 		protected static int NumGrids = 0;
 		private static int LastTick = 0;
 		public int Tick = 0;
+		// private int TargetTick = 0;
 		public IMyRemoteControl Remote;
 		public Dictionary<string,int> Balance = null;
 		private bool Drone = false;
+		public IMyEntity Target = null;
 
 		public CubeGrid DockedTo;
     public List<CubeGrid> Docked = new List<CubeGrid>();
@@ -214,11 +216,34 @@ namespace SpaceCraft.Utils {
 			// if( Remote == null || (Remote.IsAutoPilotEnabled && Grid.Physics.IsMoving) ) return;
 			if( Remote == null ) return;
 
-			IMyPlayer player = Owner.Following == null ? Owner.GetClosestEnemy(Grid.WorldMatrix.Translation) : Owner.Following;
+			Vector3D position = Vector3D.Zero;
 
-			if( player == null ) return;
+			if( Owner.Following == null ) {
+				IMyEntity enemy = null;
+				
+				//TargetTick++;
+				// if( TargetTick == 180 || (Target != null && (Target.Closed || Target.MarkedForClose) ) ) {
+				if( Target != null && (Target.Closed || Target.MarkedForClose) ) {
+					Target = null;
+					//TargetTick = 0;
+				}
+				bool wasNull = Target == null;
+				Target = Target ?? Owner.ResolveTarget(Grid.WorldMatrix.Translation);
+				if( wasNull && Convars.Static.Debug )
+					MyAPIGateway.Utilities.ShowMessage( Grid.DisplayName, "Target -> " + Target.DisplayName );
+				enemy = Target;
+				if( enemy == null ) return;
+				position = enemy.WorldMatrix.Translation;
+			} else {
+				position = Owner.Following.GetPosition();
+			}
 
-			Vector3D position = player.GetPosition();
+			// Previous Behavior:
+			// IMyPlayer player = Owner.Following == null ? Owner.GetClosestEnemy(Grid.WorldMatrix.Translation) : Owner.Following;
+			//
+			// if( player == null ) return;
+			//
+			// Vector3D position = player.GetPosition();
 
 			MyPlanet planet = SpaceCraftSession.GetClosestPlanet(Grid.WorldMatrix.Translation);
 
@@ -239,7 +264,7 @@ namespace SpaceCraft.Utils {
 				Vector3D dir = Vector3D.Normalize(position - Grid.WorldMatrix.Translation);
 				Remote.AddWaypoint( position - (dir*Owner.FollowDistance), "Offset Player Location" );
 			} else
-				Remote.AddWaypoint( position, "Tracked Player Location" );
+				Remote.AddWaypoint( position, "Target Location" );
 
 
 

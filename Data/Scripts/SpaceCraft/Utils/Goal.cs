@@ -11,7 +11,7 @@ namespace SpaceCraft.Utils {
     Construct,
     Attack,
     Defend,
-    Colonize
+    Spawn
   };
 
   public enum Steps : ushort {

@@ -26,6 +26,26 @@ namespace SpaceCraft.Utils {
 
     protected Queue<Message> QueuedMessages = new Queue<Message>();
 
+    protected Dictionary<string,string> Descriptions = new Dictionary<string,string>{
+      {"war","Declares war between factions /sc war faction1 faction2"},
+      {"peace","Nakes peace between factions /sc peace faction1 faction2"},
+      {"get","Checks a setting /sc get setting"},
+      {"set","Changes a setting /sc set setting value"},
+      {"build","Begins construction of prefab /sc build \"Prefab name\" faction"},
+      {"spawn","Spawns in a prefab /sc spawn \"Prefab name\" faction"},
+      {"join","Join specified faction /sc join faction"},
+      {"gps","Gets GPS locations for your faction /sc gps"},
+      {"follow","Orders faction to follow /sc follow distance"},
+      {"stop","Stops following /sc stop"},
+      {"donate","Donates grid you're controlling /sc donate"},
+      {"respawn","Respawns a faction /sc respawn faction planet"},
+      {"reset","Resets quest progress /sc reset"},
+      {"lock","Locks all technology /sc lock"},
+      {"unlock","Unlocks all technology /sc unlock"},
+      {"establish","Establishes AI faction /sc establish faction"},
+      {"dissolve","Dissolve AI faction /sc dissolve faction"}
+    };
+
     public CLI(bool server) {
       Server = server;
 
@@ -52,9 +72,14 @@ namespace SpaceCraft.Utils {
       Actions.Add("lock",Lock);
       Actions.Add("establish",Establish);
       Actions.Add("dissolve",Dissolve);
+      Actions.Add("?",Help);
 
       MyAPIGateway.Utilities.MessageEntered += MessageEntered;
       MyAPIGateway.Multiplayer.RegisterMessageHandler(Id, MessageHandler);
+
+      MyAPIGateway.Utilities.ShowMessage( "SpaceCraft", "For help with commands, visit archmage.co/sccmd or type /sc ?" );
+
+
     }
 
     public bool IsPlaying { get { return SoundEmitter != null && SoundEmitter.IsPlaying; } }
@@ -213,6 +238,25 @@ namespace SpaceCraft.Utils {
       faction.Mulligan("User chat command", !cmd.Switch("remain"), planet );
 
       // Respond("Respawn", "Attempted to respawn " + faction.Name, message);
+    }
+
+    public void Help( MyCommandLine cmd, Message message ) {
+      IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
+      if( player == null ) {
+        Respond("Error", "Player not found", message);
+        return;
+      }
+
+      if( String.IsNullOrWhiteSpace(cmd.Argument(2)) ) {
+        foreach( string action in Descriptions.Keys ) {
+          Respond(action, Descriptions[action], message);
+        }
+        Respond("Help", "Type \"/sc ? command\" for help with a specific command", message);
+        Respond("Command Generator", "https://archmage.co/sccmd", message);
+      } else if(Descriptions.ContainsKey(cmd.Argument(2).ToLower())) {
+        Respond(cmd.Argument(2), Descriptions[cmd.Argument(2).ToLower()], message);
+      }
+
     }
 
     public void Establish( MyCommandLine cmd, Message message ) {
@@ -726,7 +770,7 @@ namespace SpaceCraft.Utils {
       IMyFaction current = MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.PlayerID);
       if( current != null )
         MyAPIGateway.Session.Factions.KickPlayerFromFaction(player.PlayerID);
-        
+
       if( message == null ) // Force join (I think)
         MyAPIGateway.Session.Factions.AddPlayerToFaction(player.PlayerID,faction.MyFaction.FactionId);
       else {
@@ -740,42 +784,57 @@ namespace SpaceCraft.Utils {
 
     public void War( MyCommandLine cmd, Message message ) {
       IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
-      if( player == null ) {
-        Respond("Error", "Player not found", message);
-        return;
-      }
-      Faction faction = SpaceCraftSession.GetFactionContaining(player.PlayerID);
+
+      // Faction faction = player == null ? SpaceCraftSession.GetFaction(cmd.Argument(3).ToUpper()) : SpaceCraftSession.GetFactionContaining(player.PlayerID);
+      //Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(3)) && player != null ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(3).ToUpper());
+      IMyFaction faction = String.IsNullOrWhiteSpace(cmd.Argument(3)) && player != null ? MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.PlayerID) : MyAPIGateway.Session.Factions.TryGetFactionByTag(cmd.Argument(3).ToUpper());
       if( faction == null ) {
-        Respond("Error", "You do not belong to a SpaceCraft faction", message);
+        Respond("Error", "Could not find faction " + cmd.Argument(3), message);
         return;
       }
 
-      Faction target = SpaceCraftSession.GetFaction(cmd.Argument(2).ToUpper());
+      //Faction target = SpaceCraftSession.GetFaction(cmd.Argument(2).ToUpper());
+      IMyFaction target = MyAPIGateway.Session.Factions.TryGetFactionByTag(cmd.Argument(2).ToUpper());
       if( target == null ) {
-        Respond("Error", "Could not find faction to declare war", message);
+        Respond("Error", "Could not find faction " + cmd.Argument(2), message);
         return;
       }
 
-      MyAPIGateway.Session.Factions.DeclareWar(faction.MyFaction.FactionId, target.MyFaction.FactionId);
+      MyAPIGateway.Session.Factions.DeclareWar(faction.FactionId, target.FactionId);
+      // MyAPIGateway.Session.Factions.DeclareWar(faction.MyFaction.FactionId, target.MyFaction.FactionId);
+
+      // Respond("War", "were declared on " + target.Name, message);
       Respond("War", "were declared on " + target.Name, message);
     }
 
     public void Peace( MyCommandLine cmd, Message message ) {
+
       IMyPlayer player = message == null ? MyAPIGateway.Session.LocalHumanPlayer : SpaceCraftSession.GetPlayer(message.PlayerID);
-      if( player == null ) {
-        Respond("Error", "Player not found", message);
-        return;
-      }
-      Faction faction = SpaceCraftSession.GetFactionContaining(player.PlayerID);
+
+      // Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(3)) && player != null ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(3).ToUpper());
+      IMyFaction faction = String.IsNullOrWhiteSpace(cmd.Argument(3)) && player != null ? MyAPIGateway.Session.Factions.TryGetPlayerFaction(player.PlayerID) : MyAPIGateway.Session.Factions.TryGetFactionByTag(cmd.Argument(3).ToUpper());
       if( faction == null ) {
-        Respond("Error", "You do not belong to a SpaceCraft faction", message);
+        Respond("Error", "Could not find faction " + cmd.Argument(3), message);
         return;
       }
-      Faction target = SpaceCraftSession.GetFaction(cmd.Argument(2).ToUpper());
+      // Faction target = SpaceCraftSession.GetFaction(cmd.Argument(2).ToUpper());
+      IMyFaction target = MyAPIGateway.Session.Factions.TryGetFactionByTag(cmd.Argument(2).ToUpper());
       if( target == null ) {
-        Respond("Error", "Could not find faction to declare war", message);
+        Respond("Error", "Could not find faction " + cmd.Argument(2), message);
         return;
       }
+
+      // faction.SetReputation( target.MyFaction.FounderId, 1500 );
+      // target.SetReputation( faction.MyFaction.FounderId, 1500 );
+      MyAPIGateway.Session.Factions.SetReputationBetweenPlayerAndFaction(target.FounderId, faction.FactionId, 1500);
+      MyAPIGateway.Session.Factions.SetReputationBetweenPlayerAndFaction(faction.FounderId, target.FactionId, 1500);
+
+      MyAPIGateway.Session.Factions.SendPeaceRequest(faction.FactionId, target.FactionId);
+      MyAPIGateway.Session.Factions.AcceptPeace(faction.FactionId, target.FactionId);
+      // MyAPIGateway.Session.Factions.SendPeaceRequest(faction.MyFaction.FactionId, target.MyFaction.FactionId);
+      // MyAPIGateway.Session.Factions.AcceptPeace(faction.MyFaction.FactionId, target.MyFaction.FactionId);
+
+
     }
 
     public void Control( MyCommandLine cmd, Message message ) {
