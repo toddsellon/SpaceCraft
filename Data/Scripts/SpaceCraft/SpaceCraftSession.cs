@@ -774,7 +774,9 @@ namespace SpaceCraft {
 		public static long GetPlayerId( IMyCharacter character ) {
       List<IMyPlayer> players = new List<IMyPlayer>();
 			MyAPIGateway.Players.GetPlayers(players);
+
 			foreach( IMyPlayer player in players) {
+				// MyAPIGateway.Utilities.ShowMessage( "GetPlayerId", player.GetPosition().ToString() + " - " + character.GetPosition().ToString() );
 				if( player.GetPosition() == character.GetPosition() ) {
           return player.PlayerID;
         }
@@ -782,6 +784,33 @@ namespace SpaceCraft {
 
       return 0;
     }
+
+		// public static long GetIdentityId() {
+		// 	List<IMyIdentity> identities = new List<IMyIdentity>();
+		// 	MyAPIGateway.Players.GetAllIdentites(identities);
+		// 	foreach(IMyIdentity identity in identities) {
+		// 	}
+		// }
+		//
+		// public static long GetBotId( IMyCharacter character ) {
+    //   List<IMyIdentity> identities = new List<IMyIdentity>();
+		// 	MyAPIGateway.Players.GetAllIdentites(identities);
+		// 	foreach(IMyIdentity identity in identities) {
+		// 		MyIdentity i = indentity as MyIdentity;
+		//
+		// 		if( i.Character == character ) {
+		// 			return i.PlayerId;
+		// 		}
+		// 	}
+		//
+    //   return 0;
+    // }
+
+		// List<IMyIdentity> identities = new List<IMyIdentity>();
+		// MyAPIGateway.Players.GetAllIdentites(identities);
+		// foreach(IMyIdentity identity in identities) {
+		//
+		// }
 
 		public static Faction GetFactionByFounder( string founder ) {
 			foreach( Faction f in SCFactions) {

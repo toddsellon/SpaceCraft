@@ -370,7 +370,7 @@
               <TypeId>GasProperties</TypeId>
               <SubtypeId>Vespene</SubtypeId>
           </Id>
-          <MaxOutputPerSecond>0.3</MaxOutputPerSecond>
+          <MaxOutputPerSecond>6</MaxOutputPerSecond>
       </ProducedGas>
       <OperationalPowerConsumption>0.02</OperationalPowerConsumption>
       <DamageEffectName>Damage_WeapExpl_Damaged</DamageEffectName>

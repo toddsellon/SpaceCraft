@@ -27,6 +27,7 @@ namespace SpaceCraft.Utils {
     }
 
     public float Difficulty = 1f;
+    public float BotDifficulty = 1f;
     public int Grids = 20;
     public bool Debug = false;
     public int Engineers = 1;
@@ -90,6 +91,10 @@ namespace SpaceCraft.Utils {
           float.TryParse(value, out Difficulty);
           Save();
           break;
+        case "botdifficulty":
+          float.TryParse(value, out BotDifficulty);
+          Save();
+          break;
         case "animations":
           Animations = Boolean.Parse(value);
           Save();
@@ -123,6 +128,7 @@ namespace SpaceCraft.Utils {
         case "grids": return Grids.ToString();
         case "bots": return Bots.ToString();
         case "difficulty": return Difficulty.ToString();
+        case "botdifficulty": return BotDifficulty.ToString();
         case "manualkits": return ManualKits.ToString();
         case "animations": return Animations.ToString();
         case "quests": return Quests.ToString();

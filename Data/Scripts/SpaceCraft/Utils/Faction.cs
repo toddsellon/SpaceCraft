@@ -120,6 +120,8 @@ namespace SpaceCraft.Utils {
         }
       }
 
+      if( CurrentBot != null ) ApplyBotDifficulty(); // Apply bot difficulty
+
       AssessGoal();
 
       Controllable remove = null;
@@ -381,8 +383,18 @@ namespace SpaceCraft.Utils {
     public void BotSpawned( IMyCharacter bot ) {
       if(Convars.Static.Debug) MyAPIGateway.Utilities.ShowMessage( "BotSpawned", bot.ToString() );
       Bots.Add(bot);
+
+      CurrentBot = bot; // Has to happen next frame because position doesn't match
+
       Spawning = false;
       CurrentGoal.Complete();
+    }
+
+    private IMyCharacter CurrentBot;
+
+    public void ApplyBotDifficulty() {
+      MyVisualScriptLogicProvider.SetPlayerGeneralDamageModifier( SpaceCraftSession.GetPlayerId(CurrentBot), 1/Convars.Static.BotDifficulty );
+      CurrentBot = null;
     }
 
     private static readonly float HIT_SIZE = 3f;
@@ -1122,7 +1134,7 @@ namespace SpaceCraft.Utils {
       MyStats.Desired.Add("Factories", .45f);
       MyStats.Desired.Add("Refineries", .45f);
       //MyStats.Desired.Add("Static", CommandLine.Switch("aggressive") ? .75f : .5f );
-      MyStats.Desired.Add("Static", .25f );
+      MyStats.Desired.Add("Static", Race == Races.Hybrid ? 0 : .25f );
 
 
 
