@@ -98,6 +98,7 @@ namespace SpaceCraft.Utils {
               Cost.Add("Organic",75);
               Fighter = true;
               Race = Races.Zerg;
+              //Race = animal.FactionTag == "HBRD" ? Races.Hybrid : Races.Zerg;
               break;
             // case "Mutalusk":
             //   Count = 1000;

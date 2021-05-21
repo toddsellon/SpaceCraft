@@ -625,7 +625,8 @@ namespace SpaceCraft.Utils {
       foreach( Prefab prefab in Prefab.Prefabs ) {
         if( prefab.Bot && !players ) continue;
         float p = Prioritize(prefab, planet.HasAtmosphere);
-        // MyAPIGateway.Utilities.ShowMessage( "GetConstructionProject", prefab.SubtypeId + ": " + p.ToString() );
+        //if( Race == Races.Hybrid )
+          //MyAPIGateway.Utilities.ShowMessage( "GetConstructionProject", prefab.SubtypeId + ": " + p.ToString() );
         if( best == null || p > priority ) {
           best = prefab;
           priority = p;
@@ -949,32 +950,32 @@ namespace SpaceCraft.Utils {
           // Do nothing
           break;
         case Tech.Space:
-          resources.Add("Uranium",(VRage.MyFixedPoint)0.05*Convars.Static.Difficulty);
-          resources.Add("Platinum",(VRage.MyFixedPoint)0.1*Convars.Static.Difficulty);
+          resources.Add("Uranium",(VRage.MyFixedPoint)0.0005*Convars.Static.Allowance*Convars.Static.Difficulty);
+          resources.Add("Platinum",(VRage.MyFixedPoint)0.001*Convars.Static.Allowance*Convars.Static.Difficulty);
           goto case Tech.Advanced;
         //case Tech.Established:
         case Tech.Advanced:
           if( Tier != Tech.Space && CommandLine.Switch("nuclear") ) {
-            resources.Add("Uranium",(VRage.MyFixedPoint)0.05*Convars.Static.Difficulty);
-            resources.Add("Platinum",(VRage.MyFixedPoint)0.1*Convars.Static.Difficulty);
+            resources.Add("Uranium",(VRage.MyFixedPoint)0.0005*Convars.Static.Allowance*Convars.Static.Difficulty);
+            resources.Add("Platinum",(VRage.MyFixedPoint)0.001*Convars.Static.Allowance*Convars.Static.Difficulty);
           }
-          resources.Add("Silver",(VRage.MyFixedPoint)1*Convars.Static.Difficulty);
-          resources.Add("Gold",(VRage.MyFixedPoint)0.5*Convars.Static.Difficulty);
+          resources.Add("Silver",(VRage.MyFixedPoint)0.01*Convars.Static.Allowance*Convars.Static.Difficulty);
+          resources.Add("Gold",(VRage.MyFixedPoint)0.005*Convars.Static.Allowance*Convars.Static.Difficulty);
           goto default;
         default:
           if( Race == Races.Terran )
-            resources.Add("Ice",(VRage.MyFixedPoint)12*Convars.Static.Difficulty);
+            resources.Add("Ice",(VRage.MyFixedPoint)0.12*Convars.Static.Allowance*Convars.Static.Difficulty);
 
-          resources.Add("Cobalt",(VRage.MyFixedPoint)(Race == Races.Protoss ? 0.2 : 0.4)*Convars.Static.Difficulty);
+          resources.Add("Cobalt",(VRage.MyFixedPoint)(Race == Races.Protoss ? 0.002 : 0.004)*Convars.Static.Allowance*Convars.Static.Difficulty);
 
           if( Race != Races.Zerg ) {
-            resources.Add("Iron",(VRage.MyFixedPoint)2*Convars.Static.Difficulty);
-            resources.Add("Nickel",(VRage.MyFixedPoint)(Race == Races.Protoss ? 0.4 : 0.2)*Convars.Static.Difficulty);
-            resources.Add("Magnesium",(VRage.MyFixedPoint)(Race == Races.Terran ? 1.5 : 0.5 )*Convars.Static.Difficulty);
-            resources.Add("Silicon",(VRage.MyFixedPoint)0.2*Convars.Static.Difficulty);
+            resources.Add("Iron",(VRage.MyFixedPoint)2*Convars.Static.Allowance*Convars.Static.Difficulty);
+            resources.Add("Nickel",(VRage.MyFixedPoint)(Race == Races.Protoss ? 0.004 : 0.002)*Convars.Static.Allowance*Convars.Static.Difficulty);
+            resources.Add("Magnesium",(VRage.MyFixedPoint)(Race == Races.Terran ? 0.015 : 0.005 )*Convars.Static.Allowance*Convars.Static.Difficulty);
+            resources.Add("Silicon",(VRage.MyFixedPoint)0.002*Convars.Static.Allowance*Convars.Static.Difficulty);
           } else {
             //resources["Stone"] *= 2;
-            resources["Cobalt"] *= 2;
+            resources["Cobalt"] *= (VRage.MyFixedPoint)0.02*Convars.Static.Allowance*Convars.Static.Difficulty;
           }
 
           break;
@@ -1248,13 +1249,22 @@ namespace SpaceCraft.Utils {
         }
       }
       Resources = DefaultResources.ToList();
-      if( Race == Races.Zerg || Race == Races.Hybrid )
+      if( Race == Races.Zerg )
         Resources.Add("Organic");
+      if( Race == Races.Hybrid ) {
+        Resources.Add("Organic");
+        Resources.Add("Silver");
+        Resources.Add("Gold");
+        Resources.Add("Cobalt");
+        Resources.Add("Magnesium");
+        Resources.Add("Uranium");
+        Resources.Add("Platinum");
+      }
       Controlled = new List<Controllable>();
       Colonized = new List<MyPlanet>();
       Engineers = 0;
       MainBase = null;
-      Tier = Tech.Primitive;
+      Tier = Race == Races.Hybrid ? Tech.Space : Tech.Primitive;
       CurrentGoal = new Goal{
         Type = Goals.Stabilize
       };
@@ -1426,6 +1436,17 @@ namespace SpaceCraft.Utils {
       return ResolveClosestTarget( point );
     }
 
+    public static bool IsSafeZone( IMyCubeGrid grid ) {
+      if( grid == null ) return false;
+      List<IMySlimBlock> blocks = new List<IMySlimBlock>();
+      grid.GetBlocks(blocks);
+      foreach( IMySlimBlock slim in blocks ) {
+        if( slim.FatBlock == null || (slim.FatBlock.BlockDefinition.TypeIdString != "MyObjectBuilder_SafeZoneBlock" && slim.FatBlock.BlockDefinition.TypeIdString != "MyObjectBuilder_StoreBlock") ) continue;
+        return true;
+      }
+      return false;
+    }
+
     public Dictionary<IMyEntity,IMyFaction> GetPossibleEnemies() {
       Dictionary<IMyEntity,IMyFaction> enemies = new Dictionary<IMyEntity,IMyFaction>();
 
@@ -1445,6 +1466,9 @@ namespace SpaceCraft.Utils {
           owner = MyAPIGateway.Session.Factions.TryGetPlayerFaction(owners[0]);
 
           if( owner != null && MyRelationsBetweenFactions.Enemies != MyAPIGateway.Session.Factions.GetRelationBetweenFactions(owner.FactionId, MyFaction.FactionId))
+            continue;
+
+          if( grid is MySafeZone || IsSafeZone(grid) )
             continue;
 
           enemies[entity] = owner;
@@ -1707,10 +1731,16 @@ namespace SpaceCraft.Utils {
 
 
     protected float Prioritize( Prefab prefab, bool atmo = true ) {
-      if( prefab.Race != Race ) return 0;
-      if( !String.IsNullOrWhiteSpace(prefab.Faction) && prefab.Faction != Name ) return 0;
+      if( prefab.Race != Race ) {
+        return 0;
+      }
+      if( !String.IsNullOrWhiteSpace(prefab.Faction) && prefab.Faction != Name ) {
+        return 0;
+      }
 
-      if( !atmo && prefab.Atmosphere && !prefab.Spacecraft ) return 0;
+      if( !atmo && prefab.Atmosphere && !prefab.Spacecraft ) {
+        return 0;
+      }
 
       foreach( string resource in prefab.Cost.Keys ) {
         // Doesn't have access to resources
@@ -1719,12 +1749,16 @@ namespace SpaceCraft.Utils {
           switch( resource ) {
             case "Cobalt":
               // Make exception if prefab has desired refinery
-              if( prefab.RefineryTier < 2 )return 0f;
+              if( prefab.RefineryTier < 2 ) {
+                return 0f;
+              }
               break;
             case "Silver":
             case "Gold":
               // Make exception if prefab has desired refinery
-              if( prefab.RefineryTier < 3 || Tier == Tech.Primitive )return 0f;
+              if( prefab.RefineryTier < 3 || Tier == Tech.Primitive ) {
+                return 0f;
+              }
               break;
             default:
               return 0f;

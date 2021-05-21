@@ -114,6 +114,29 @@ namespace SpaceCraft {
 			}
 		}
 
+
+		private static bool Producing = false;
+		private static int ProductionTick = 0;
+		public static void FacilitateProduction() {
+			Producing = true;
+			MyAPIGateway.Parallel.Start(() => {
+
+				try {
+					foreach( Faction faction in SCFactions ) {
+						if( faction.MainBase == null ) continue;
+
+						CubeGrid.Work job = faction.MainBase.GetJob();
+
+						MyAPIGateway.Utilities.InvokeOnGameThread( () => faction.MainBase.FulfillNeeds(job) );
+					}
+					Producing = false;
+				} catch (Exception e) {
+					Producing = false;
+				}
+
+			});
+		}
+
 		public static MyBlueprintDefinitionBase GetBlueprintDefinition( string name ) {
 			if( Components.Keys.Contains(name) )
 				return Components[name];
@@ -388,6 +411,18 @@ namespace SpaceCraft {
 			if( Current == 4000 ) {
 				Current = 0;
 				HealZergBlocks();
+			}
+
+			ProductionTick++;
+
+			if( ProductionTick == Convars.Static.Allowance ) {
+				if( Producing ) { // Taking too long
+					Convars.Static.Allowance += 10;
+					Convars.Static.Save();
+				} else {
+					ProductionTick = 0;
+					FacilitateProduction();
+				}
 			}
 			//MyAPIGateway.Players.NewPlayerRequestSucceeded += NewPlayerAdded;
 

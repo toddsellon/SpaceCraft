@@ -187,20 +187,20 @@ namespace SpaceCraft.Utils {
 				Grid.Physics.ClearSpeed();
 			}
 
-			if( Job != null ) {
-				try {
-					UpdateInventory();
-				} catch( Exception e ) {
-					Job = null;
-				}
-			}
+			// if( Job != null ) {
+			// 	try {
+			// 		UpdateInventory();
+			// 	} catch( Exception e ) {
+			// 		Job = null;
+			// 	}
+			// }
 
 			if( Tick == 99 ) {
 				//AssessInventory();
 				if( Drone || (Fighter && Owner.Following != null) ) CheckAutopilot();
 
-				if( DockedTo == null )
-					UpdateInventory();
+				// if( DockedTo == null )
+				// 	UpdateInventory();
 				// if( Grid.IsStatic )
 				// 	Drill();
 				Tick = 0;
@@ -264,7 +264,7 @@ namespace SpaceCraft.Utils {
 				Vector3D dir = Vector3D.Normalize(position - Grid.WorldMatrix.Translation);
 				Remote.AddWaypoint( position - (dir*Owner.FollowDistance), "Offset Player Location" );
 			} else
-				Remote.AddWaypoint( position, "Target Location" );
+				Remote.AddWaypoint( position, Target.DisplayName );
 
 
 
@@ -348,18 +348,8 @@ namespace SpaceCraft.Utils {
 
 
 		public void Drill() {
-			// This is not working ATM
-			// if( PercentFull > .9) {
-			// 	if( !IsStatic )
-			// 		Execute( new Order{
-			// 			Type = Orders.Deposit,
-			// 			Range = 50f,
-			// 			Entity = Owner.GetBestRefinery(this)
-			// 		}, true );
-			// 	return;
-			// }
 			int max = 3;
-			List<IMySlimBlock> drills = GetBlocks<IMyShipDrill>();
+			List<IMySlimBlock> drills = GetBlocks<IMyShipDrill>(null,true);
 			foreach( IMySlimBlock slim in drills ) {
 				if( !slim.FatBlock.IsFunctional ) continue;
 				IMyInventory inv = slim.FatBlock.GetInventory(0);
@@ -582,6 +572,172 @@ namespace SpaceCraft.Utils {
 			return list;
 		}
 
+		public CubeGrid.Work GetJob() {
+			if( Balance == null )
+				if( ConstructionSite != null && ConstructionSite.FatBlock != null && (ConstructionSite.FatBlock.MarkedForClose || ConstructionSite.FatBlock.Closed) ) {
+					FindConstructionSite();
+				}
+			//if(ConstructionSite != null) ConstructionSite.SpawnFirstItemInConstructionStockpile(); // Hack to fix world reload bug (might not be necessary)
+			// float old = ConstructionSite == null ? 1.0f : ConstructionSite.BuildIntegrity;
+
+			CubeGrid.Work job = new CubeGrid.Work{
+				Blocks = GetBlocks<IMySlimBlock>( collect: x => x.FatBlock != null && (x.FatBlock is IMyBatteryBlock || x.FatBlock.GetInventory() != null) ),
+				Integrity = ConstructionSite == null ? 1.0f : ConstructionSite.BuildIntegrity
+			};
+
+			// List<IMySlimBlock> blocks = GetBlocks<IMySlimBlock>();
+			List<IMySlimBlock> blocks = job.Blocks;
+
+			IMyAssembler main = GetAssembler(blocks);
+
+			if( ConstructionSite != null && ConstructionSite.FatBlock != null && main != null && main.GetQueue().Count == 0 ) { // Not enough components
+				MyAPIGateway.Utilities.InvokeOnGameThread( () => AddQueueItems(ConstructionSite.FatBlock,true,main) );
+				// AddQueueItems(ConstructionSite.FatBlock,true,main);// Try again
+			} else if( Balance != null && Balance.Count > 0 && main != null && main.GetQueue().Count == 0 ) {
+				MyAPIGateway.Utilities.InvokeOnGameThread( () => AddQueueItems(Balance,true,main) );
+			}
+
+			Dictionary<IMyCubeBlock,CubeGrid.Item> needs = new Dictionary<IMyCubeBlock,CubeGrid.Item>();
+
+			job.Needs = needs;
+			CubeGrid.Item bp = null;
+			// Assess needs
+			foreach( IMySlimBlock slim in blocks ) {
+				if( slim == null ) continue;
+
+				IMyCubeBlock block = slim.FatBlock;
+				if( block == null || !block.IsFunctional ) continue;
+				CubeGrid.Item need = AssessNeed(block);
+				if( need != null ) {
+					if( need.Id.TypeId == OBTypes.Magazine )
+						bp = need;
+
+					if( !needs.ContainsKey(block)) // This is a fix for bug on reload, should get removed eventually
+						needs.Add(block,need);
+				}
+				else if( block is IMyAssembler && block != main ) {
+					IMyAssembler factory = block as IMyAssembler;
+					//string SubtypeName = factory.SlimBlock.BlockDefinition.Id.SubtypeName;
+					List<MyProductionQueueItem> queue = main.GetQueue();
+
+					if( factory.IsQueueEmpty && queue.Count > 0 ) {
+						// Cooperative Mode
+						if( factory.CanUseBlueprint(queue[0].Blueprint) ) {
+							MyAPIGateway.Utilities.InvokeOnGameThread( () => main.RemoveQueueItem(0, (VRage.MyFixedPoint)1) );
+							// main.RemoveQueueItem(0, (VRage.MyFixedPoint)1);
+							MyAPIGateway.Utilities.InvokeOnGameThread( () => factory.AddQueueItem(queue[0].Blueprint, (VRage.MyFixedPoint)1) );
+							// factory.AddQueueItem(queue[0].Blueprint, (VRage.MyFixedPoint)1);
+						}
+					}
+				}
+				// if( slim != ConstructionSite )
+					AllocateResources(block);
+			}
+
+			// See if ammo needs queue
+			if( main != null && bp != null ) {
+
+				MyBlueprintDefinitionBase bpd =	MyDefinitionManager.Static.TryGetBlueprintDefinitionByResultId(bp.Id);
+				if( bpd != null ) {
+
+					List<MyProductionQueueItem> queue = main.GetQueue();
+					if( queue.Count == 0 || queue[0].Blueprint != bpd )
+						MyAPIGateway.Utilities.InvokeOnGameThread( () => main.InsertQueueItem(0,bpd, bp.Amount) );
+						//main.InsertQueueItem(0,bpd, bp.Amount);
+						//main.AddQueueItem(bpd, bp.Amount);
+				}
+			}
+
+			return job;
+
+		}
+
+		public void FulfillNeeds( CubeGrid.Work job ) {
+			if( job == null ) return;
+			// Fulfill needs
+			List<IMySlimBlock> blocks = job.Blocks;
+			Dictionary<IMyCubeBlock,CubeGrid.Item> needs = job.Needs;
+
+			try {
+				foreach( IMySlimBlock slim in blocks ) {
+					if( slim == null ) continue;
+					IMyCubeBlock block = slim.FatBlock;
+					if( block == null || block.Closed || !block.IsFunctional ) continue;
+
+
+
+					List<IMyCubeBlock> fulfilled = new List<IMyCubeBlock>();
+					foreach( IMyCubeBlock b in needs.Keys ) {
+						if( b == null || block == b || b.Closed ) continue;
+						IMyInventory inventory = b.GetInventory();
+
+						if( inventory == null ) continue;
+						CubeGrid.Item need = needs[b];
+						//bool fnd = false;
+						for( int i = 0; i < 2; i++ ) {
+							IMyInventory inv = block.GetInventory(i);
+							if( inv == null ) continue;
+							List<IMyInventoryItem> items = inv.GetItems();
+							int j = 0;
+
+							foreach( IMyInventoryItem item in items ) {
+								if( item.Content.TypeId == need.Id.TypeId
+										&& (need.Id.SubtypeName == String.Empty || need.Id.SubtypeName == item.Content.SubtypeName )
+										&& (b.BlockDefinition.TypeId != block.BlockDefinition.TypeId ) // Same type of block
+										//&& (!needs.ContainsKey(block) || needs[block] != need ) // Need same thing
+										//&& (need.Id != OBTypes.AnyOre || (need.Id == OBTypes.AnyOre && (item.Content.SubtypeName != "Ice" && item.Content.SubtypeName != "Stone" ) ) )
+										&& (need.Id != OBTypes.AnyOre || (need.Id == OBTypes.AnyOre && block.BlockDefinition.TypeIdString != "MyObjectBuilder_SurvivalKit" ) )
+									) {
+
+									inv.TransferItemTo(inventory, j, null, true, need.Amount, false);
+									//if( !fnd )
+									if( need.Id != OBTypes.AnyOre && need.Id != OBTypes.Ice ) {
+										fulfilled.Add(b);
+
+										//fnd = true;
+										break;
+									}/* else {
+										fnd = true;
+									}*/
+								}
+								j++;
+							}
+
+							//if( fnd )
+								//fulfilled.Add(b);
+						}
+					}
+
+					foreach( IMyCubeBlock f in fulfilled ) needs.Remove(f);
+				}
+			} catch( Exception e ) {
+				return;
+			}
+
+			if( ConstructionSite == null || Owner == null ) return;
+
+			if( ConstructionSite.FatBlock == null || ConstructionSite.FatBlock.Closed ) {
+				StopProduction( Filter<IMyAssembler>(blocks) );
+				ConstructionCompleted();
+				FindConstructionSite();
+				return;
+			}
+
+			long owner = Owner.MyFaction == null ? (long)0 : Owner.MyFaction.FounderId;
+			//ConstructionSite.IncreaseMountLevel(5.0f,Owner.MyFaction.FounderId);
+
+			// if( ConstructionSite.CanContinueBuild(null))
+			ConstructionSite.IncreaseMountLevel(5.0f, owner);
+
+			if( ConstructionSite.IsFullIntegrity ) {
+				StopProduction( Filter<IMyAssembler>(blocks) );
+				ConstructionCompleted();
+				FindConstructionSite();
+			} else if( job.Integrity < ConstructionSite.BuildIntegrity ) {
+				ConstructionSite.PlayConstructionSound(MyIntegrityChangeEnum.ConstructionProcess);
+			}
+		}
+
 		public void UpdateInventory() {
 			if( Job == null && Balance == null )
 				if( ConstructionSite != null && ConstructionSite.FatBlock != null && (ConstructionSite.FatBlock.MarkedForClose || ConstructionSite.FatBlock.Closed) ) {
@@ -773,10 +929,12 @@ namespace SpaceCraft.Utils {
 					inventory = kit.GetInventory(1);
 					//if( Convars.Static.ManualKits && (kit.IsQueueEmpty || !kit.IsProducing) )
 					if( inventory.CurrentVolume > MyFixedPoint.MultiplySafe(inventory.MaxVolume, 0.94f) ) {
-						DiscardComponents(inventory);
+						MyAPIGateway.Utilities.InvokeOnGameThread( () => DiscardComponents(inventory) );
+						// DiscardComponents(inventory);
 					}
 					if( kit.IsQueueEmpty || !kit.IsProducing )
-						kit.AddQueueItem( OBTypes.StoneToOre, (VRage.MyFixedPoint)1 );
+						MyAPIGateway.Utilities.InvokeOnGameThread( () => kit.AddQueueItem( OBTypes.StoneToOre, (VRage.MyFixedPoint)1 ) );
+						//kit.AddQueueItem( OBTypes.StoneToOre, (VRage.MyFixedPoint)1 );
 					return new CubeGrid.Item {
 						Id = OBTypes.Stone,
 						Amount = (VRage.MyFixedPoint)500
@@ -784,9 +942,17 @@ namespace SpaceCraft.Utils {
 				}
 
 				IMyAssembler ass = block as IMyAssembler;
+
+				inventory = ass.GetInventory();
+				if( inventory.CurrentVolume > MyFixedPoint.MultiplySafe(inventory.MaxVolume, 0.94f) ) {
+					MyAPIGateway.Utilities.InvokeOnGameThread( () => DiscardComponents(inventory) );
+					// DiscardComponents(inventory);
+				}
+
 				inventory = ass.GetInventory(1);
 				if( inventory.CurrentVolume > MyFixedPoint.MultiplySafe(inventory.MaxVolume, 0.94f) ) {
-					DiscardComponents(inventory);
+					MyAPIGateway.Utilities.InvokeOnGameThread( () => DiscardComponents(inventory) );
+					// DiscardComponents(inventory);
 				}
 				if( ass.IsQueueEmpty ) return null;
 				List<MyProductionQueueItem> queue = ass.GetQueue();
@@ -848,7 +1014,9 @@ namespace SpaceCraft.Utils {
 			if( block is IMyRefinery ) {
 				// Shuffle ores
 				if( items.Count > 1 )
-					inventory.TransferItemTo(inventory, 0, inventory.GetItems().Count, true, inventory.GetItems()[0].Amount, false);
+					MyAPIGateway.Utilities.InvokeOnGameThread( () => ShuffleOres(inventory) );
+					// MyAPIGateway.Utilities.InvokeOnGameThread( () => inventory.TransferItemTo(inventory, 0, inventory.GetItems().Count, true, inventory.GetItems()[0].Amount, false) );
+					//inventory.TransferItemTo(inventory, 0, inventory.GetItems().Count, true, inventory.GetItems()[0].Amount, false);
 				else if( items.Count == 0 )
 					return new CubeGrid.Item {
 						Id = OBTypes.AnyOre,
@@ -873,12 +1041,19 @@ namespace SpaceCraft.Utils {
 			return null;
 		}
 
-		public void DiscardComponents( IMyInventory inventory ) {
+		public static void ShuffleOres( IMyInventory inventory ) {
+			if( inventory == null ) return;
+			List<IMyInventoryItem> items = inventory.GetItems();
+			if( items.Count > 1 )
+				inventory.TransferItemTo(inventory, 0, items.Count, true, items[0].Amount, false);
+		}
+
+		public static void DiscardComponents( IMyInventory inventory ) {
 			List<IMyInventoryItem> items = inventory.GetItems();
 			for( int j = items.Count-1; j >= 0; j-- ) {
 				IMyInventoryItem item = items[j];
 
-				if( item.Content.SubtypeName != "SteelPlate" && item.Content.SubtypeName != "Adanium" && item.Content.SubtypeName != "Organic" )
+				if( item.Content.SubtypeName != "Stone" && item.Content.SubtypeName != "SteelPlate" && item.Content.SubtypeName != "Adanium" && item.Content.SubtypeName != "Organic" && item.Content.SubtypeName != "Iron" )
 					continue;
 
 				//if( item.Amount > 10 ) {
@@ -970,9 +1145,9 @@ namespace SpaceCraft.Utils {
 			}
 		}
 
-		public bool AddQueueItems( Dictionary<string,int> components, bool clear = false ) {
+		public bool AddQueueItems( Dictionary<string,int> components, bool clear = false, IMyAssembler ass = null ) {
 			if( components == null ) return true;
-			IMyAssembler ass = GetAssembler();
+			ass = ass ?? GetAssembler();
 			if( ass == null ) return false;
 
 			if( clear ) ass.ClearQueue();

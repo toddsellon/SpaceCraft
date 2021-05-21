@@ -370,7 +370,7 @@ namespace SpaceCraft.Utils {
         return;
       }
 
-      Respond("Error", tag + " has been dissolved", message);
+      Respond("Dissolved", tag + " has been dissolved", message);
 
     }
 

@@ -1608,7 +1608,7 @@ namespace SpaceCraft.Utils {
       }
     }
 
-    private static IMyCubeBlock GetSafeZone( IMyCubeGrid grid, bool enable = true ) {
+    public static IMyCubeBlock GetSafeZone( IMyCubeGrid grid, bool enable = true ) {
       if( grid == null ) return null;
       List<IMySlimBlock> blocks = new List<IMySlimBlock>();
       grid.GetBlocks(blocks);

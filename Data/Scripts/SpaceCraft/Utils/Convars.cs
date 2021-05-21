@@ -36,6 +36,7 @@ namespace SpaceCraft.Utils {
     public bool Spawned = false;
     public bool Animations = true;
     public bool Quests = true;
+    public int Allowance = 100;
     public TargetMethod Target = TargetMethod.Reputation;
 
     protected static string File = "SCConvars.xml";
@@ -71,6 +72,10 @@ namespace SpaceCraft.Utils {
 
     public string Set( string convar, string value ) {
       switch( convar.ToLower() ) {
+        case "allowance":
+          Int32.TryParse(value, out Allowance);
+          Save();
+          break;
         case "engineers":
           Int32.TryParse(value, out Engineers);
           Save();
@@ -124,6 +129,7 @@ namespace SpaceCraft.Utils {
 
     public string Get( string convar ) {
       switch( convar.ToLower() ) {
+        case "allowance": return Allowance.ToString();
         case "engineers": return Engineers.ToString();
         case "grids": return Grids.ToString();
         case "bots": return Bots.ToString();
