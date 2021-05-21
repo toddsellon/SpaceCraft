@@ -220,7 +220,7 @@ namespace SpaceCraft.Utils {
 
 			if( Owner.Following == null ) {
 				IMyEntity enemy = null;
-				
+
 				//TargetTick++;
 				// if( TargetTick == 180 || (Target != null && (Target.Closed || Target.MarkedForClose) ) ) {
 				if( Target != null && (Target.Closed || Target.MarkedForClose) ) {
@@ -592,7 +592,7 @@ namespace SpaceCraft.Utils {
 
 			if( Job == null ) {
 				Job = new CubeGrid.Work{
-					Blocks = GetBlocks<IMySlimBlock>( collect: x => x.FatBlock != null && x.FatBlock.GetInventory() != null ),
+					Blocks = GetBlocks<IMySlimBlock>( collect: x => x.FatBlock != null && (x.FatBlock is IMyBatteryBlock || x.FatBlock.GetInventory() != null) ),
 					Integrity = ConstructionSite == null ? 1.0f : ConstructionSite.BuildIntegrity
 				};
 				return;

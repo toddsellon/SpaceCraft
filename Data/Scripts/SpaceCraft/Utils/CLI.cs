@@ -642,9 +642,9 @@ namespace SpaceCraft.Utils {
         return;
       }
 
-      Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(3)) ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(3).ToUpper());
+      Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(2)) ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(2).ToUpper());
       if( faction == null ) {
-        Respond("Error", "SpaceCraft faction not found " + cmd.Argument(3), message);
+        Respond("Error", "SpaceCraft faction not found " + cmd.Argument(2), message);
         return;
       }
 
@@ -699,9 +699,9 @@ namespace SpaceCraft.Utils {
         return;
       }
 
-      Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(3)) ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(3).ToUpper());
+      Faction faction = String.IsNullOrWhiteSpace(cmd.Argument(2)) ? SpaceCraftSession.GetFactionContaining(player.PlayerID) : SpaceCraftSession.GetFaction(cmd.Argument(2).ToUpper());
       if( faction == null ) {
-        Respond("Error", "SpaceCraft faction not found " + cmd.Argument(3), message);
+        Respond("Error", "SpaceCraft faction not found " + cmd.Argument(2), message);
         return;
       }
 

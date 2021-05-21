@@ -574,6 +574,8 @@ namespace SpaceCraft.Utils {
           SearchOffset += SEARCH_STEP;
           return; // Try again next frame
         }
+        if( Convars.Static.Debug )
+          MyAPIGateway.Utilities.ShowMessage( Name, "Building " + CurrentGoal.Prefab.ToString() + " at " + location.Translation.ToString() );
         SearchOffset = 0;
 
         if( CurrentGoal.Prefab.Bot ) {
@@ -618,8 +620,10 @@ namespace SpaceCraft.Utils {
       MyPlanet planet = SpaceCraftSession.GetClosestPlanet(last.Entity.WorldMatrix.Translation);
       SearchOffset = 0;
       float priority = 0f;
+      bool players = GetClosestEnemy(last.Entity.WorldMatrix.Translation) != null;
       // MyAPIGateway.Utilities.ShowMessage( "GetConstructionProject", String.Join(",",Resources) );
       foreach( Prefab prefab in Prefab.Prefabs ) {
+        if( prefab.Bot && !players ) continue;
         float p = Prioritize(prefab, planet.HasAtmosphere);
         // MyAPIGateway.Utilities.ShowMessage( "GetConstructionProject", prefab.SubtypeId + ": " + p.ToString() );
         if( best == null || p > priority ) {
@@ -731,8 +735,9 @@ namespace SpaceCraft.Utils {
         // Place close to base
       //}
 
-      if( Convars.Static.Debug )
-        MyAPIGateway.Utilities.ShowMessage( Name, "Building " + prefab.ToString() + " at " + position.ToString() );
+      // Old Location
+      // if( Convars.Static.Debug )
+      //   MyAPIGateway.Utilities.ShowMessage( Name, "Building " + prefab.ToString() + " at " + position.ToString() );
 
       return matrix;
     }
