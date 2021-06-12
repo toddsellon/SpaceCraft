@@ -309,6 +309,7 @@ namespace SpaceCraft.Utils {
 
           if( parent == null ) {
             CubeGrid g = new CubeGrid(grid);
+            g.Owner = scFaction;
             g.FindSubgrids();
             // g.CheckFlags();
             scFaction.TakeControl( g );
