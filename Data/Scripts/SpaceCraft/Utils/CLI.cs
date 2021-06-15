@@ -400,6 +400,7 @@ namespace SpaceCraft.Utils {
         if( grid == null ) continue;
         grid.DisplayName = faction.Name + " " + grid.DisplayName;
         CubeGrid g = new CubeGrid(grid);
+        g.Owner = faction;
         g.FindSubgrids();
         g.CheckFlags();
         faction.TakeControl( g );
