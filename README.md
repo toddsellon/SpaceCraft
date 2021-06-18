@@ -212,6 +212,7 @@ This example adds a the "Terran SCV" prefab to all SpaceCraft factions because o
 			<Speed>0.0</Speed>
 		</Prefab>
 	</Prefabs>
+</SpawnGroup>
 </SpawnGroups>
 </Definitions>
 ```
