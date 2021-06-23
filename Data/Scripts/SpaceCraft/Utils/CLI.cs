@@ -594,7 +594,7 @@ namespace SpaceCraft.Utils {
           return;
       }
 
-
+      grid.Owner = faction;
 
       List<IMySlimBlock> suspensions = grid.GetBlocks<IMyMotorSuspension>();
       long owner = faction.MyFaction == null ? (long)0 : faction.MyFaction.FounderId;
@@ -626,6 +626,8 @@ namespace SpaceCraft.Utils {
       faction.TakeControl( grid );
       if( faction.MainBase != null )
         faction.MainBase.ToggleDocked(grid);
+
+      Faction.Refill( grid.Grid );
 
       Respond("Spawning", cmd.Argument(2), message);
     }

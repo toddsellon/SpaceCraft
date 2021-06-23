@@ -262,9 +262,9 @@ namespace SpaceCraft.Utils {
 
 			if( Owner.Following != null && Owner.FollowDistance > 0 ) {
 				Vector3D dir = Vector3D.Normalize(position - Grid.WorldMatrix.Translation);
-				Remote.AddWaypoint( position - (dir*Owner.FollowDistance), "Offset Player Location" );
+				Remote.AddWaypoint( position - (dir*Owner.FollowDistance), "Offset from " + Owner.Following.DisplayName );
 			} else
-				Remote.AddWaypoint( position, Target.DisplayName );
+				Remote.AddWaypoint( position, Owner.Following == null ? Target.DisplayName : Owner.Following.DisplayName );
 
 
 
