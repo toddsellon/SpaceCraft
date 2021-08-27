@@ -171,12 +171,11 @@ Faction parameters are still a work in progress but will allow factions to utili
 * aggressive (More likely to attack and build fighting units)
 * defensive (Less likely to attack or build fighting units)
 * outsider (Spawns on a random planet)
-* grounded (Does not build flying units (untested))
+* grounded (Does not build flying units)
 * static (Only builds static prefabs)
 * nobuild (Does not build new prefabs and just does the best it can with existing prefabs)
 * spawned (Is considered already spawned by SpaceCraft and therefore does not create a planet pod for this Faction)
 * nuclear (This faction gains access to Uranium once it builds its first Refinery. This is intended for grounded factions who never reach space and get Uranium legitimately.)
-More to come!
 
 
 
